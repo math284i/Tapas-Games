@@ -26,7 +26,7 @@ public class ClientMain {
             System.out.println("Failed while trying to connect to IP: " + _serverIp + "\n with: " + e);
         }
         try {
-            Object[] chatIps = _space.get(new ActualField(name), new ActualField("senderIp")
+            Object[] chatIps = _space.get(new ActualField(name), new ActualField("chatIps")
                     , new FormalField(String.class), new FormalField(String.class));
             _senderIp = chatIps[2].toString();
             _receiverIp = chatIps[3].toString();
@@ -44,8 +44,12 @@ public class ClientMain {
         return _name;
     }
 
-    public void updateChatUI(String name, String message) {
+    public String getReceiverIp() {
+        return _receiverIp;
+    }
 
+    public void updateChatUI(String name, String message) {
+        System.out.println(name + " Says: " + message);
     }
 }
 
@@ -68,10 +72,11 @@ class ChatSender implements Runnable {
     @Override
     public void run() {
         String message = "";
+        String type = "chat";
         while (true) {
             message = cSource.nextLine();
             try {
-                _space.put(_client.getName(), message);
+                _space.put(_client.getName(), message, type);
             } catch (InterruptedException ignored) {
             }
         }
@@ -98,7 +103,6 @@ class ChatReceiver implements Runnable {
         while (true) {
             try {
                 Object[] t = _space.get(new FormalField(String.class), new FormalField(String.class));
-                System.out.println(t[0] + " says: " + t[1]);
                 _client.updateChatUI(t[0].toString(), t[1].toString());
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
