@@ -1,27 +1,108 @@
 package TapasGames.Client;
 
+import JspaceFiles.jspace.ActualField;
+import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.RemoteSpace;
 import TapasGames.UI.UIController;
 
-public class ClientMain implements Runnable{
+import java.util.Scanner;
+
+public class ClientMain {
     private RemoteSpace _space;
     private UIController _ui;
     private String _name;
-    private String _ip;
+    private String _serverIp;
+    private String _senderIp;
+    private String _receiverIp;
 
     public ClientMain(UIController ui, String name, String ip) {
         _ui = ui;
         _name = name;
-        _ip = ip;
+        _serverIp = ip;
+
         try {
-            _space = new RemoteSpace(_ip);
+            _space = new RemoteSpace(_serverIp);
         } catch (Exception e) {
-            System.out.println("Failed while trying to connect to IP :" + _ip + "\n with " + e);
+            System.out.println("Failed while trying to connect to IP: " + _serverIp + "\n with: " + e);
+        }
+        try {
+            Object[] chatIps = _space.get(new ActualField(name), new ActualField("senderIp")
+                    , new FormalField(String.class), new FormalField(String.class));
+            _senderIp = chatIps[2].toString();
+            _receiverIp = chatIps[3].toString();
+
+        } catch (Exception e) {
+            System.out.println("Failed to get chatIps with: " + e);
+        }
+
+
+        new Thread(new ChatSender(this, _senderIp)).start();
+        new Thread(new ChatReceiver(this, _receiverIp)).start();
+    }
+
+    public String getName() {
+        return _name;
+    }
+
+    public void updateChatUI(String name, String message) {
+
+    }
+}
+
+class ChatSender implements Runnable {
+    private ClientMain _client;
+    private String _senderIp;
+    private RemoteSpace _space;
+    Scanner cSource = new Scanner(System.in);
+
+    public ChatSender(ClientMain client, String senderIp) {
+        _client = client;
+        _senderIp = senderIp;
+        try {
+            _space = new RemoteSpace(_senderIp);
+        } catch (Exception e) {
+            System.out.println("Failed while trying to connect to IP: " + _senderIp + "\n with: " + e);
         }
     }
 
     @Override
     public void run() {
+        String message = "";
+        while (true) {
+            message = cSource.nextLine();
+            try {
+                _space.put(_client.getName(), message);
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+}
 
+class ChatReceiver implements Runnable {
+    private ClientMain _client;
+    private String _receiverIp;
+    private RemoteSpace _space;
+
+    public ChatReceiver(ClientMain client, String receiverIp) {
+        _client = client;
+        _receiverIp = receiverIp;
+        try {
+            _space = new RemoteSpace(_receiverIp);
+        } catch (Exception e) {
+            System.out.println("Failed while trying to connect to IP: " + _receiverIp + "\n with: " + e);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] t = _space.get(new FormalField(String.class), new FormalField(String.class));
+                System.out.println(t[0] + " says: " + t[1]);
+                _client.updateChatUI(t[0].toString(), t[1].toString());
+            } catch (InterruptedException e) {
+                System.out.println("Receiver caught an error!");
+            }
+        }
     }
 }
