@@ -7,6 +7,16 @@
     </content>
     <orderEntry type="jdk" jdkName="openjdk-17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="lib" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="file://C:/Program Files/Java/javafx-sdk-17.0.1/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://C:/Program Files/Java/javafx-sdk-17.0.1/lib" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="javafx-sdk-17.0" level="project" />
   </component>
 </module>
