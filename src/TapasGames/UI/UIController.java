@@ -1,10 +1,11 @@
 package TapasGames.UI;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,15 +14,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class UIController extends Application {
 
     Scene mainScene;
     Rectangle2D screenSize;
-    Label label = new Label("Big old titties");
     GridPane buttons = new GridPane();
     GridPane grid = new GridPane();
     Button exit = new Button("Exit");
@@ -151,8 +151,26 @@ public class UIController extends Application {
         grid.setHgrow(chat,Priority.ALWAYS);
         grid.setVgrow(chat,Priority.ALWAYS);
 
+        settings.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                final Stage settingsDialog = new Stage();
+                settingsDialog.initModality(Modality.APPLICATION_MODAL);
+                settingsDialog.initOwner(primaryStage);
+                VBox content = new VBox();
+                content.getChildren().add(new Label("Ulrik dum"));
+                Scene settingsScene = new Scene(content,windowSize[0]/4,windowSize[1]/2);
+                settingsDialog.setScene(settingsScene);
+                settingsDialog.setResizable(false);
+                settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue)
+                        settingsDialog.setMaximized(false);
+                });
+                settingsDialog.show();
+            }
+        });
+
         mainScene = new Scene(grid, (int) windowSize[0],(int) windowSize[1]);
-        label.setText("" + mainScene.getWidth() + ", " + mainScene.getHeight());
         primaryStage.setScene(mainScene);
         primaryStage.setResizable(false);
         primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
