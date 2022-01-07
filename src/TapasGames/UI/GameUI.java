@@ -96,6 +96,8 @@ public class GameUI extends Application {
         ScrollPane chatPane = new ScrollPane();
         chatPane.setPadding(new Insets(10, 10, 10, 10));
 
+
+        layout.setCenter(chatPane);
         //</editor-fold>
 
         //<editor-fold desc="Code for: Sent Message Text-field/Button">
