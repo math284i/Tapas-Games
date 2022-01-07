@@ -97,13 +97,14 @@ public class GameUI extends Application {
         chatPane.setPadding(new Insets(10, 10, 10, 10));
 
 
+
         layout.setCenter(chatPane);
         //</editor-fold>
 
         //<editor-fold desc="Code for: Sent Message Text-field/Button">
         //Make message send box
-        VBox sentMessageBar = new VBox();
-        sentMessageBar.setPadding(new Insets(10, 10, 10, 10));
+        VBox sendMessageBar = new VBox();
+        sendMessageBar.setPadding(new Insets(10, 10, 10, 10));
 
         TextField messageBox = new TextField();
         messageBox.setPromptText("Write Message");
@@ -111,13 +112,13 @@ public class GameUI extends Application {
         messageBox.getText();
 
         //Make send button
-        Button sentButtons = new Button("Sent");
+        Button sendButtons = new Button("Send");
 
-        sentMessageBar.getChildren().addAll(messageBox, sentButtons);
+        sendMessageBar.getChildren().addAll(messageBox, sendButtons);
 
-        layout.setBottom(sentMessageBar);
+        layout.setBottom(sendMessageBar);
 
-        //</editor-fold>   ded
+        //</editor-fold>
 
         Scene chatScene = new Scene(layout);
         chatStage.setResizable(false);
