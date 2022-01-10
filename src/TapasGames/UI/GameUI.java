@@ -1,9 +1,20 @@
 package TapasGames.UI;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+
 
 public class GameUI extends Application {
 
@@ -50,18 +61,69 @@ public class GameUI extends Application {
     }
 
     public void ChatScene(){
-        Stage chatScene = new Stage();
-        chatScene.setTitle("Chat Window");
+        Stage chatStage = new Stage();
+        chatStage.setTitle("Chat Window");
 
-        chatScene.setWidth(configureScreenSize.getWidth() * 0.7 * 0.25);
-        chatScene.setHeight(configureScreenSize.getHeight() * 0.70);
+        chatStage.setWidth(configureScreenSize.getWidth() * 0.7 * 0.25);
+        chatStage.setHeight(configureScreenSize.getHeight() * 0.70);
 
-        chatScene.setX(configureScreenSize.getWidth() * 0.15 + configureScreenSize.getWidth() * 0.7 * 0.75);
-        chatScene.setY(configureScreenSize.getHeight() * 0.15);
+        chatStage.setX(configureScreenSize.getWidth() * 0.15 + configureScreenSize.getWidth() * 0.7 * 0.75);
+        chatStage.setY(configureScreenSize.getHeight() * 0.15);
 
-        chatScene.setResizable(false);
+        //Pane used for the layout
+        BorderPane layout = new BorderPane();
 
-        chatScene.show();
+        //<editor-fold desc="Code for: Global/Team Chat + header">
+        VBox chatHeader = new VBox();
+        chatHeader.setPadding(new Insets(10, 10, 10, 10));
+
+        Label headerText = new Label("Messages");
+        headerText.setFont(new Font("Arial", 30));
+        chatHeader.setAlignment(Pos.TOP_CENTER);
+
+        Button globalChat = new Button("global");
+        Button teamChat = new Button("Team");
+
+        HBox chatButtons = new HBox(globalChat, teamChat);
+        chatButtons.setAlignment(Pos.TOP_CENTER);
+
+        chatHeader.getChildren().addAll(headerText, chatButtons);
+
+        layout.setTop(chatHeader);
+        //</editor-fold>
+
+        //<editor-fold desc="Code for: Messages sent to the chat">
+        ScrollPane chatPane = new ScrollPane();
+        chatPane.setPadding(new Insets(10, 10, 10, 10));
+
+
+
+        layout.setCenter(chatPane);
+        //</editor-fold>
+
+        //<editor-fold desc="Code for: Sent Message Text-field/Button">
+        //Make message send box
+        VBox sendMessageBar = new VBox();
+        sendMessageBar.setPadding(new Insets(10, 10, 10, 10));
+
+        TextField messageBox = new TextField();
+        messageBox.setPromptText("Write Message");
+        messageBox.setPrefColumnCount(10);
+        messageBox.getText();
+
+        //Make send button
+        Button sendButtons = new Button("Send");
+
+        sendMessageBar.getChildren().addAll(messageBox, sendButtons);
+
+        layout.setBottom(sendMessageBar);
+
+        //</editor-fold>
+
+        Scene chatScene = new Scene(layout);
+        chatStage.setResizable(false);
+        chatStage.setScene(chatScene);
+        chatStage.show();
     }
 
     public static void main(String[] args) {
