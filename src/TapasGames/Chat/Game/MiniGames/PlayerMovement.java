@@ -10,6 +10,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
@@ -24,33 +27,40 @@ public class PlayerMovement extends Application {
     private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
     private Image playerImage;
     private Node player;
+    private double angle = 0;
+    private double playerWidth = 25;
+    private double playerHeight = 25;
 
-    boolean run, goUp, goDown, goLeft, goRight;
+    private Path path = new Path();
+    private Color pathColor = Color.BLACK;
+    private double pathSize = 2;
+
+    boolean run, goLeft, goRight;
 
     @Override
     public void start(Stage stage) throws Exception {
         playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
         ImageView playerView = new ImageView(playerImage);
         playerView.setPreserveRatio(true);
-        playerView.setFitHeight(100);
-        playerView.setFitWidth(100);
+        playerView.setFitHeight(playerHeight);
+        playerView.setFitWidth(playerWidth);
         player = playerView;
         Group dungeon = new Group(player);
 
         movePlayerTo(W / 2, H / 2); //Move hero to center
 
-        Scene scene = new Scene(dungeon, W, H, Color.FORESTGREEN);
+        Scene scene = new Scene(dungeon, W, H, Color.WHITE);
+
+        path.setStrokeWidth(pathSize);
+        path.setStroke(pathColor);
+
+        dungeon.getChildren().add(path);
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
             @Override
             public void handle(KeyEvent keyEvent) {
                 switch (keyEvent.getCode()) {
-                    case UP -> {
-                        goUp = true;
-                        _logger.log(Level.INFO, "Up!");
-                    }
-                    case DOWN -> goDown = true;
                     case LEFT -> goLeft = true;
                     case RIGHT -> goRight = true;
                     case SHIFT -> run = true;
@@ -62,8 +72,6 @@ public class PlayerMovement extends Application {
             @Override
             public void handle(KeyEvent keyEvent) {
                 switch (keyEvent.getCode()) {
-                    case UP -> goUp = false;
-                    case DOWN -> goDown = false;
                     case LEFT -> goLeft = false;
                     case RIGHT -> goRight = false;
                     case SHIFT -> run = false;
@@ -77,21 +85,21 @@ public class PlayerMovement extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                int dx = 0, dy = 0;
+                double dx = 0, dy = 0;
 
-                if (goUp) dy -= 1;
-                if (goDown) dy += 1;
-                if (goRight) dx += 1;
-                if (goLeft) dx -= 1;
+                if (goRight) angle += 0.025;
+                if (goLeft) angle -= 0.025;
+                dy = Math.sin(angle);
+                dx = Math.cos(angle);
+
                 if (run) {dx *= 3; dy *= 3; }
-                //_logger.log(Level.INFO, "MovingPlayerBy: " + dx + " : " + dy);
                 movePlayerBy(dx, dy);
             }
         };
         timer.start();
     }
 
-    private void movePlayerBy(int dx, int dy) {
+    private void movePlayerBy(double dx, double dy) {
         if (dx == 0 && dy == 0) return;
 
         final double cx = player.getBoundsInLocal().getWidth() / 2;
@@ -106,17 +114,21 @@ public class PlayerMovement extends Application {
     private void movePlayerTo(double x, double y) {
         final double cx = player.getBoundsInLocal().getWidth() / 2;
         final double cy = player.getBoundsInLocal().getWidth() / 2;
-        _logger.log(Level.INFO, "cx: " + cx + " x: " + x);
-        _logger.log(Level.INFO, "cy: " + cy + " y: " + y);
+        if (path.contains(x - cx, y - cy)) path.getElements().clear();
         //Check bounderies
-        if (x - cx >= 0 &&
-            x + cx <= W &&
-            y - cy >= 0 &&
-            y + cy <= H) {
+        if (x - cx < 0) player.relocate(W - playerWidth, y - cy);
+        else if (x + cx > W) player.relocate(0, y - cy);
+        else if (y - cy < 0) player.relocate(x - cx, H - playerHeight);
+        else if (y + cy > H) player.relocate(x - cx, 0);
+
+        else {
             _logger.log(Level.INFO, "moving!");
+            path.getElements()
+                    .add(new MoveTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
             player.relocate(x - cx, y - cy);
+            path.getElements().add(new LineTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
         }
-        //_logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
+        _logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
     }
 
     public static void main(String[] args) { launch(args); }
