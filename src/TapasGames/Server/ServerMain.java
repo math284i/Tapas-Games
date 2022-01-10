@@ -8,42 +8,53 @@ import TapasGames.Client.ClientMain;
 import TapasGames.UI.UIController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ServerMain {
     private UIController _ui;
     private String _ip;
     private String _port;
     private String _ipWithPort;
-    private ClientMain[] _clients;
-    private SequentialSpace _space;
+    private ArrayList<ClientMain> _clients;
+    private SequentialSpace _clientSpace;
     private SequentialSpace _chatSpace;
+    private SequentialSpace _gameSpace;
     private SpaceRepository _repository;
-    private String _senderIp;
-    private String _receiverIp;
+    private ChatController _chatController;
 
     public ServerMain(UIController ui, String ip, String port) {
         _ui = ui;
         _ip = ip;
         _port = port;
         _ipWithPort = "tcp://localhost:" + port + "/";
-        _senderIp = _ipWithPort + "chatServer?keep";
-
         _repository = new SpaceRepository();
-         _space = new SequentialSpace();
-         _chatSpace = new SequentialSpace();
-        _repository.add("clientConnections", _space);
-        _repository.add("chatServer", _chatSpace);
+        _clientSpace = new SequentialSpace();
+        _chatSpace = new SequentialSpace();
+        //_repository.add("clientServer", _clientSpace);
+        //_repository.add("chatServer", _chatSpace);
+        //_repository.add("gameServer", _gameSpace);
         _repository.addGate(_ipWithPort + "?keep");
+        _clients = new ArrayList<>();
+        _chatController = new ChatController(_repository);
     }
 
-    public void getIpsFromServer(ClientMain client) {
+    public void addClient(String name) {
+        _clients.add(new ClientMain(name, _repository, _clientSpace));
+    }
+
+    private void createChatRoom(int id) {
+        _chatController.addChatRoom(id);
+    }
+
+    public void addClientToChatRoom(String name, int id) {
         try {
-            _space.put(client.getName(), "chatIds", _senderIp, _receiverIp);
-        } catch (InterruptedException e) {
-            System.out.println("Server failed sending ips");
+            _repository.get("toChatRoom: " + id).put(1,name,"");
+            _clientSpace.put(name,0,id);
+
+        } catch (Exception e) {
+            System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
         }
     }
-
     //I need a MainController
     //Tell MainController im ready to receive connections!
 

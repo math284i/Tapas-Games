@@ -1,58 +1,65 @@
 package TapasGames.Client;
 
-import JspaceFiles.jspace.ActualField;
-import JspaceFiles.jspace.FormalField;
-import JspaceFiles.jspace.RemoteSpace;
+import JspaceFiles.jspace.*;
 import TapasGames.UI.UIController;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
-public class ClientMain {
-    private RemoteSpace _space;
+public class ClientMain implements Runnable{
     private UIController _ui;
     private String _name;
-    private String _serverIp;
-    private String _senderIp;
-    private String _receiverIp;
+    private SequentialSpace _serverSpace;
+    private SpaceRepository _repository;
+    private ArrayList<Space> chatRooms;
 
-    public ClientMain(UIController ui, String name, String ip) {
-        _ui = ui;
+    public ClientMain(String name, SpaceRepository repository, SequentialSpace serverSpace) {
         _name = name;
-        _serverIp = ip;
+        _serverSpace = serverSpace;
+        _repository = repository;
 
-        try {
-            _space = new RemoteSpace(_serverIp);
-        } catch (Exception e) {
-            System.out.println("Failed while trying to connect to IP: " + _serverIp + "\n with: " + e);
-        }
-        try {
-            Object[] chatIps = _space.get(new ActualField(name), new ActualField("chatIps")
-                    , new FormalField(String.class), new FormalField(String.class));
-            _senderIp = chatIps[2].toString();
-            _receiverIp = chatIps[3].toString();
-
-        } catch (Exception e) {
-            System.out.println("Failed to get chatIps with: " + e);
-        }
-
-
-        new Thread(new ChatSender(this, _senderIp)).start();
-        new Thread(new ChatReceiver(this, _receiverIp)).start();
+        new Thread(new ChatReceiver(this,_repository.get("ChatToClient: "+_name))).start();
     }
 
     public String getName() {
         return _name;
     }
 
-    public String getReceiverIp() {
-        return _receiverIp;
+    private void sendDataToChatRoom(int id, String data){
+        try{
+            _repository.get("toChatRoom: "+id).put(0,_name,data);
+        } catch (InterruptedException ignored) {}
+    }
+
+    private void addChatRoom(int id) {
+        chatRooms.add(_repository.get("toChatRoom: "+id));
+
     }
 
     public void updateChatUI(String name, String message) {
         System.out.println(name + " Says: " + message);
     }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] data = _serverSpace.get(
+                        new ActualField(_name),
+                        new FormalField(Integer.class), new FormalField(Tuple.class));
+                if((int) data[1] == 0) {
+                    addChatRoom((Tuple) data[2]);
+                } else if((int) data[1] == 1) {
+                    sendDataToChatRoom();
+                } else if((int) data[1] == 2) {
+
+                }
+            } catch (InterruptedException ignored) {}
+        }
+    }
 }
 
+/*
 class ChatSender implements Runnable {
     private ClientMain _client;
     private String _senderIp;
@@ -82,28 +89,22 @@ class ChatSender implements Runnable {
         }
     }
 }
-
+*/
 class ChatReceiver implements Runnable {
     private ClientMain _client;
-    private String _receiverIp;
-    private RemoteSpace _space;
+    private Space _fromChatSpace;
 
-    public ChatReceiver(ClientMain client, String receiverIp) {
+    public ChatReceiver(ClientMain client, Space fromChatSpace) {
         _client = client;
-        _receiverIp = receiverIp;
-        try {
-            _space = new RemoteSpace(_receiverIp);
-        } catch (Exception e) {
-            System.out.println("Failed while trying to connect to IP: " + _receiverIp + "\n with: " + e);
-        }
+        _fromChatSpace = fromChatSpace;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Object[] t = _space.get(new FormalField(String.class), new FormalField(String.class));
-                _client.updateChatUI(t[0].toString(), t[1].toString());
+                Object[] data = _fromChatSpace.get(new FormalField(String.class), new FormalField(String.class));
+                _client.updateChatUI(data[0].toString(), data[1].toString());
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
             }

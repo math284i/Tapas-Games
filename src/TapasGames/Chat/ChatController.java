@@ -1,44 +1,57 @@
 package TapasGames.Chat;
 
 import JspaceFiles.jspace.*;
-import JspaceFiles.src.Chat.Client;
-import TapasGames.Client.ClientMain;
 
 import java.util.ArrayList;
 
-public class ChatController implements Runnable{
-    private ArrayList<ClientMain> _clients;
-    private SequentialSpace _serverSpace;
-    private SpaceRepository _spaceRepository;
-    private String _ipWithPort;
+public class ChatController{
+    private ArrayList<Thread> _rooms;
+    private SpaceRepository _repository;
 
-    public ChatController(SequentialSpace serverSpace, String ipWithPort) {
-        _serverSpace = serverSpace;
-        _ipWithPort = ipWithPort;
-
-        _clients = new ArrayList<>();
-        _spaceRepository = new SpaceRepository();
-        _spaceRepository.addGate(_ipWithPort + "?keep");
+    public ChatController(SpaceRepository repository) {
+        _repository = repository;
+        _rooms = new ArrayList<>();
     }
 
-    public void removeClient(ClientMain client) {
-        _spaceRepository.remove(client.getName());
+    public void addChatRoom(int id){
+        SequentialSpace toChatRoomSpace = new SequentialSpace();
+        _repository.add("toChatRoom: "+id,toChatRoomSpace);
+        _rooms.add(new Thread(new ChatRoom(id, _repository,toChatRoomSpace)));
+        _rooms.get(id).start();
+    }
+
+}
+
+class ChatRoom implements Runnable {
+    private ArrayList<String> _clients;
+    private SpaceRepository _repository;
+    private SequentialSpace _toChatRoomSpace;
+    private int _id;
+
+    ChatRoom(int id, SpaceRepository repository, SequentialSpace toChatRoomSpace){
+        _id = id;
+        _repository = repository;
+        _toChatRoomSpace = toChatRoomSpace;
+    }
+
+    public void removeClient(String client) {
+        _repository.remove("ChatToClient: "+client);
         _clients.remove(client);
     }
 
-    public void addClient(ClientMain client) {
+    public void addClient(String client) {
         SequentialSpace space = new SequentialSpace();
-        _spaceRepository.add(client.getName(), space);
+        _repository.add("ChatToClient: "+client, space);
         _clients.add(client);
     }
 
     private void sendMessageToAll(String name, String message) {
-        for (ClientMain client : _clients) {
-            Space space = _spaceRepository.get(client.getName());
+        for (String client : _clients) {
+            Space toClientSpace = _repository.get("ChatToClient: "+client);
             try {
-                space.put(name, message);
+                toClientSpace.put(name, message);
             } catch (InterruptedException e) {
-                System.out.println("ChatController failed to send message to: " + client.getName() + " with " + e);
+                System.out.println("ChatController failed to send message to: " + client + " with " + e);
             }
         }
     }
@@ -47,10 +60,15 @@ public class ChatController implements Runnable{
     public void run() {
         while (true) {
             try {
-                Object[] nameAndMessage = _serverSpace.get(
-                        new FormalField(String.class), new FormalField(String.class));
-                sendMessageToAll(nameAndMessage[0].toString(), nameAndMessage[1].toString());
-
+                Object[] data = _toChatRoomSpace.get(
+                        new FormalField(Integer.class), new FormalField(String.class), new FormalField(String.class));
+                if((int) data[0] == 0) {
+                    sendMessageToAll(data[1].toString(), data[2].toString());
+                } else if((int) data[0] == 1) {
+                    addClient(data[1].toString());
+                } else if((int) data[0] == 2) {
+                    removeClient(data[1].toString());
+                }
             } catch (InterruptedException ignored) {}
         }
     }
