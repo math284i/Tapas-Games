@@ -17,9 +17,10 @@ public class Startup extends Application {
         //What u wanna be?
         //If client
         //New page - Get name and IP - check if valid name
-        //New ClientMain(NEW UICONTROLLER(CLIENT UI), name, ip)
+        //Repository
+        //New ClientMain(NEW UICONTROLLER(CLIENT UI), name, ip, repository)
 
         //if server
-        //New ServerMain(NEW UICONTROLLER(SERVER UI))
+        //New ServerMain(NEW UICONTROLLER(SERVER UI), repository)
     }
 }

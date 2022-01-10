@@ -3,13 +3,11 @@ package TapasGames.Client;
 import JspaceFiles.jspace.*;
 import TapasGames.UI.UIController;
 
-import java.util.ArrayList;
-import java.util.Scanner;
-
 public class ClientMain implements Runnable{
     private UIController _ui;
     private String _name;
     private SequentialSpace _serverSpace;
+    private SequentialSpace _uiSpace;
     private SpaceRepository _repository;
 
     public ClientMain(String name, SpaceRepository repository, SequentialSpace serverSpace) {
@@ -30,6 +28,13 @@ public class ClientMain implements Runnable{
         } catch (InterruptedException ignored) {}
     }
 
+    private void sendKeyboardInputToGame() {
+
+    }
+
+    private void sendMouseInputToGame() {
+
+    }
 
     public void updateChatUI(String name, String message) {
         System.out.println(name + " Says: " + message);
@@ -39,15 +44,13 @@ public class ClientMain implements Runnable{
     public void run() {
         while (true) {
             try {
-                Object[] data = _serverSpace.get(
+                Object[] data = _uiSpace.get(
                         new ActualField(_name),
-                        new FormalField(Integer.class), new FormalField(Tuple.class));
-                if((int) data[1] == 0) {
-
-                } else if((int) data[1] == 1) {
-                    sendDataToChatRoom();
-                } else if((int) data[1] == 2) {
-
+                        new FormalField(String.class), new FormalField(String.class));
+                switch (data[1].toString()) {
+                    case "chat" -> sendDataToChatRoom(); //Tuple = (id, message); //TODO
+                    case "keyboardInput" -> sendKeyboardInputToGame();
+                    case "mouseInput" -> sendMouseInputToGame();
                 }
             } catch (InterruptedException ignored) {}
         }

@@ -61,13 +61,11 @@ class ChatRoom implements Runnable {
         while (true) {
             try {
                 Object[] data = _toChatRoomSpace.get(
-                        new FormalField(Integer.class), new FormalField(String.class), new FormalField(String.class));
-                if((int) data[0] == 0) {
-                    sendMessageToAll(data[1].toString(), data[2].toString());
-                } else if((int) data[0] == 1) {
-                    addClient(data[1].toString());
-                } else if((int) data[0] == 2) {
-                    removeClient(data[1].toString());
+                        new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+                switch (data[0].toString()) {
+                    case "sendMessage" -> sendMessageToAll(data[1].toString(), data[2].toString());
+                    case "addClient" -> addClient(data[1].toString());
+                    case "removeClient" -> removeClient(data[1].toString());
                 }
             } catch (InterruptedException ignored) {}
         }

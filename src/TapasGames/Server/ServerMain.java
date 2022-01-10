@@ -30,9 +30,9 @@ public class ServerMain {
         _repository = new SpaceRepository();
         _clientSpace = new SequentialSpace();
         _chatSpace = new SequentialSpace();
-        //_repository.add("clientServer", _clientSpace);
-        //_repository.add("chatServer", _chatSpace);
-        //_repository.add("gameServer", _gameSpace);
+        _repository.add("clientServer", _clientSpace);
+        _repository.add("chatServer", _chatSpace);
+        _repository.add("gameServer", _gameSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository);
@@ -48,13 +48,24 @@ public class ServerMain {
 
     public void addClientToChatRoom(String name, int id) {
         try {
-            _repository.get("toChatRoom: " + id).put(1,name,"");
-            _clientSpace.put(name,0,id);
+            _repository.get("toChatRoom: " + id).put("addClient",name,"");
+            _clientSpace.put(name,"",id); //TODO UPDATE
 
         } catch (Exception e) {
             System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
         }
     }
+
+    public void removeClientFromChatRoom(String name, int id) {
+        try {
+            _repository.get("toChatRoom: " + id).put("removeClient",name,"");
+            _clientSpace.put(name,"",id); //TODO UPDATE
+
+        } catch (Exception e) {
+            System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
+        }
+    }
+
     //I need a MainController
     //Tell MainController im ready to receive connections!
 
