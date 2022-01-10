@@ -11,7 +11,6 @@ public class ClientMain implements Runnable{
     private String _name;
     private SequentialSpace _serverSpace;
     private SpaceRepository _repository;
-    private ArrayList<Space> chatRooms;
 
     public ClientMain(String name, SpaceRepository repository, SequentialSpace serverSpace) {
         _name = name;
@@ -31,10 +30,6 @@ public class ClientMain implements Runnable{
         } catch (InterruptedException ignored) {}
     }
 
-    private void addChatRoom(int id) {
-        chatRooms.add(_repository.get("toChatRoom: "+id));
-
-    }
 
     public void updateChatUI(String name, String message) {
         System.out.println(name + " Says: " + message);
@@ -48,7 +43,7 @@ public class ClientMain implements Runnable{
                         new ActualField(_name),
                         new FormalField(Integer.class), new FormalField(Tuple.class));
                 if((int) data[1] == 0) {
-                    addChatRoom((Tuple) data[2]);
+
                 } else if((int) data[1] == 1) {
                     sendDataToChatRoom();
                 } else if((int) data[1] == 2) {
