@@ -17,9 +17,7 @@ public class Startup extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         try {
-            FXMLLoader loader = FXMLLoader.load(getClass().getResource("/src/TapasGames/UiFiles/frontpage.fxml"));
-
-            BorderPane root = loader.load();
+            Parent root = FXMLLoader.load(getClass().getResource("UiFiles/frontpage.fxml"));
 
             Scene scene = new Scene(root);
             stage.setTitle("FXML Welcome");
@@ -28,14 +26,7 @@ public class Startup extends Application {
             System.out.println(e);
         }
         stage.show();
-        //What u wanna be?
-        //If client
-        //New page - Get name and IP - check if valid name
-        //Repository
-        //New ClientMain(NEW UICONTROLLER(CLIENT UI), name, ip, repository)
 
-        //if server
-        //New ServerMain(NEW UICONTROLLER(SERVER UI), repository)
     }
 
     public static void main(String[] args) {
