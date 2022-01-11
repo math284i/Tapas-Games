@@ -1,61 +1,112 @@
 package TapasGames.UI;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.stage.*;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 
 public class UIController extends Application {
 
-    Scene mainScene;
-    Rectangle2D screenSize;
-    GridPane buttons = new GridPane();
-    GridPane grid = new GridPane();
-    Button exit = new Button("Exit");
-    Button settings = new Button("Settings");
-    Button vts = new Button("Vote to skip");
-    Separator separatorH = new Separator(Orientation.HORIZONTAL);
-    Separator separatorV1 = new Separator(Orientation.VERTICAL);
-    Separator separatorV2 = new Separator(Orientation.VERTICAL);
-    Separator separatorV3 = new Separator(Orientation.VERTICAL);
-    VBox team1 = new VBox();
-    Label team1L = new Label("Team 1");
-    Label team1S = new Label("0");
-    VBox team2 = new VBox();
-    Label team2L = new Label("Team 2");
-    Label team2S = new Label("0");
-    VBox team3 = new VBox();
-    Label team3L = new Label("Team 3");
-    Label team3S = new Label("0");
-    VBox team4 = new VBox();
-    Label team4L = new Label("Team 4");
-    Label team4S = new Label("0");
-    HBox teams = new HBox();
-    Label points = new Label("Points");
-    VBox score = new VBox();
+    Rectangle2D configureScreenSize;
+    double size = 0.7;
+    Stage gameStage;
+    Stage menuStage;
+    Stage chatStage;
 
-    //TEMP
-    Button controls = new Button("Controls");
-    Button game = new Button("Game");
-    Button chat = new Button("Chat");
+    int score1 = 0;
+    int score2 = 0;
+
+    TabPane chatTabs;
+    ScrollPane chatPaneG;
+    ScrollPane chatPaneT;
+    VBox chatBoxG;
+    VBox chatBoxT;
+
 
     @Override
-    public void start(Stage primaryStage){
-        screenSize = Screen.getPrimary().getBounds();
-        double[] windowSize = {0.7*screenSize.getWidth(), 0.7*screenSize.getHeight()};
+    public void start(Stage stage) throws Exception{
+        configureScreenSize = Screen.getPrimary().getBounds();
+
+        GameScene();
+        MenuScene();
+        ChatScene();
+
+    }
+
+    public void GameScene(){
+        gameStage = new Stage();
+        gameStage.setTitle("Game Window");
+
+        gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
+        gameStage.setHeight(configureScreenSize.getHeight() * size * 0.75);
+
+        gameStage.setX(configureScreenSize.getWidth() * 0.15);
+        gameStage.setY(configureScreenSize.getHeight() * 0.15);
+
+        gameStage.setResizable(false);
+
+        gameStage.show();
+
+    }
+
+    public void MenuScene() throws FileNotFoundException {
+        menuStage = new Stage();
+        menuStage.setTitle("Menu Window");
+        menuStage.setWidth(configureScreenSize.getWidth()*size*0.75);
+        menuStage.setHeight(configureScreenSize.getHeight()*size*0.25);
+
+        menuStage.setX(configureScreenSize.getWidth() * 0.15);
+        menuStage.setY(configureScreenSize.getHeight() * 0.15 + configureScreenSize.getHeight() * size * 0.75);
+
+        menuStage.initOwner(gameStage);
+        menuStage.setResizable(false);
+        menuStage.setOnCloseRequest(evt -> {
+            // prevent window from closing
+            evt.consume();
+        });
+
+        GridPane buttons = new GridPane();
+        Button exit = new Button("Exit");
+        Button settings = new Button("Settings");
+        Button vts = new Button("Vote to skip");
+        Separator separatorH = new Separator(Orientation.HORIZONTAL);
+        Separator separatorV = new Separator(Orientation.VERTICAL);
+        Separator separatorV1 = new Separator(Orientation.VERTICAL);
+        Separator separatorV2 = new Separator(Orientation.VERTICAL);
+        Separator separatorV3 = new Separator(Orientation.VERTICAL);
+        VBox team1 = new VBox();
+        Label team1L = new Label("Team 1");
+        Label team1S = new Label("" + score1);
+        VBox team2 = new VBox();
+        Label team2L = new Label("Team 2");
+        Label team2S = new Label("" + score2);
+        VBox team3 = new VBox();
+        Label team3L = new Label("Team 3");
+        Label team3S = new Label("0");
+        VBox team4 = new VBox();
+        Label team4L = new Label("Team 4");
+        Label team4S = new Label("0");
+        HBox teams = new HBox();
+        Label points = new Label("Points");
+        VBox score = new VBox();
+        ImageView controls = new ImageView();
+
         exit.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
         settings.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
         vts.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
@@ -71,6 +122,7 @@ public class UIController extends Application {
         buttons.setHgrow(vts,Priority.ALWAYS);
         buttons.setVgap(5);
         buttons.setHgap(5);
+        buttons.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
 
         team1.setVgrow(team1L,Priority.NEVER);
         team1.setVgrow(team1S,Priority.ALWAYS);
@@ -127,39 +179,32 @@ public class UIController extends Application {
         points.setMaxWidth(Double.MAX_VALUE);
         points.setAlignment(Pos.TOP_CENTER);
         score.getChildren().addAll(points,separatorH,teams);
-        score.setPrefSize(windowSize[0]*0.25,windowSize[1]*0.2);
+        score.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
 
-        game.setPrefSize(windowSize[0]*0.75,windowSize[1]*0.8);
-        buttons.setPrefSize(windowSize[0]*0.25,windowSize[1]*0.2);
-        controls.setPrefSize(windowSize[0]*0.25,windowSize[1]*0.2);
-        chat.setPrefSize(windowSize[0]*0.25,windowSize[1]);
+        StackPane con = new StackPane();
+        //con.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
+        con.setMinWidth(configureScreenSize.getWidth()*size*0.25);
+        con.setMinHeight(configureScreenSize.getHeight()*size*0.2);
+        con.setAlignment(Pos.CENTER);
+        controls.setFitWidth(configureScreenSize.getWidth()*size*0.25);
+        controls.setFitHeight(configureScreenSize.getHeight()*size*0.2);
+        Image minesweeper = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
+        controls.setImage(minesweeper);
+        controls.setPreserveRatio(true);
+        controls.setSmooth(true);
+        controls.setCache(true);
+        con.getChildren().add(controls);
 
-        grid.add(game,0,0,15,16);
-        grid.add(buttons,0,16,5,4);
-        grid.add(controls,5,16,5,4);
-        grid.add(score,10,16,5,4);
-        grid.add(chat,15,0,5,20);
-
-        grid.setHgrow(game,Priority.ALWAYS);
-        grid.setVgrow(game,Priority.ALWAYS);
-        grid.setHgrow(buttons,Priority.ALWAYS);
-        grid.setVgrow(buttons,Priority.ALWAYS);
-        grid.setHgrow(controls,Priority.ALWAYS);
-        grid.setVgrow(controls,Priority.ALWAYS);
-        grid.setHgrow(score,Priority.ALWAYS);
-        grid.setVgrow(score,Priority.ALWAYS);
-        grid.setHgrow(chat,Priority.ALWAYS);
-        grid.setVgrow(chat,Priority.ALWAYS);
 
         settings.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 final Stage settingsDialog = new Stage();
                 settingsDialog.initModality(Modality.APPLICATION_MODAL);
-                settingsDialog.initOwner(primaryStage);
+                settingsDialog.initOwner(menuStage);
                 VBox content = new VBox();
                 content.getChildren().add(new Label("Ulrik dum"));
-                Scene settingsScene = new Scene(content,windowSize[0]/4,windowSize[1]/2);
+                Scene settingsScene = new Scene(content,configureScreenSize.getWidth()/4,configureScreenSize.getHeight()/2);
                 settingsDialog.setScene(settingsScene);
                 settingsDialog.setResizable(false);
                 settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
@@ -169,18 +214,116 @@ public class UIController extends Application {
                 settingsDialog.show();
             }
         });
-
-        mainScene = new Scene(grid, (int) windowSize[0],(int) windowSize[1]);
-        primaryStage.setScene(mainScene);
-        primaryStage.setResizable(false);
-        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue)
-                primaryStage.setMaximized(false);
+        exit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameStage.close();
+            }
         });
-        primaryStage.show();
+        vts.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                chatBoxG.getChildren().add(new Label("I vote to skip"));
+                score1++;
+                team1S.setText("" + score1);
+            }
+        });
+
+        HBox combi = new HBox();
+        combi.getChildren().addAll(buttons,con,separatorV,score);
+        Scene menuScene = new Scene(combi,configureScreenSize.getWidth() * size * 0.75,configureScreenSize.getHeight() * size * 0.25);
+
+        menuStage.setScene(menuScene);
+        menuStage.show();
     }
 
-    public static void main(String[] args){
+    public void ChatScene(){
+        chatStage = new Stage();
+        chatStage.setTitle("Chat Window");
+
+        chatStage.setWidth(configureScreenSize.getWidth() * 0.7 * 0.25);
+        chatStage.setHeight(configureScreenSize.getHeight() * 0.70);
+
+        chatStage.setX(configureScreenSize.getWidth() * 0.15 + configureScreenSize.getWidth() * 0.7 * 0.75);
+        chatStage.setY(configureScreenSize.getHeight() * 0.15);
+
+        chatStage.setResizable(false);
+        chatStage.setOnCloseRequest(evt -> {
+            // prevent window from closing
+            evt.consume();
+        });
+        chatStage.initOwner(gameStage);
+
+        //Pane used for the layout
+        BorderPane layout = new BorderPane();
+
+        //<editor-fold desc="Code for: Global/Team Chat + header">
+        VBox chatHeader = new VBox();
+        chatHeader.setPadding(new Insets(10, 10, 10, 10));
+
+        Label headerText = new Label("Messages");
+        headerText.setFont(new Font("Arial", 30));
+        chatHeader.setAlignment(Pos.TOP_CENTER);
+
+        chatBoxT = new VBox();
+        chatBoxG = new VBox();
+        chatTabs = new TabPane();
+        Tab globalChat = new Tab("Global");
+        chatPaneG = new ScrollPane();
+        chatPaneG.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneG.setContent(chatBoxG);
+        globalChat.setContent(chatPaneG);
+        Tab teamChat = new Tab("Team");
+        chatPaneT = new ScrollPane();
+        chatPaneT.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneT.setContent(chatBoxG);
+        teamChat.setContent(chatPaneT);
+
+        chatTabs.getTabs().addAll(globalChat,teamChat);
+        chatTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        layout.setCenter(chatTabs);
+
+        chatBoxT.heightProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                chatPaneT.setVvalue((Double)newValue );
+            }
+        });
+        chatBoxG.heightProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                chatPaneG.setVvalue((Double)newValue );
+            }
+        });
+
+        //</editor-fold>
+
+        //<editor-fold desc="Code for: Sent Message Text-field/Button">
+        //Make message send box
+        VBox sendMessageBar = new VBox();
+        sendMessageBar.setPadding(new Insets(10, 10, 10, 10));
+
+        TextField messageBox = new TextField();
+        messageBox.setPromptText("Write Message");
+        messageBox.setPrefColumnCount(10);
+        messageBox.getText();
+
+        //Make send button
+        Button sendButtons = new Button("Send");
+
+        sendMessageBar.getChildren().addAll(messageBox, sendButtons);
+
+        layout.setBottom(sendMessageBar);
+
+        //</editor-fold>
+
+        Scene chatScene = new Scene(layout);
+        chatStage.setScene(chatScene);
+        chatStage.show();
+    }
+
+    public static void main(String[] args) {
         launch(args);
     }
 }
