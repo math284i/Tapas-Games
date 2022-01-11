@@ -2,6 +2,7 @@ package TapasGames.Client;
 
 import JspaceFiles.jspace.*;
 import TapasGames.UI.UIController;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 
@@ -19,6 +20,7 @@ public class ClientMain {
         _uiSpace = uiSpace;
 
         try {
+            _ui.start(new Stage());
             _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
             _serverSpace.put("toServer",name,"addClient","");
         } catch (IOException | InterruptedException ignored) {

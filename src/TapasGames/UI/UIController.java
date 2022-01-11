@@ -1,14 +1,18 @@
 package TapasGames.UI;
 
+import JspaceFiles.jspace.SequentialSpace;
+import TapasGames.Game.MiniGames.PlayerMovement;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -25,7 +29,7 @@ public class UIController extends Application {
 
     Rectangle2D configureScreenSize;
     double size = 0.7;
-    Stage gameStage;
+    Stage gameStage = new Stage();
     Stage menuStage;
     Stage chatStage;
 
@@ -38,19 +42,16 @@ public class UIController extends Application {
     VBox chatBoxG;
     VBox chatBoxT;
 
+    private SequentialSpace _clientSpace;
+    private PlayerMovement pm;
+
+    public UIController(SequentialSpace clientSpace) {
+        _clientSpace = clientSpace;
+    }
 
     @Override
     public void start(Stage stage) throws Exception{
         configureScreenSize = Screen.getPrimary().getBounds();
-
-        GameScene();
-        MenuScene();
-        ChatScene();
-
-    }
-
-    public void GameScene(){
-        gameStage = new Stage();
         gameStage.setTitle("Game Window");
 
         gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
@@ -61,7 +62,29 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        gameStage.show();
+        MenuScene();
+        ChatScene();
+
+        pm = new PlayerMovement();
+        pm.start(gameStage);
+
+        //GameScene();
+
+    }
+
+    public void GameScene() throws Exception {
+        gameStage.setTitle("Game Window");
+
+        gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
+        gameStage.setHeight(configureScreenSize.getHeight() * size * 0.75);
+
+        gameStage.setX(configureScreenSize.getWidth() * 0.15);
+        gameStage.setY(configureScreenSize.getHeight() * 0.15);
+
+        gameStage.setResizable(false);
+        pm = new PlayerMovement();
+        pm.start(gameStage);
+        //gameStage.show();
 
     }
 
@@ -217,7 +240,21 @@ public class UIController extends Application {
         exit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                pm.stop();
                 gameStage.close();
+                menuStage.close();
+                chatStage.close();
+                Stage stage = new Stage();
+                try {
+                    Parent root = FXMLLoader.load(getClass().getResource("../UiFiles/frontpage.fxml"));
+
+                    Scene scene = new Scene(root);
+                    stage.setTitle("FXML Welcome");
+                    stage.setScene(scene);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+                stage.show();
             }
         });
         vts.setOnAction(new EventHandler<ActionEvent>() {
