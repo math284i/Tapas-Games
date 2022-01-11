@@ -5,30 +5,33 @@ import TapasGames.UI.UIController;
 
 import java.io.IOException;
 
-public class ClientMain implements Runnable {
+public class ClientMain {
     private UIController _ui;
     private String _name;
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
 
-    public ClientMain(String name, String serverIpWithPort, UIController ui) throws IOException {
+    public ClientMain(UIController ui, String name, String serverIpWithPort, SequentialSpace uiSpace) throws IOException {
         _ui = ui;
         _name = name;
         _serverIpWithPort = serverIpWithPort;
+        _uiSpace = uiSpace;
+
         try {
             _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
         } catch (IOException ignored) {
         }
 
         new Thread(new ChatReceiver(this, new RemoteSpace(serverIpWithPort + "ChatToClient: " + _name))).start();
+        new Thread(new UIReceiver(this, uiSpace)).start();
     }
 
     public String getName() {
         return _name;
     }
 
-    private void sendDataToChatRoom(String id, String data) {
+    public void sendDataToChatRoom(String id, String data) {
         try {
             new RemoteSpace(_serverIpWithPort + "toChatRoom: " + id).put("sendMessage", _name, data);
         } catch (IOException | InterruptedException e) {
@@ -36,11 +39,11 @@ public class ClientMain implements Runnable {
         }
     }
 
-    private void sendKeyboardInputToGame() {
+    public void sendKeyboardInputToGame() {
 
     }
 
-    private void sendMouseInputToGame() {
+    public void sendMouseInputToGame() {
 
     }
 
@@ -48,18 +51,27 @@ public class ClientMain implements Runnable {
         System.out.println(name + " Says: " + message);
     }
 
+}
+class UIReceiver implements Runnable {
+    private ClientMain _client;
+    private SequentialSpace _fromInputSpace;
+
+    public UIReceiver(ClientMain client, SequentialSpace fromInputSpace) {
+        _client = client;
+        _fromInputSpace = fromInputSpace;
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
-                Object[] data = _uiSpace.get(
-                        new ActualField(_name),
-                        new FormalField(String.class), new FormalField(String.class));
+                Object[] data = _fromInputSpace.get(
+                        new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 String[] tuple = data[2].toString().split(",");
                 switch (data[1].toString()) {
-                    case "chat" -> sendDataToChatRoom(tuple[0], tuple[1]);
-                    case "keyboardInput" -> sendKeyboardInputToGame();
-                    case "mouseInput" -> sendMouseInputToGame();
+                    case "chat" -> _client.sendDataToChatRoom(tuple[0], tuple[1]);
+                    case "keyboardInput" -> _client.sendKeyboardInputToGame();
+                    case "mouseInput" -> _client.sendMouseInputToGame();
                 }
             } catch (InterruptedException ignored) {
             }
@@ -100,7 +112,7 @@ class ChatSender implements Runnable {
 */
 class ChatReceiver implements Runnable {
     private ClientMain _client;
-    private Space _fromChatSpace;
+    private RemoteSpace _fromChatSpace;
 
     public ChatReceiver(ClientMain client, RemoteSpace fromChatSpace) {
         _client = client;
