@@ -12,7 +12,8 @@ public class ClientMain implements Runnable {
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
 
-    public ClientMain(String name, String serverIpWithPort) throws IOException {
+    public ClientMain(String name, String serverIpWithPort, UIController ui) throws IOException {
+        _ui = ui;
         _name = name;
         _serverIpWithPort = serverIpWithPort;
         try {
@@ -27,7 +28,7 @@ public class ClientMain implements Runnable {
         return _name;
     }
 
-    private void sendDataToChatRoom(int id, String data) {
+    private void sendDataToChatRoom(String id, String data) {
         try {
             new RemoteSpace(_serverIpWithPort + "toChatRoom: " + id).put("sendMessage", _name, data);
         } catch (IOException | InterruptedException e) {
@@ -54,8 +55,9 @@ public class ClientMain implements Runnable {
                 Object[] data = _uiSpace.get(
                         new ActualField(_name),
                         new FormalField(String.class), new FormalField(String.class));
+                String[] tuple = data[2].toString().split(",");
                 switch (data[1].toString()) {
-                    case "chat" -> sendDataToChatRoom(); //Tuple = (id, message); //TODO
+                    case "chat" -> sendDataToChatRoom(tuple[0], tuple[1]);
                     case "keyboardInput" -> sendKeyboardInputToGame();
                     case "mouseInput" -> sendMouseInputToGame();
                 }
