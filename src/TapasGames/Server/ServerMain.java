@@ -1,6 +1,6 @@
 package TapasGames.Server;
 
-import JspaceFiles.jspace.RemoteSpace;
+import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 import TapasGames.Chat.ChatController;
@@ -10,12 +10,12 @@ import TapasGames.UI.UIController;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ServerMain {
+public class ServerMain implements Runnable{
     private UIController _ui;
     private String _ip;
     private String _port;
     private String _ipWithPort;
-    private ArrayList<ClientMain> _clients;
+    private ArrayList<String> _clients;
     private SequentialSpace _clientSpace;
     private SequentialSpace _chatSpace;
     private SequentialSpace _gameSpace;
@@ -38,8 +38,8 @@ public class ServerMain {
         _chatController = new ChatController(_repository);
     }
 
-    public void addClient(String name) throws IOException {
-        _clients.add(new ClientMain(name, _ipWithPort));
+    public void addClient(String name){
+        _clients.add(name);
     }
 
     private void createChatRoom(int id) {
@@ -63,6 +63,20 @@ public class ServerMain {
 
         } catch (Exception e) {
             System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            /*
+            try {
+                Object[] data = _fromChatSpace.get(new FormalField(String.class), new FormalField(String.class));
+                _client.updateChatUI(data[0].toString(), data[1].toString());
+            } catch (InterruptedException e) {
+                System.out.println("Receiver caught an error!");
+            }
+            */
         }
     }
 
