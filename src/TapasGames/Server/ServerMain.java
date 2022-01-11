@@ -38,8 +38,8 @@ public class ServerMain {
         _chatController = new ChatController(_repository);
     }
 
-    public void addClient(String name) {
-        _clients.add(new ClientMain(name, _repository, _clientSpace));
+    public void addClient(String name) throws IOException {
+        _clients.add(new ClientMain(name, _ipWithPort));
     }
 
     private void createChatRoom(int id) {

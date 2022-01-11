@@ -3,29 +3,37 @@ package TapasGames.Client;
 import JspaceFiles.jspace.*;
 import TapasGames.UI.UIController;
 
-public class ClientMain implements Runnable{
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+public class ClientMain implements Runnable {
     private UIController _ui;
     private String _name;
-    private SequentialSpace _serverSpace;
+    private String _serverIp;
+    private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
-    private SpaceRepository _repository;
 
-    public ClientMain(String name, SpaceRepository repository, SequentialSpace serverSpace) {
+    public ClientMain(String name, String serverIp) throws IOException {
         _name = name;
-        _serverSpace = serverSpace;
-        _repository = repository;
+        _serverIp = serverIp;
+        try {
+            _serverSpace = new RemoteSpace(serverIp + "chatServer" + "?keep");
+        } catch (IOException ignored) {
+        }
 
-        new Thread(new ChatReceiver(this,_repository.get("ChatToClient: "+_name))).start();
+        new Thread(new ChatReceiver(this, new RemoteSpace(serverIp + "ChatToClient: " + _name))).start();
     }
 
     public String getName() {
         return _name;
     }
 
-    private void sendDataToChatRoom(int id, String data){
-        try{
-            _repository.get("toChatRoom: "+id).put(0,_name,data);
-        } catch (InterruptedException ignored) {}
+    private void sendDataToChatRoom(int id, String data) {
+        try {
+            new RemoteSpace(_serverIp + "toChatRoom: " + id).put(0, _name, data);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendKeyboardInputToGame() {
@@ -52,7 +60,8 @@ public class ClientMain implements Runnable{
                     case "keyboardInput" -> sendKeyboardInputToGame();
                     case "mouseInput" -> sendMouseInputToGame();
                 }
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 }
@@ -92,7 +101,7 @@ class ChatReceiver implements Runnable {
     private ClientMain _client;
     private Space _fromChatSpace;
 
-    public ChatReceiver(ClientMain client, Space fromChatSpace) {
+    public ChatReceiver(ClientMain client, RemoteSpace fromChatSpace) {
         _client = client;
         _fromChatSpace = fromChatSpace;
     }
