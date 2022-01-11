@@ -29,7 +29,7 @@ public class UIController extends Application {
 
     Rectangle2D configureScreenSize;
     double size = 0.7;
-    Stage gameStage = new Stage();
+    Stage gameStage;
     Stage menuStage;
     Stage chatStage;
 
@@ -52,27 +52,15 @@ public class UIController extends Application {
     @Override
     public void start(Stage stage) throws Exception{
         configureScreenSize = Screen.getPrimary().getBounds();
-        gameStage.setTitle("Game Window");
 
-        gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
-        gameStage.setHeight(configureScreenSize.getHeight() * size * 0.75);
-
-        gameStage.setX(configureScreenSize.getWidth() * 0.15);
-        gameStage.setY(configureScreenSize.getHeight() * 0.15);
-
-        gameStage.setResizable(false);
-
+        GameScene();
         MenuScene();
         ChatScene();
-
-        pm = new PlayerMovement();
-        pm.start(gameStage);
-
-        //GameScene();
-
+        gameStage.toFront();
     }
 
     public void GameScene() throws Exception {
+        gameStage = new Stage();
         gameStage.setTitle("Game Window");
 
         gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
@@ -82,10 +70,10 @@ public class UIController extends Application {
         gameStage.setY(configureScreenSize.getHeight() * 0.15);
 
         gameStage.setResizable(false);
-        pm = new PlayerMovement();
-        pm.start(gameStage);
-        //gameStage.show();
 
+        pm = new PlayerMovement();
+        gameStage.setScene(pm.start());
+        gameStage.show();
     }
 
     public void MenuScene() throws FileNotFoundException {
@@ -242,8 +230,6 @@ public class UIController extends Application {
             public void handle(ActionEvent actionEvent) {
                 pm.stop();
                 gameStage.close();
-                menuStage.close();
-                chatStage.close();
                 Stage stage = new Stage();
                 try {
                     Parent root = FXMLLoader.load(getClass().getResource("../UiFiles/frontpage.fxml"));
