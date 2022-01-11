@@ -19,7 +19,7 @@ import java.io.FileInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PlayerMovement extends Application {
+public class PlayerMovement {
 
     private static final double W = 600, H = 600;
     private static final Logger _logger = Logger.getLogger(PlayerMovement.class.getName());
@@ -38,15 +38,14 @@ public class PlayerMovement extends Application {
     boolean run, goLeft, goRight;
 
     private AnimationTimer timer;
-    private Stage stage;
+    //private Stage stage;
 
     public void stop() {
         timer.stop();
-        stage.close();
+        //stage.close();
     }
 
-    @Override
-    public void start(Stage stage) throws Exception {
+    public Scene start() throws Exception {
         playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
         ImageView playerView = new ImageView(playerImage);
         playerView.setPreserveRatio(true);
@@ -87,8 +86,8 @@ public class PlayerMovement extends Application {
             }
         });
 
-        stage.setScene(scene);
-        stage.show();
+        //stage.setScene(scene);
+        //stage.show();
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -105,8 +104,9 @@ public class PlayerMovement extends Application {
             }
         };
         timer.start();
-        this.stage = stage;
+        //this.stage = stage;
         this.timer = timer;
+        return scene;
     }
 
     private void movePlayerBy(double dx, double dy) {
@@ -140,6 +140,5 @@ public class PlayerMovement extends Application {
         }
         _logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
     }
-
-    public static void main(String[] args) { launch(args); }
+    //public static void main(String[] args) { launch(args); }
 }
