@@ -20,7 +20,8 @@ public class ClientMain {
 
         try {
             _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
-        } catch (IOException ignored) {
+            _serverSpace.put("toServer",name,"addClient","");
+        } catch (IOException | InterruptedException ignored) {
         }
 
         new Thread(new ChatReceiver(this, new RemoteSpace(serverIpWithPort + "ChatToClient: " + _name))).start();
