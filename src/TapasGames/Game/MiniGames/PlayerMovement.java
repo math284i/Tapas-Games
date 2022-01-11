@@ -1,4 +1,4 @@
-package TapasGames.Chat.Game.MiniGames;
+package TapasGames.Game.MiniGames;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
