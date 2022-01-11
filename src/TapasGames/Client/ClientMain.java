@@ -10,13 +10,16 @@ public class ClientMain {
     private String _name;
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
+    private SequentialSpace _uiSpace;
 
     public ClientMain(UIController ui, String name, String serverIpWithPort, SequentialSpace uiSpace) throws IOException {
+        _ui = ui;
         _name = name;
         _serverIpWithPort = serverIpWithPort;
+        _uiSpace = uiSpace;
+
         try {
             _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
-            _serverSpace.put()
         } catch (IOException ignored) {
         }
 
@@ -28,7 +31,7 @@ public class ClientMain {
         return _name;
     }
 
-    public void sendDataToChatRoom(int id, String data) {
+    public void sendDataToChatRoom(String id, String data) {
         try {
             new RemoteSpace(_serverIpWithPort + "toChatRoom: " + id).put("sendMessage", _name, data);
         } catch (IOException | InterruptedException e) {
@@ -64,8 +67,9 @@ class UIReceiver implements Runnable {
             try {
                 Object[] data = _fromInputSpace.get(
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
+                String[] tuple = data[2].toString().split(",");
                 switch (data[1].toString()) {
-                    case "chat" -> _client.sendDataToChatRoom(); //Tuple = (id, message); //TODO
+                    case "chat" -> _client.sendDataToChatRoom(tuple[0], tuple[1]);
                     case "keyboardInput" -> _client.sendKeyboardInputToGame();
                     case "mouseInput" -> _client.sendMouseInputToGame();
                 }
