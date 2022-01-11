@@ -37,6 +37,14 @@ public class PlayerMovement extends Application {
 
     boolean run, goLeft, goRight;
 
+    private AnimationTimer timer;
+    private Stage stage;
+
+    public void stop() {
+        timer.stop();
+        stage.close();
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
@@ -97,6 +105,8 @@ public class PlayerMovement extends Application {
             }
         };
         timer.start();
+        this.stage = stage;
+        this.timer = timer;
     }
 
     private void movePlayerBy(double dx, double dy) {
