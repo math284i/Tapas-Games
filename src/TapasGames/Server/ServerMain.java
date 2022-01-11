@@ -1,16 +1,15 @@
 package TapasGames.Server;
 
+import JspaceFiles.jspace.ActualField;
 import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 import TapasGames.Chat.ChatController;
-import TapasGames.Client.ClientMain;
 import TapasGames.UI.UIController;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-public class ServerMain implements Runnable{
+public class ServerMain {
     private UIController _ui;
     private String _ip;
     private String _port;
@@ -36,9 +35,12 @@ public class ServerMain implements Runnable{
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository);
+
+        new Thread(new ClientReceiver(this,_clientSpace)).start();
     }
 
     public void addClient(String name){
+        //TODO check if valid
         _clients.add(name);
     }
 
@@ -65,22 +67,32 @@ public class ServerMain implements Runnable{
             System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
         }
     }
+    //I need a MainController
+    //Tell MainController im ready to receive connections!
+
+}
+class ClientReceiver implements Runnable{
+    ServerMain _server;
+    SequentialSpace _fromClientSpace;
+
+    public ClientReceiver(ServerMain server, SequentialSpace fromClientSpace){
+        _server = server;
+        _fromClientSpace = fromClientSpace;
+    }
 
     @Override
     public void run() {
         while (true) {
-            /*
             try {
-                Object[] data = _fromChatSpace.get(new FormalField(String.class), new FormalField(String.class));
-                _client.updateChatUI(data[0].toString(), data[1].toString());
-            } catch (InterruptedException e) {
-                System.out.println("Receiver caught an error!");
+                Object[] data = _fromClientSpace.get(
+                        new ActualField("toServer"), new FormalField(String.class)
+                        , new FormalField(String.class), new FormalField(String.class));
+                String[] tuple = data[3].toString().split(",");
+                switch (data[2].toString()) {
+                    case "addClient" -> _server.addClient(data[1].toString());
+                }
+            } catch (InterruptedException ignored) {
             }
-            */
         }
     }
-
-    //I need a MainController
-    //Tell MainController im ready to receive connections!
-
 }
