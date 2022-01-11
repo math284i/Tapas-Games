@@ -4,24 +4,23 @@ import JspaceFiles.jspace.*;
 import TapasGames.UI.UIController;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 public class ClientMain implements Runnable {
     private UIController _ui;
     private String _name;
-    private String _serverIp;
+    private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
 
-    public ClientMain(String name, String serverIp) throws IOException {
+    public ClientMain(String name, String serverIpWithPort) throws IOException {
         _name = name;
-        _serverIp = serverIp;
+        _serverIpWithPort = serverIpWithPort;
         try {
-            _serverSpace = new RemoteSpace(serverIp + "chatServer" + "?keep");
+            _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
         } catch (IOException ignored) {
         }
 
-        new Thread(new ChatReceiver(this, new RemoteSpace(serverIp + "ChatToClient: " + _name))).start();
+        new Thread(new ChatReceiver(this, new RemoteSpace(serverIpWithPort + "ChatToClient: " + _name))).start();
     }
 
     public String getName() {
@@ -30,7 +29,7 @@ public class ClientMain implements Runnable {
 
     private void sendDataToChatRoom(int id, String data) {
         try {
-            new RemoteSpace(_serverIp + "toChatRoom: " + id).put(0, _name, data);
+            new RemoteSpace(_serverIpWithPort + "toChatRoom: " + id).put("sendMessage", _name, data);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
