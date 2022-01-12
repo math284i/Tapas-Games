@@ -99,7 +99,7 @@ public class PlayerMovement {
                 dy = Math.sin(angle);
                 dx = Math.cos(angle);
 
-                if (run) {dx *= 3; dy *= 3; }
+                //if (run) {dx *= 3; dy *= 3; }
                 movePlayerBy(dx, dy);
             }
         };
@@ -124,21 +124,28 @@ public class PlayerMovement {
     private void movePlayerTo(double x, double y) {
         final double cx = player.getBoundsInLocal().getWidth() / 2;
         final double cy = player.getBoundsInLocal().getWidth() / 2;
-        if (path.contains(x - cx, y - cy)) path.getElements().clear();
         //Check bounderies
+
+        path.setStroke(Color.GREEN);
+        path.getElements()
+                .add(new MoveTo(x - cx, y - cy));
+        path.getElements().add(new LineTo(x - cx, y - cy));
+
+        if (path.contains(x - cx, y - cy)) //path.getElements().clear();
         if (x - cx < 0) player.relocate(W - playerWidth, y - cy);
         else if (x + cx > W) player.relocate(0, y - cy);
         else if (y - cy < 0) player.relocate(x - cx, H - playerHeight);
         else if (y + cy > H) player.relocate(x - cx, 0);
 
         else {
-            _logger.log(Level.INFO, "moving!");
+            //_logger.log(Level.INFO, "moving!");
+            player.relocate(x - cx, y - cy);
+            path.setStroke(pathColor);
             path.getElements()
                     .add(new MoveTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
-            player.relocate(x - cx, y - cy);
             path.getElements().add(new LineTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
         }
-        _logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
+        //_logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
     }
     //public static void main(String[] args) { launch(args); }
 }

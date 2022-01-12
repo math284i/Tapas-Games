@@ -23,7 +23,7 @@ public class ClientMain {
             _ui.start(new Stage());
             _serverSpace = new RemoteSpace(serverIpWithPort + "chatServer" + "?keep");
             _serverSpace.put("toServer",name,"addClient","");
-        } catch (IOException | InterruptedException ignored) {
+        } catch (Exception ignored) {
         }
 
         new Thread(new ChatReceiver(this, new RemoteSpace(serverIpWithPort + "ChatToClient: " + _name))).start();

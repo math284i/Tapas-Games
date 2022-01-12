@@ -246,6 +246,7 @@ public class UIController extends Application {
         vts.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                //TODO output message from Space
                 chatBoxG.getChildren().add(new Label("I vote to skip"));
                 score1++;
                 team1S.setText("" + score1);
@@ -334,6 +335,16 @@ public class UIController extends Application {
 
         //Make send button
         Button sendButtons = new Button("Send");
+
+        sendButtons.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                //TODO output message from Space
+                String message = messageBox.getText();
+                System.out.println("message: " + message);
+                messageBox.clear();
+            }
+        });
 
         sendMessageBar.getChildren().addAll(messageBox, sendButtons);
 
