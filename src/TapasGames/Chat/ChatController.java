@@ -3,55 +3,132 @@ package TapasGames.Chat;
 import JspaceFiles.jspace.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class ChatController{
-    private ArrayList<Thread> _rooms;
+public class ChatController {
+    private HashMap<String, Thread> _rooms;
     private SpaceRepository _repository;
+    private SequentialSpace _serverSpace;
+    private SequentialSpace _chatRoomSpace;
 
-    public ChatController(SpaceRepository repository) {
+    public ChatController(SpaceRepository repository, SequentialSpace serverSpace) {
+        _rooms = new HashMap<>();
         _repository = repository;
-        _rooms = new ArrayList<>();
+        _serverSpace = serverSpace;
+        _chatRoomSpace = new SequentialSpace();
+        new Thread(new ServerReceiver(this, _serverSpace)).start();
     }
 
-    public void addChatRoom(int id){
+    public void addChatRoom(String id) {
         SequentialSpace toChatRoomSpace = new SequentialSpace();
-        _repository.add("toChatRoom: "+id,toChatRoomSpace);
-        _rooms.add(new Thread(new ChatRoom(id, _repository,toChatRoomSpace)));
+        _repository.add("toChatRoom: " + id, toChatRoomSpace);
+        _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace)));
         _rooms.get(id).start();
+        try {
+            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + "Created"));
+            _serverSpace.put("fromChat","ChatRoomAdded");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    public void addClient(String name, String id) {
+        try {
+            _repository.get("toChatRoom: " + id).put("addClient",name);
+            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Added"));
+            _serverSpace.put("fromChat", "ClientAdded");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeClient(String name, String id) {
+        try {
+            _repository.get("toChatRoom: " + id).put("removeClient",name);
+            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Removed"));
+            _serverSpace.put("fromChat", "ClientRemoved");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+class ServerReceiver implements Runnable {
+    private ChatController _controller;
+    private SequentialSpace _serverSpace;
+
+    public ServerReceiver(ChatController controller, SequentialSpace serverSpace) {
+        _controller = controller;
+        _serverSpace = serverSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _serverSpace.get(
+                        new ActualField("fromServer"), new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
+                    case "addChatRoom" -> _controller.addChatRoom(data[0]);
+                    case "addClient" -> _controller.addClient(data[0],data[1]);
+                    case "removeClient" -> _controller.removeClient(data[0],data[1]);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 class ChatRoom implements Runnable {
     private ArrayList<String> _clients;
     private SpaceRepository _repository;
     private SequentialSpace _toChatRoomSpace;
-    private int _id;
+    private SequentialSpace _controllerSpace;
+    private String _id;
 
-    ChatRoom(int id, SpaceRepository repository, SequentialSpace toChatRoomSpace){
+    ChatRoom(String id, SpaceRepository repository, SequentialSpace toChatRoomSpace, SequentialSpace controllerSpace) {
         _id = id;
         _repository = repository;
         _toChatRoomSpace = toChatRoomSpace;
-    }
-
-    public void removeClient(String client) {
-        _repository.remove("ChatToClient: "+client);
-        _clients.remove(client);
+        _controllerSpace = controllerSpace;
+        try {
+            _controllerSpace.put("fromChatRoom" + _id + "Created");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void addClient(String client) {
         SequentialSpace space = new SequentialSpace();
-        _repository.add("ChatToClient: "+client, space);
+        _repository.add("ChatToClient: " + _id + client, space);
         _clients.add(client);
+        try {
+            _controllerSpace.put("fromChatRoom" + _id + client + "Added");
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeClient(String client) {
+        _repository.remove("ChatToClient: " + _id + client);
+        _clients.remove(client);
+        try {
+            _controllerSpace.put("fromChatRoom" + _id + "Removed");
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMessageToAll(String name, String message) {
         for (String client : _clients) {
-            Space toClientSpace = _repository.get("ChatToClient: "+client);
+            Space toClientSpace = _repository.get("ChatToClient: " + _id + client);
             try {
-                toClientSpace.put(name, message);
-            } catch (InterruptedException e) {
-                System.out.println("ChatController failed to send message to: " + client + " with " + e);
+                toClientSpace.put(name, _id+","+message);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -60,14 +137,17 @@ class ChatRoom implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] data = _toChatRoomSpace.get(
-                        new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
-                switch (data[0].toString()) {
-                    case "sendMessage" -> sendMessageToAll(data[1].toString(), data[2].toString());
-                    case "addClient" -> addClient(data[1].toString());
-                    case "removeClient" -> removeClient(data[1].toString());
+                Object[] tuple = _toChatRoomSpace.get(
+                        new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[1].toString().split(",");
+                switch (tuple[0].toString()) {
+                    case "sendMessage" -> sendMessageToAll(data[0], data[1]);
+                    case "addClient" -> addClient(data[0]);
+                    case "removeClient" -> removeClient(data[0]);
                 }
-            } catch (InterruptedException ignored) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

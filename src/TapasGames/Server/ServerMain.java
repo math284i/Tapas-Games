@@ -30,11 +30,9 @@ public class ServerMain {
         _clientSpace = new SequentialSpace();
         _chatSpace = new SequentialSpace();
         _repository.add("clientServer", _clientSpace);
-        _repository.add("chatServer", _chatSpace);
-        _repository.add("gameServer", _gameSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
-        _chatController = new ChatController(_repository);
+        _chatController = new ChatController(_repository, _chatSpace);
 
         new Thread(new ClientReceiver(this,_clientSpace)).start();
     }
@@ -44,27 +42,38 @@ public class ServerMain {
         _clients.add(name);
     }
 
-    private void createChatRoom(int id) {
-        _chatController.addChatRoom(id);
-    }
-
-    public void addClientToChatRoom(String name, int id) {
+    private void createChatRoom(String id) {
         try {
-            _repository.get("toChatRoom: " + id).put("addClient",name,"");
-            _clientSpace.put(name,"",id); //TODO UPDATE
-
+            _chatSpace.put("fromServer","addChatRoom",id);
+            _chatSpace.get(new ActualField ("fromChat"), new ActualField("chatRoomAdded"));
         } catch (Exception e) {
-            System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
+            e.printStackTrace();
         }
     }
 
-    public void removeClientFromChatRoom(String name, int id) {
+    public void addClientToChatRoom(String name, String id) {
+        try {
+            _chatSpace.put("fromServer","addClient",name+","+id);
+            _clientSpace.put(name,"",id); //TODO UPDATE
+            _chatSpace.get(new ActualField ("fromChatRoom"),
+                    new ActualField("clientAdded"), new FormalField(String.class));
+            _clientSpace.get(new ActualField ("from" + name),
+                    new ActualField("chatRoomAdded"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeClientFromChatRoom(String name, String id) {
         try {
             _repository.get("toChatRoom: " + id).put("removeClient",name,"");
             _clientSpace.put(name,"",id); //TODO UPDATE
-
+            _chatSpace.get(new ActualField ("fromChatRoom"),
+                    new ActualField("clientRemoved"), new FormalField(String.class));
+            _clientSpace.get(new ActualField ("from" + name),
+                    new ActualField("chatRoomRemoved"));
         } catch (Exception e) {
-            System.out.println("Failed putting into toChatRoom: " + id + "\n with: " + e);
+            e.printStackTrace();
         }
     }
     //I need a MainController
@@ -84,12 +93,12 @@ class ClientReceiver implements Runnable{
     public void run() {
         while (true) {
             try {
-                Object[] data = _fromClientSpace.get(
+                Object[] tuple = _fromClientSpace.get(
                         new ActualField("toServer"), new FormalField(String.class)
                         , new FormalField(String.class), new FormalField(String.class));
-                String[] tuple = data[3].toString().split(",");
-                switch (data[2].toString()) {
-                    case "addClient" -> _server.addClient(data[1].toString());
+                String[] data = tuple[3].toString().split(",");
+                switch (tuple[2].toString()) {
+                    case "addClient" -> _server.addClient(tuple[1].toString());
                 }
             } catch (InterruptedException ignored) {
             }
