@@ -5,12 +5,12 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 import TapasGames.Chat.ChatController;
-import TapasGames.UI.UIController;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
 public class ServerMain {
-    private UIController _ui;
+    private ServerUI _ui;
     private String _ip;
     private String _port;
     private String _ipWithPort;
@@ -21,11 +21,11 @@ public class ServerMain {
     private SpaceRepository _repository;
     private ChatController _chatController;
 
-    public ServerMain(UIController ui, String ip, String port) {
+    public ServerMain(ServerUI ui, String ip, String port) throws Exception {
         _ui = ui;
         _ip = ip;
         _port = port;
-        _ipWithPort = "tcp://localhost:" + port + "/";
+        _ipWithPort = ip + port + "/";
         _repository = new SpaceRepository();
         _clientSpace = new SequentialSpace();
         _chatSpace = new SequentialSpace();
@@ -34,11 +34,13 @@ public class ServerMain {
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
 
+        _ui.start(new Stage());
         new Thread(new ClientReceiver(this,_clientSpace)).start();
     }
 
     public void addClient(String name){
         //TODO check if valid
+        System.out.println("Server adding: " + name);
         _clients.add(name);
     }
 
@@ -76,8 +78,6 @@ public class ServerMain {
             e.printStackTrace();
         }
     }
-    //I need a MainController
-    //Tell MainController im ready to receive connections!
 
 }
 class ClientReceiver implements Runnable{

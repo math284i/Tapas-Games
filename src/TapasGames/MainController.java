@@ -1,6 +1,8 @@
  package TapasGames;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Client.ClientMain;
+import TapasGames.Server.ServerMain;
+import TapasGames.Server.ServerUI;
 import TapasGames.UI.UIController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -101,5 +103,14 @@ import java.io.IOException;
 
     public void onPressServer(ActionEvent actionEvent) {
         System.out.println("Server is being created!");
+        Node node = (Node) actionEvent.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        stage.close();
+        ServerUI ui = new ServerUI();
+        try {
+            new ServerMain(ui, "tcp://localhost:","31415");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
