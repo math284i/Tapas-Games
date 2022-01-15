@@ -342,6 +342,11 @@ public class UIController extends Application {
                 //TODO output message from Space
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
+                try {
+                    _clientSpace.put("chat", "id," + message);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 messageBox.clear();
             }
         });

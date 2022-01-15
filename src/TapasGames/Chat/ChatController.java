@@ -20,6 +20,7 @@ public class ChatController {
     }
 
     public void addChatRoom(String id) {
+        System.out.println("ChatController creating new chatRoom id: " + id);
         SequentialSpace toChatRoomSpace = new SequentialSpace();
         _repository.add("toChatRoom: " + id, toChatRoomSpace);
         _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace)));

@@ -12,7 +12,7 @@ public class ClientMain {
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
-
+    //tcp://localhost:31415/
     public ClientMain(UIController ui, String name, String serverIpWithPort, SequentialSpace uiSpace) throws IOException {
         _ui = ui;
         _name = name;
@@ -46,7 +46,8 @@ public class ClientMain {
 
     public void sendDataToChatRoom(String id, String data) {
         try {
-            new RemoteSpace(_serverIpWithPort + "toChatRoom: " + id).put("sendMessage", _name, data);
+            System.out.println("Client recieved: " + id + " : " + data);
+            new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep").put("sendMessage", _name, data);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
