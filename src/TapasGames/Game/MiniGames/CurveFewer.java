@@ -1,7 +1,6 @@
 package TapasGames.Game.MiniGames;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -13,16 +12,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.stage.Stage;
 
 import java.io.FileInputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PlayerMovement {
+public class CurveFewer {
 
     private static final double W = 600, H = 600;
-    private static final Logger _logger = Logger.getLogger(PlayerMovement.class.getName());
+    private static final Logger _logger = Logger.getLogger(CurveFewer.class.getName());
 
     private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
     private Image playerImage;
@@ -86,9 +83,6 @@ public class PlayerMovement {
             }
         });
 
-        //stage.setScene(scene);
-        //stage.show();
-
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -99,12 +93,11 @@ public class PlayerMovement {
                 dy = Math.sin(angle);
                 dx = Math.cos(angle);
 
-                //if (run) {dx *= 3; dy *= 3; }
+                if (run) {dx *= 3; dy *= 3; } //TODO: Should this be removed?
                 movePlayerBy(dx, dy);
             }
         };
         timer.start();
-        //this.stage = stage;
         this.timer = timer;
         return scene;
     }
@@ -122,30 +115,26 @@ public class PlayerMovement {
     }
 
     private void movePlayerTo(double x, double y) {
-        final double cx = player.getBoundsInLocal().getWidth() / 2;
-        final double cy = player.getBoundsInLocal().getWidth() / 2;
-        //Check bounderies
+        final double cx = player.getBoundsInLocal().getWidth() / 2; //Gives the middle of the player,
+        final double cy = player.getBoundsInLocal().getHeight() / 2;
+        double a = (player.getBoundsInLocal().getWidth() / 2) + (player.getLayoutX() + Math.cos(angle)*8) + Math.cos(angle);
+        double b = (player.getBoundsInLocal().getWidth() / 2) + (player.getLayoutY() + Math.sin(angle)*8) + Math.sin(angle);
 
-        path.setStroke(Color.GREEN);
-        path.getElements()
-                .add(new MoveTo(x - cx, y - cy));
-        path.getElements().add(new LineTo(x - cx, y - cy));
+        if (path.contains(a - cx + playerWidth/2, b - cy + playerHeight/2)) {
+            path.getElements().clear();
 
-        if (path.contains(x - cx, y - cy)) //path.getElements().clear();
+        }
         if (x - cx < 0) player.relocate(W - playerWidth, y - cy);
         else if (x + cx > W) player.relocate(0, y - cy);
         else if (y - cy < 0) player.relocate(x - cx, H - playerHeight);
         else if (y + cy > H) player.relocate(x - cx, 0);
 
         else {
-            //_logger.log(Level.INFO, "moving!");
             player.relocate(x - cx, y - cy);
             path.setStroke(pathColor);
             path.getElements()
                     .add(new MoveTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
             path.getElements().add(new LineTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
         }
-        //_logger.log(Level.INFO, "MovingPlayerTo: " + (x - cx) + " : " + (y - cy));
     }
-    //public static void main(String[] args) { launch(args); }
 }
