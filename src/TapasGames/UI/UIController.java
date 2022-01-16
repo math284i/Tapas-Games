@@ -1,7 +1,7 @@
 package TapasGames.UI;
 
 import JspaceFiles.jspace.SequentialSpace;
-import TapasGames.Game.MiniGames.PlayerMovement;
+import TapasGames.Game.MiniGames.CurveFewer;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -43,7 +43,7 @@ public class UIController extends Application {
     VBox chatBoxT;
 
     private SequentialSpace _clientSpace;
-    private PlayerMovement pm;
+    private CurveFewer pm;
 
     public UIController(SequentialSpace clientSpace) {
         _clientSpace = clientSpace;
@@ -71,7 +71,7 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        pm = new PlayerMovement();
+        pm = new CurveFewer();
         gameStage.setScene(pm.start());
         gameStage.show();
     }
