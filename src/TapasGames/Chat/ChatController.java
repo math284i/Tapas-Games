@@ -27,7 +27,7 @@ public class ChatController {
         _rooms.get(id).start();
         try {
             _chatRoomSpace.get(new ActualField("fromChatRoom" + id + "Created"));
-            _serverSpace.put("fromChat","chatRoomAdded");
+            _serverSpace.put("fromChat","chatRoomAdded"); //THis is correct
             System.out.println("ChatController have created ChatRoom");
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,6 +129,7 @@ class ChatRoom implements Runnable {
         for (String client : _clients) {
             Space toClientSpace = _repository.get("ChatToClient:" + client);
             try {
+                System.out.println("Sending message from: " + name + " to: " + client);
                 toClientSpace.put(name + "," + _id + "," + message);
             } catch (Exception e) {
                 e.printStackTrace();
