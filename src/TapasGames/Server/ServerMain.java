@@ -34,6 +34,7 @@ public class ServerMain {
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
 
+        createChatRoom("Global");
         _ui.start(new Stage());
         new Thread(new ClientReceiver(this,_clientSpace)).start();
     }
@@ -42,12 +43,24 @@ public class ServerMain {
         //TODO check if valid
         System.out.println("Server adding: " + name);
         _clients.add(name);
+        try {
+            SequentialSpace space = new SequentialSpace();
+            _repository.add("ChatToClient:" + name, space);
+            _clientSpace.get(new ActualField(name), new ActualField("ClientCreated"));
+            addClientToChatRoom(name, "Global");
+            //TODO check if client is added to chat room
+            //TODO write to client it has been added to chat room
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createChatRoom(String id) {
         try {
             _chatSpace.put("fromServer","addChatRoom",id);
+            System.out.println("ServerMain asked chatRoom for: " + id);
             _chatSpace.get(new ActualField ("fromChat"), new ActualField("chatRoomAdded"));
+            System.out.println("Server recieved chatRoomAdded!");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,7 +69,7 @@ public class ServerMain {
     public void addClientToChatRoom(String name, String id) {
         try {
             _chatSpace.put("fromServer","addClient",name+","+id);
-            _clientSpace.put(name,"",id); //TODO UPDATE
+            _clientSpace.put(name,"addChatRoom",id); //TODO UPDATE
             _chatSpace.get(new ActualField ("fromChatRoom"),
                     new ActualField("clientAdded"), new FormalField(String.class));
             _clientSpace.get(new ActualField ("from" + name),
@@ -68,7 +81,7 @@ public class ServerMain {
 
     public void removeClientFromChatRoom(String name, String id) {
         try {
-            _repository.get("toChatRoom: " + id).put("removeClient",name,"");
+            _repository.get("toChatRoom:" + id).put("removeClient",name,"");
             _clientSpace.put(name,"",id); //TODO UPDATE
             _chatSpace.get(new ActualField ("fromChatRoom"),
                     new ActualField("clientRemoved"), new FormalField(String.class));
@@ -96,6 +109,7 @@ class ClientReceiver implements Runnable{
                 Object[] tuple = _fromClientSpace.get(
                         new ActualField("toServer"), new FormalField(String.class)
                         , new FormalField(String.class), new FormalField(String.class));
+                System.out.println("Someone wrote to serverSpace!");
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
                     case "addClient" -> _server.addClient(tuple[1].toString());

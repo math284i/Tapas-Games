@@ -22,12 +22,13 @@ public class ChatController {
     public void addChatRoom(String id) {
         System.out.println("ChatController creating new chatRoom id: " + id);
         SequentialSpace toChatRoomSpace = new SequentialSpace();
-        _repository.add("toChatRoom: " + id, toChatRoomSpace);
+        _repository.add("toChatRoom:" + id, toChatRoomSpace);
         _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace)));
         _rooms.get(id).start();
         try {
             _chatRoomSpace.get(new ActualField("fromChatRoom" + id + "Created"));
-            _serverSpace.put("fromChat","ChatRoomAdded");
+            _serverSpace.put("fromChat","chatRoomAdded");
+            System.out.println("ChatController have created ChatRoom");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -35,7 +36,7 @@ public class ChatController {
 
     public void addClient(String name, String id) {
         try {
-            _repository.get("toChatRoom: " + id).put("addClient",name);
+            _repository.get("toChatRoom:" + id).put("addClient",name);
             _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Added"));
             _serverSpace.put("fromChat", "ClientAdded");
         } catch (Exception e) {
@@ -45,7 +46,7 @@ public class ChatController {
 
     public void removeClient(String name, String id) {
         try {
-            _repository.get("toChatRoom: " + id).put("removeClient",name);
+            _repository.get("toChatRoom:" + id).put("removeClient",name);
             _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Removed"));
             _serverSpace.put("fromChat", "ClientRemoved");
         } catch (Exception e) {
@@ -95,6 +96,7 @@ class ChatRoom implements Runnable {
         _repository = repository;
         _toChatRoomSpace = toChatRoomSpace;
         _controllerSpace = controllerSpace;
+        _clients = new ArrayList<>();
         try {
             _controllerSpace.put("fromChatRoom" + _id + "Created");
         } catch (Exception e) {
@@ -103,8 +105,7 @@ class ChatRoom implements Runnable {
     }
 
     public void addClient(String client) {
-        SequentialSpace space = new SequentialSpace();
-        _repository.add("ChatToClient: " + _id + client, space);
+        System.out.println("ChatRoom adding client: " + client + " : " + _id);
         _clients.add(client);
         try {
             _controllerSpace.put("fromChatRoom" + _id + client + "Added");
@@ -114,7 +115,7 @@ class ChatRoom implements Runnable {
     }
 
     public void removeClient(String client) {
-        _repository.remove("ChatToClient: " + _id + client);
+        _repository.remove("ChatToClient:" + client);
         _clients.remove(client);
         try {
             _controllerSpace.put("fromChatRoom" + _id + "Removed");
@@ -124,10 +125,11 @@ class ChatRoom implements Runnable {
     }
 
     private void sendMessageToAll(String name, String message) {
+        System.out.println("ChatRoom sending to all: " + name + " : " + message);
         for (String client : _clients) {
-            Space toClientSpace = _repository.get("ChatToClient: " + _id + client);
+            Space toClientSpace = _repository.get("ChatToClient:" + client);
             try {
-                toClientSpace.put(name, _id+","+message);
+                toClientSpace.put(name + "," + _id + "," + message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
