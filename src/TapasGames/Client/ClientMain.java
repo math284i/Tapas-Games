@@ -22,12 +22,16 @@ public class ClientMain {
         try {
             _ui.start(new Stage());
             _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer" + "?keep");
-            _serverSpace.put("toServer",name,"addClient","");
-        } catch (Exception ignored) {
+            System.out.println("Writing to serverspace: " + _serverSpace.toString());
+            _serverSpace.put("toServer",name,"addClient",",");
+            //TODO get from server, that we can continue
+            new Thread(new UIReceiver(this, uiSpace)).start();
+            new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient:" + _name + "?keep"))).start();
+            new Thread(new ServerReceiver(this, _serverSpace)).start();
+            _serverSpace.put(name, "ClientCreated");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-
-        new Thread(new UIReceiver(this, uiSpace)).start();
     }
 
     public String getName() {
@@ -36,7 +40,7 @@ public class ClientMain {
 
     public void addChatRoom(String id) {
         try {
-            new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient: " + id + _name))).start();
+            _uiSpace.put("AddChat", "placeholder" + "," + id + "," + "placeholder");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,9 +48,10 @@ public class ClientMain {
     }
 
     public void sendDataToChatRoom(String id, String data) {
-        try {
+        try { //id = tap
             System.out.println("Client recieved: " + id + " : " + data);
-            new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep").put("sendMessage", _name, data);
+            new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep")
+                    .put("sendMessage", _name + "," + data);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -60,8 +65,13 @@ public class ClientMain {
 
     }
 
-    public void updateChatUI(String name, String message, String id) {
+    public void updateChatUI(String name, String id, String message) {
         System.out.println("in "+id+": "+name + " Says: " + message);
+        try {
+            _uiSpace.put("UpdateChat", name + "," + id + "," + message);
+        } catch(Exception ignored) {
+
+        }
     }
 
 }
@@ -78,11 +88,11 @@ class ServerReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] data = _fromServerSpace.get(
+                Object[] tuple = _fromServerSpace.get(
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
-                String[] tuple = data[2].toString().split(",");
-                switch (data[1].toString()) {
-                    case "addChatRoom" -> _client.addChatRoom(tuple[0]);
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
+                    case "addChatRoom" -> _client.addChatRoom(data[0]);
                 }
             } catch (InterruptedException ignored) {
             }
@@ -117,37 +127,6 @@ class UIReceiver implements Runnable {
     }
 }
 
-/*
-class ChatSender implements Runnable {
-    private ClientMain _client;
-    private String _senderIp;
-    private RemoteSpace _space;
-    Scanner cSource = new Scanner(System.in);
-
-    public ChatSender(ClientMain client, String senderIp) {
-        _client = client;
-        _senderIp = senderIp;
-        try {
-            _space = new RemoteSpace(_senderIp);
-        } catch (Exception e) {
-            System.out.println("Failed while trying to connect to IP: " + _senderIp + "\n with: " + e);
-        }
-    }
-
-    @Override
-    public void run() {
-        String message = "";
-        String type = "chat";
-        while (true) {
-            message = cSource.nextLine();
-            try {
-                _space.put(_client.getName(), message, type);
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
-}
-*/
 class ChatReceiver implements Runnable {
     private ClientMain _client;
     private RemoteSpace _fromChatSpace;
@@ -162,6 +141,7 @@ class ChatReceiver implements Runnable {
         while (true) {
             try {
                 Object[] tuple = _fromChatSpace.get(new FormalField(String.class));
+                System.out.println("I recieved something in my receiver from chat.");
                 String[] data = tuple[0].toString().split(",");
                 _client.updateChatUI(data[0], data[1], data[2]);
             } catch (InterruptedException e) {

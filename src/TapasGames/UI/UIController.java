@@ -1,10 +1,15 @@
 package TapasGames.UI;
 
+import JspaceFiles.jspace.FormalField;
+import JspaceFiles.jspace.RemoteSpace;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.CurveFewer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -47,6 +52,8 @@ public class UIController extends Application {
 
     public UIController(SequentialSpace clientSpace) {
         _clientSpace = clientSpace;
+
+        new Thread(new ClientReceiver(this, _clientSpace)).start();
     }
 
     @Override
@@ -73,8 +80,11 @@ public class UIController extends Application {
 
         pm = new CurveFewer();
         gameStage.setScene(pm.start());
+        //TODO: IDEA: implement switch statements, with different scenes, like lobbyScene, CurveFewerScene and MineSweeperScene.
         gameStage.show();
     }
+
+    //TODO: Create an update function for the GameScene.
 
     public void MenuScene() throws FileNotFoundException {
         menuStage = new Stage();
@@ -199,7 +209,8 @@ public class UIController extends Application {
         con.setAlignment(Pos.CENTER);
         controls.setFitWidth(configureScreenSize.getWidth()*size*0.25);
         controls.setFitHeight(configureScreenSize.getHeight()*size*0.2);
-        Image minesweeper = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
+        //Image minesweeper = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
+        Image minesweeper = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
         controls.setImage(minesweeper);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
@@ -292,18 +303,18 @@ public class UIController extends Application {
         chatBoxT = new VBox();
         chatBoxG = new VBox();
         chatTabs = new TabPane();
-        Tab globalChat = new Tab("Global");
-        chatPaneG = new ScrollPane();
-        chatPaneG.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneG.setContent(chatBoxG);
-        globalChat.setContent(chatPaneG);
+        //Tab globalChat = new Tab("Global");
+        //chatPaneG = new ScrollPane();
+        //chatPaneG.setPadding(new Insets(10, 10, 10, 10));
+        //chatPaneG.setContent(chatBoxG);
+        //globalChat.setContent(chatPaneG);
         Tab teamChat = new Tab("Team");
         chatPaneT = new ScrollPane();
         chatPaneT.setPadding(new Insets(10, 10, 10, 10));
         chatPaneT.setContent(chatBoxG);
         teamChat.setContent(chatPaneT);
 
-        chatTabs.getTabs().addAll(globalChat,teamChat);
+        //chatTabs.getTabs().addAll(globalChat,teamChat);
         chatTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         layout.setCenter(chatTabs);
@@ -343,7 +354,7 @@ public class UIController extends Application {
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
                 try {
-                    _clientSpace.put("chat", "id," + message);
+                    _clientSpace.put("chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -362,7 +373,70 @@ public class UIController extends Application {
         chatStage.show();
     }
 
+    public void AddChat(String id) {
+        System.out.println("UiController adding chat to ui: " + id);
+        Tab globalChat = new Tab(id);
+        chatPaneG = new ScrollPane();
+        chatPaneG.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneG.setContent(chatBoxG);
+        globalChat.setContent(chatPaneG);
+        Platform.runLater( () -> {
+            chatTabs.getTabs().addAll(globalChat);
+            });
+    }
+
+    public void RemoveChat() {
+
+    }
+
+    public void UpdateChat(String name, String id, String message) {
+        ObservableList<Tab> list = chatTabs.getTabs();
+        Tab test = list.get(0);
+        System.out.println("Updating ui!");
+        System.out.println(test);
+        Platform.runLater( () -> {
+            chatBoxG.getChildren().add(new Label(name + " : " + message));
+        });
+
+        switch (id) {
+
+        }
+    }
+
+    public void SetGameWindow() {
+
+    }
+
     public static void main(String[] args) {
         launch(args);
+    }
+}
+
+class ClientReceiver implements Runnable {
+    private UIController _uiController;
+    private SequentialSpace _fromClientSpace;
+
+    public ClientReceiver(UIController client, SequentialSpace fromClientSpace) {
+        _uiController = client;
+        _fromClientSpace = fromClientSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _fromClientSpace.get(new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[1].toString().split(",");
+                switch (tuple[0].toString()) {
+                    case "AddChat" -> _uiController.AddChat(data[1]);
+                    case "RemoveChat" -> _uiController.RemoveChat();
+                    case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]); //TODO UpdateChat with message
+                    case "SetGameWindow" -> _uiController.SetGameWindow();
+
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Receiver caught an error!");
+            }
+        }
     }
 }

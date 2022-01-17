@@ -21,7 +21,8 @@ public class CurveFewer {
     private static final double W = 600, H = 600;
     private static final Logger _logger = Logger.getLogger(CurveFewer.class.getName());
 
-    private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
+    //private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
+    private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/player.png";
     private Image playerImage;
     private Node player;
     private double angle = 0;
