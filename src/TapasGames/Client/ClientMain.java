@@ -22,8 +22,12 @@ public class ClientMain {
         try {
             _ui.start(new Stage());
             _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer" + "?keep");
+            //_serverSpace = new RemoteSpace(serverIpWithPort + "clientServer");
             System.out.println("Writing to serverspace: " + _serverSpace.toString());
-            _serverSpace.put("toServer",name,"addClient",",");
+            _serverSpace.put("toServer", name, "addClient", "PlaceHolder,PlaceHolder");
+            //_serverSpace.get(new ActualField(name), new ActualField("Test"));
+
+            System.out.println("Have wrote to server!");
             //TODO get from server, that we can continue
             new Thread(new UIReceiver(this, uiSpace)).start();
             new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient:" + _name + "?keep"))).start();
@@ -41,6 +45,8 @@ public class ClientMain {
     public void addChatRoom(String id) {
         try {
             _uiSpace.put("AddChat", "placeholder" + "," + id + "," + "placeholder");
+            //TODO get confirmation from chatRoom
+            //TODO Send to _chatSpace(new ActualField("from" + name), new ActualField("chatRoomAdded));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,6 +96,7 @@ class ServerReceiver implements Runnable {
             try {
                 Object[] tuple = _fromServerSpace.get(
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
+                System.out.println("Client recieved something from server!");
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
@@ -121,7 +128,7 @@ class UIReceiver implements Runnable {
                     case "keyboardInput" -> _client.sendKeyboardInputToGame();
                     case "mouseInput" -> _client.sendMouseInputToGame();
                 }
-            } catch (InterruptedException ignored) {
+            } catch (Exception ignored) {
             }
         }
     }

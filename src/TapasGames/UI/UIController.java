@@ -430,7 +430,7 @@ class ClientReceiver implements Runnable {
                 switch (tuple[0].toString()) {
                     case "AddChat" -> _uiController.AddChat(data[1]);
                     case "RemoveChat" -> _uiController.RemoveChat();
-                    case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]); //TODO UpdateChat with message
+                    case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "SetGameWindow" -> _uiController.SetGameWindow();
 
                 }
