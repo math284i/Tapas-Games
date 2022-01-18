@@ -17,6 +17,8 @@ public class GamesController {
         _serverSpace = serverSpace;
 
         playerDic = new HashMap<>();
+
+        new Thread(new ServerReceiver(this, _serverSpace)).start();
     }
 
     public void AddNewPlayer(String name) {
@@ -27,13 +29,11 @@ public class GamesController {
                 break;
             }
         }
-
         try {
-            _serverSpace.put("toServer", "fromGame", name + " has been added", playerDic.get(name));
+            _serverSpace.put("GameBackToServer", name + " has been added", "" + playerDic.get(name));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public void RemovePlayer(String name) {
@@ -42,7 +42,7 @@ public class GamesController {
         indexs[(Integer.parseInt(value) - 1)] -= 1;
 
         try {
-            _serverSpace.put("toServer", "fromGame", name + " has been removed");
+            _serverSpace.put("GameBackToServer", name + " has been removed");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,9 +53,9 @@ public class GamesController {
 
 class ServerReceiver implements Runnable {
     private GamesController _gamesController;
-    private RemoteSpace _fromServerSpace;
+    private SequentialSpace _fromServerSpace;
 
-    public ServerReceiver(GamesController gamesController, RemoteSpace fromServerSpace) {
+    public ServerReceiver(GamesController gamesController, SequentialSpace fromServerSpace) {
         _gamesController = gamesController;
         _fromServerSpace = fromServerSpace;
     }
@@ -64,10 +64,13 @@ class ServerReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromServerSpace.get(new ActualField("ToGame"), new FormalField(String.class));
+                Object[] tuple = _fromServerSpace.get(new ActualField("ServerToGame")
+                        , new FormalField(String.class), new FormalField(String.class));
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
-                    case "addNewPlayer" -> {_gamesController.AddNewPlayer("Kp dum");}
+                    case "addNewPlayer" -> _gamesController.AddNewPlayer(data[0]);
+                    case "removePlayer" -> _gamesController.RemovePlayer(data[0]);
+                    case "updateMovement" -> { }
                 }
             } catch (InterruptedException ignored) {
             }

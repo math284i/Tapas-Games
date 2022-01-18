@@ -5,6 +5,7 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 import TapasGames.Chat.ChatController;
+import TapasGames.Game.GamesController;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class ServerMain {
     private SequentialSpace _gameSpace;
     private SpaceRepository _repository;
     private ChatController _chatController;
+    private GamesController _gamesController;
 
     public ServerMain(ServerUI ui, String ip, String port) throws Exception {
         _ui = ui;
@@ -29,14 +31,17 @@ public class ServerMain {
         _repository = new SpaceRepository();
         _clientSpace = new SequentialSpace();
         _chatSpace = new SequentialSpace();
+        _gameSpace = new SequentialSpace();
         _repository.add("clientServer", _clientSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
+        _gamesController = new GamesController(_gameSpace);
 
         createChatRoom("Global");
         _ui.start(new Stage());
         new Thread(new ClientReceiver(this,_clientSpace)).start();
+        new Thread(new GameReceiver(this, _gameSpace)).start();
     }
 
     public void addClient(String name){
@@ -49,8 +54,23 @@ public class ServerMain {
             _clientSpace.get(new ActualField(name), new ActualField("ClientCreated"));
             System.out.println("ServerMain received clientCreated!");
             addClientToChatRoom(name, "Global");
+            addClientToGame(name);
             //TODO check if client is added to chat room
             //TODO write to client it has been added to chat room
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addClientToGame(String name) {
+        try {
+            _gameSpace.put("ServerToGame", "addNewPlayer", name);
+            Object[] tuple = _gameSpace.get(new ActualField("GameBackToServer")
+                    , new ActualField(name + " has been added"), new FormalField(String.class));
+            System.out.println(name + " has been added to game as number: " + tuple[2].toString());
+
+            //TODO send to all clients, name has been added as player number 1.
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -121,6 +141,35 @@ class ClientReceiver implements Runnable{
                        //_fromClientSpace.put(tuple[1].toString(), "Test");
                         _server.addClient(tuple[1].toString());
                         }
+                }
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+}
+
+class GameReceiver implements Runnable{
+    ServerMain _server;
+    SequentialSpace _fromGameSpace;
+
+    public GameReceiver(ServerMain server, SequentialSpace fromGameSpace){
+        _server = server;
+        _fromGameSpace = fromGameSpace;
+    }
+
+    @Override
+    public void run() { //TODO everything below should be rewrote.
+        while (true) {
+            try {
+                Object[] tuple = _fromGameSpace.get(
+                        new ActualField("GameToServer"), new FormalField(String.class)
+                        , new FormalField(String.class), new FormalField(String.class));
+                System.out.println("Someone wrote to serverSpace!, my space is: " + _fromGameSpace.toString());
+                String[] data = tuple[3].toString().split(",");
+                switch (tuple[2].toString()) {
+                    case "addNewPlayer" -> { }
+                    case "removePlayer" -> { }
+                    case "updateMovement" -> {}
                 }
             } catch (InterruptedException ignored) {
             }
