@@ -1,5 +1,6 @@
 package TapasGames.UI;
 
+import JspaceFiles.jspace.ActualField;
 import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.RemoteSpace;
 import JspaceFiles.jspace.SequentialSpace;
@@ -57,7 +58,7 @@ public class UIController extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception{
+    public void start(Stage stage) throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
         GameScene();
@@ -89,8 +90,8 @@ public class UIController extends Application {
     public void MenuScene() throws FileNotFoundException {
         menuStage = new Stage();
         menuStage.setTitle("Menu Window");
-        menuStage.setWidth(configureScreenSize.getWidth()*size*0.75);
-        menuStage.setHeight(configureScreenSize.getHeight()*size*0.25);
+        menuStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
+        menuStage.setHeight(configureScreenSize.getHeight() * size * 0.25);
 
         menuStage.setX(configureScreenSize.getWidth() * 0.15);
         menuStage.setY(configureScreenSize.getHeight() * 0.15 + configureScreenSize.getHeight() * size * 0.75);
@@ -128,87 +129,87 @@ public class UIController extends Application {
         VBox score = new VBox();
         ImageView controls = new ImageView();
 
-        exit.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
-        settings.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
-        vts.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
-        buttons.setPrefSize(Double.MAX_VALUE,Double.MAX_VALUE);
-        buttons.add(exit,0,0,1,2);
-        buttons.add(settings,1,0,1,1);
-        buttons.add(vts,1,1,1,1);
+        exit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        settings.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        vts.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        buttons.setPrefSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        buttons.add(exit, 0, 0, 1, 2);
+        buttons.add(settings, 1, 0, 1, 1);
+        buttons.add(vts, 1, 1, 1, 1);
         buttons.setVgrow(exit, Priority.ALWAYS);
-        buttons.setVgrow(settings,Priority.ALWAYS);
-        buttons.setVgrow(vts,Priority.ALWAYS);
-        buttons.setHgrow(exit,Priority.ALWAYS);
-        buttons.setHgrow(settings,Priority.ALWAYS);
-        buttons.setHgrow(vts,Priority.ALWAYS);
+        buttons.setVgrow(settings, Priority.ALWAYS);
+        buttons.setVgrow(vts, Priority.ALWAYS);
+        buttons.setHgrow(exit, Priority.ALWAYS);
+        buttons.setHgrow(settings, Priority.ALWAYS);
+        buttons.setHgrow(vts, Priority.ALWAYS);
         buttons.setVgap(5);
         buttons.setHgap(5);
-        buttons.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
+        buttons.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
 
-        team1.setVgrow(team1L,Priority.NEVER);
-        team1.setVgrow(team1S,Priority.ALWAYS);
+        team1.setVgrow(team1L, Priority.NEVER);
+        team1.setVgrow(team1S, Priority.ALWAYS);
         team1L.setMaxWidth(Double.MAX_VALUE);
         team1S.setMaxWidth(Double.MAX_VALUE);
         team1S.setMaxHeight(Double.MAX_VALUE);
         team1L.setAlignment(Pos.TOP_CENTER);
         team1S.setAlignment(Pos.CENTER);
-        team1.getChildren().addAll(team1L,team1S);
+        team1.getChildren().addAll(team1L, team1S);
 
-        team2.setVgrow(team2L,Priority.NEVER);
-        team2.setVgrow(team2S,Priority.ALWAYS);
+        team2.setVgrow(team2L, Priority.NEVER);
+        team2.setVgrow(team2S, Priority.ALWAYS);
         team2L.setMaxWidth(Double.MAX_VALUE);
         team2S.setMaxWidth(Double.MAX_VALUE);
         team2S.setMaxHeight(Double.MAX_VALUE);
         team2L.setAlignment(Pos.TOP_CENTER);
         team2S.setAlignment(Pos.CENTER);
-        team2.getChildren().addAll(team2L,team2S);
+        team2.getChildren().addAll(team2L, team2S);
 
-        team3.setVgrow(team3L,Priority.NEVER);
-        team3.setVgrow(team3S,Priority.ALWAYS);
+        team3.setVgrow(team3L, Priority.NEVER);
+        team3.setVgrow(team3S, Priority.ALWAYS);
         team3L.setMaxWidth(Double.MAX_VALUE);
         team3S.setMaxWidth(Double.MAX_VALUE);
         team3S.setMaxHeight(Double.MAX_VALUE);
         team3L.setAlignment(Pos.TOP_CENTER);
         team3S.setAlignment(Pos.CENTER);
-        team3.getChildren().addAll(team3L,team3S);
+        team3.getChildren().addAll(team3L, team3S);
 
-        team4.setVgrow(team4L,Priority.NEVER);
-        team4.setVgrow(team4S,Priority.ALWAYS);
+        team4.setVgrow(team4L, Priority.NEVER);
+        team4.setVgrow(team4S, Priority.ALWAYS);
         team4L.setMaxWidth(Double.MAX_VALUE);
         team4S.setMaxWidth(Double.MAX_VALUE);
         team4S.setMaxHeight(Double.MAX_VALUE);
         team4L.setAlignment(Pos.TOP_CENTER);
         team4S.setAlignment(Pos.CENTER);
-        team4.getChildren().addAll(team4L,team4S);
+        team4.getChildren().addAll(team4L, team4S);
 
-        teams.setHgrow(team1,Priority.ALWAYS);
-        teams.setHgrow(team2,Priority.ALWAYS);
-        teams.setHgrow(team3,Priority.ALWAYS);
-        teams.setHgrow(team4,Priority.ALWAYS);
+        teams.setHgrow(team1, Priority.ALWAYS);
+        teams.setHgrow(team2, Priority.ALWAYS);
+        teams.setHgrow(team3, Priority.ALWAYS);
+        teams.setHgrow(team4, Priority.ALWAYS);
         team1.setMaxHeight(Double.MAX_VALUE);
         team2.setMaxHeight(Double.MAX_VALUE);
         team3.setMaxHeight(Double.MAX_VALUE);
         team4.setMaxHeight(Double.MAX_VALUE);
-        teams.getChildren().addAll(team1,separatorV1,team2);
+        teams.getChildren().addAll(team1, separatorV1, team2);
         //teams.getChildren().addAll(separatorV2,team3); //Adds team 3
         //teams.getChildren().addAll(separatorV3,team4); //Adds team 4
         //teams.getChildren().removeAll(separatorV3,team4); //Removes team 4
 
-        score.setVgrow(teams,Priority.ALWAYS);
-        score.setVgrow(points,Priority.NEVER);
+        score.setVgrow(teams, Priority.ALWAYS);
+        score.setVgrow(points, Priority.NEVER);
         teams.setMaxWidth(Double.MAX_VALUE);
         points.setMaxWidth(Double.MAX_VALUE);
         points.setAlignment(Pos.TOP_CENTER);
-        score.getChildren().addAll(points,separatorH,teams);
-        score.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
+        score.getChildren().addAll(points, separatorH, teams);
+        score.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
 
         StackPane con = new StackPane();
         //con.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
-        con.setMinWidth(configureScreenSize.getWidth()*size*0.25);
-        con.setMinHeight(configureScreenSize.getHeight()*size*0.2);
+        con.setMinWidth(configureScreenSize.getWidth() * size * 0.25);
+        con.setMinHeight(configureScreenSize.getHeight() * size * 0.2);
         con.setAlignment(Pos.CENTER);
-        controls.setFitWidth(configureScreenSize.getWidth()*size*0.25);
-        controls.setFitHeight(configureScreenSize.getHeight()*size*0.2);
+        controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
+        controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
         //Image minesweeper = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
         Image minesweeper = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
         controls.setImage(minesweeper);
@@ -226,7 +227,7 @@ public class UIController extends Application {
                 settingsDialog.initOwner(menuStage);
                 VBox content = new VBox();
                 content.getChildren().add(new Label("Ulrik dum"));
-                Scene settingsScene = new Scene(content,configureScreenSize.getWidth()/4,configureScreenSize.getHeight()/2);
+                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 2);
                 settingsDialog.setScene(settingsScene);
                 settingsDialog.setResizable(false);
                 settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
@@ -265,14 +266,14 @@ public class UIController extends Application {
         });
 
         HBox combi = new HBox();
-        combi.getChildren().addAll(buttons,con,separatorV,score);
-        Scene menuScene = new Scene(combi,configureScreenSize.getWidth() * size * 0.75,configureScreenSize.getHeight() * size * 0.25);
+        combi.getChildren().addAll(buttons, con, separatorV, score);
+        Scene menuScene = new Scene(combi, configureScreenSize.getWidth() * size * 0.75, configureScreenSize.getHeight() * size * 0.25);
 
         menuStage.setScene(menuScene);
         menuStage.show();
     }
 
-    public void ChatScene(){
+    public void ChatScene() {
         chatStage = new Stage();
         chatStage.setTitle("Chat Window");
 
@@ -322,13 +323,13 @@ public class UIController extends Application {
         chatBoxT.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT.setVvalue((Double)newValue );
+                chatPaneT.setVvalue((Double) newValue);
             }
         });
         chatBoxG.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneG.setVvalue((Double)newValue );
+                chatPaneG.setVvalue((Double) newValue);
             }
         });
 
@@ -354,7 +355,7 @@ public class UIController extends Application {
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
                 try {
-                    _clientSpace.put("chat", "Global," + message); //TODO replace id with current tap
+                    _clientSpace.put("UIToClient","chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -380,9 +381,9 @@ public class UIController extends Application {
         chatPaneG.setPadding(new Insets(10, 10, 10, 10));
         chatPaneG.setContent(chatBoxG);
         globalChat.setContent(chatPaneG);
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             chatTabs.getTabs().addAll(globalChat);
-            });
+        });
     }
 
     public void RemoveChat() {
@@ -394,7 +395,7 @@ public class UIController extends Application {
         Tab test = list.get(0);
         System.out.println("Updating ui!");
         System.out.println(test);
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             chatBoxG.getChildren().add(new Label(name + " : " + message));
         });
 
@@ -425,10 +426,10 @@ class ClientReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromClientSpace.get(new FormalField(String.class), new FormalField(String.class));
-                String[] data = tuple[1].toString().split(",");
-                switch (tuple[0].toString()) {
-                    case "AddChat" -> _uiController.AddChat(data[1]);
+                Object[] tuple = _fromClientSpace.get(new ActualField("ClientToUI"), new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
+                    case "AddChat" -> _uiController.AddChat(data[0]);
                     case "RemoveChat" -> _uiController.RemoveChat();
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "SetGameWindow" -> _uiController.SetGameWindow();
