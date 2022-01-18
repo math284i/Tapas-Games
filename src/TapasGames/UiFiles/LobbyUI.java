@@ -15,29 +15,18 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class LobbyUI extends Application {
+public class LobbyUI {
     Rectangle2D configureScreenSize;
 
     double size = 0.7;
 
-    Stage LobbyStage;
-
-    @Override
-    public void start(Stage stage) throws Exception {
+    public Scene start() throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
-        LobbyScene();
+        return LobbyScene();
     }
 
-    public  void LobbyScene() throws Exception{
-        LobbyStage = new Stage();
-        LobbyStage.setTitle("Lobby");
-
-        LobbyStage.setWidth(configureScreenSize.getHeight() * size);
-        LobbyStage.setHeight(configureScreenSize.getHeight() * size);
-
-        LobbyStage.setResizable(false);
-
+    public Scene LobbyScene() throws Exception{
         VBox Layout = new VBox();
         Layout.setAlignment(Pos.CENTER);
 
@@ -138,10 +127,6 @@ public class LobbyUI extends Application {
         Layout.getChildren().addAll(header, participants, readyButton);
         Scene lobbyScene = new Scene(Layout, configureScreenSize.getHeight() * size,configureScreenSize.getHeight() * size);
 
-        LobbyStage.setScene(lobbyScene);
-        LobbyStage.show();
-    }
-    public static void main(String[] args) {
-        launch(args);
+        return lobbyScene;
     }
 }
