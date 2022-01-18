@@ -2,6 +2,7 @@ package TapasGames.Game.MiniGames;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -12,14 +13,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.util.logging.Logger;
 
 public class CurveFewer {
-
-    private static final double W = 600, H = 600;
+    private static final Rectangle2D configureScreenSize = Screen.getPrimary().getBounds();
+    private static final double size = 0.7;
     private static final Logger _logger = Logger.getLogger(CurveFewer.class.getName());
+    private static final double W = configureScreenSize.getWidth() * size * 0.75, H = configureScreenSize.getHeight() * size * 0.75;
 
     //private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
     private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/player.png";
