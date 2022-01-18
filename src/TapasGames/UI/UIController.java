@@ -43,9 +43,14 @@ public class UIController extends Application {
 
     TabPane chatTabs;
     ScrollPane chatPaneG;
-    ScrollPane chatPaneT;
+    ScrollPane chatPaneT1;
+    ScrollPane chatPaneT2;
     VBox chatBoxG;
-    VBox chatBoxT;
+    VBox chatBoxT1;
+    VBox chatBoxT2;
+    Tab teamChat1 = new Tab("Team 1");
+    Tab teamChat2 = new Tab("Team 2");
+    Tab globalChat = new Tab("Global");
 
     public String gameScene = "lobby";
 
@@ -301,29 +306,40 @@ public class UIController extends Application {
         headerText.setFont(new Font("Arial", 30));
         chatHeader.setAlignment(Pos.TOP_CENTER);
 
-        chatBoxT = new VBox();
+        chatBoxT1 = new VBox();
         chatBoxG = new VBox();
         chatTabs = new TabPane();
-        //Tab globalChat = new Tab("Global");
-        //chatPaneG = new ScrollPane();
-        //chatPaneG.setPadding(new Insets(10, 10, 10, 10));
-        //chatPaneG.setContent(chatBoxG);
-        //globalChat.setContent(chatPaneG);
-        Tab teamChat = new Tab("Team");
-        chatPaneT = new ScrollPane();
-        chatPaneT.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneT.setContent(chatBoxG);
-        teamChat.setContent(chatPaneT);
+
+        chatPaneG = new ScrollPane();
+        chatPaneG.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneG.setContent(chatBoxG);
+        globalChat.setContent(chatPaneG);
+
+        chatPaneT1 = new ScrollPane();
+        chatPaneT1.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneT1.setContent(chatBoxG);
+        teamChat1.setContent(chatPaneT1);
+
+        chatPaneT2 = new ScrollPane();
+        chatPaneT2.setPadding(new Insets(10, 10, 10, 10));
+        chatPaneT2.setContent(chatBoxG);
+        teamChat2.setContent(chatPaneT2);
 
         //chatTabs.getTabs().addAll(globalChat,teamChat);
         chatTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         layout.setCenter(chatTabs);
 
-        chatBoxT.heightProperty().addListener(new ChangeListener() {
+        chatBoxT1.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT.setVvalue((Double)newValue );
+                chatPaneT1.setVvalue((Double)newValue );
+            }
+        });
+        chatBoxT2.heightProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                chatPaneT2.setVvalue((Double)newValue );
             }
         });
         chatBoxG.heightProperty().addListener(new ChangeListener() {
@@ -376,18 +392,28 @@ public class UIController extends Application {
 
     public void AddChat(String id) {
         System.out.println("UiController adding chat to ui: " + id);
-        Tab globalChat = new Tab(id);
-        chatPaneG = new ScrollPane();
-        chatPaneG.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneG.setContent(chatBoxG);
-        globalChat.setContent(chatPaneG);
-        Platform.runLater( () -> {
-            chatTabs.getTabs().addAll(globalChat);
-            });
+        if(id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)){
+            chatTabs.getTabs().add(teamChat1);
+        }else if(id.equals("Team 2") && !chatTabs.getTabs().contains(teamChat2)){
+            chatTabs.getTabs().add(teamChat2);
+        }else if(id.equals("Global") && !chatTabs.getTabs().contains(globalChat)){
+            chatTabs.getTabs().add(globalChat);
+        }else{
+            System.out.println("No tab found with id: " + id);
+        }
     }
 
     public void RemoveChat(String id) {
-
+        System.out.println("UiController removing chat from ui: " + id);
+        if(id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)){
+            chatTabs.getTabs().remove(teamChat1);
+        }else if(id.equals("Team 2") && chatTabs.getTabs().contains(teamChat2)){
+            chatTabs.getTabs().remove(teamChat2);
+        }else if(id.equals("Global") && chatTabs.getTabs().contains(globalChat)){
+            chatTabs.getTabs().remove(globalChat);
+        }else{
+            System.out.println("No tab found with id: " + id);
+        }
     }
 
     public void UpdateChat(String name, String id, String message) {
@@ -403,7 +429,21 @@ public class UIController extends Application {
         });
 
         switch (id) {
-
+            case "Team 1" -> {
+                Platform.runLater( () -> {
+                    chatBoxT1.getChildren().add(new Label(name + " : " + message));
+                });
+            }
+            case "Team 2" -> {
+                Platform.runLater( () -> {
+                    chatBoxT2.getChildren().add(new Label(name + " : " + message));
+                });
+            }
+            case "Global" -> {
+                Platform.runLater( () -> {
+                    chatBoxG.getChildren().add(new Label(name + " : " + message));
+                });
+            }
         }
     }
 
