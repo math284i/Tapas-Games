@@ -153,3 +153,27 @@ class ChatReceiver implements Runnable {
         }
     }
 }
+
+class GameReceiver implements Runnable {
+    private ClientMain _client;
+    private RemoteSpace _fromGameSpace;
+
+    public GameReceiver(ClientMain client, RemoteSpace fromGameSpace) {
+        _client = client;
+        _fromGameSpace = fromGameSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _fromGameSpace.get(new ActualField(_client.getName()), new FormalField(String.class));
+                System.out.println("I recieved something in my receiver from game.");
+                String[] data = tuple[1].toString().split(",");
+                _client.updateChatUI(data[0], data[1], data[2]);
+            } catch (InterruptedException e) {
+                System.out.println("Receiver caught an error!");
+            }
+        }
+    }
+}

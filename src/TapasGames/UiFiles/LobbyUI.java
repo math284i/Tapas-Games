@@ -15,29 +15,34 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class LobbyUI extends Application {
+public class LobbyUI {
     Rectangle2D configureScreenSize;
 
     double size = 0.7;
 
-    Stage LobbyStage;
+    //p1
+    public Label p1Name;
+    public Label display1Status;
 
-    @Override
-    public void start(Stage stage) throws Exception {
+    //p2
+    public Label p2Name;
+    public Label display2Status;
+
+    //p3
+    public Label p3Name;
+    public Label display3Status;
+
+    //p4
+    public Label p4Name;
+    public Label display4Status;
+
+    public Scene start() throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
-        LobbyScene();
+        return LobbyScene();
     }
 
-    public  void LobbyScene() throws Exception{
-        LobbyStage = new Stage();
-        LobbyStage.setTitle("Lobby");
-
-        LobbyStage.setWidth(configureScreenSize.getHeight() * size);
-        LobbyStage.setHeight(configureScreenSize.getHeight() * size);
-
-        LobbyStage.setResizable(false);
-
+    public Scene LobbyScene() throws Exception{
         VBox Layout = new VBox();
         Layout.setAlignment(Pos.CENTER);
 
@@ -50,10 +55,10 @@ public class LobbyUI extends Application {
 
 
         //Code for Player 1
-        Label p1Name = new Label("Player: " + "Name1"); //<-- Change to players name
+        p1Name = new Label("Player: " + "Not connected"); //<-- Change to players name
 
         Label p1Status = new Label("Status: ");
-        Label display1Status = new Label("Not Ready"); //<-- Change to players status
+        display1Status = new Label("Not Ready"); //<-- Change to players status
         HBox status1 = new HBox();
         status1.getChildren().addAll(p1Status, display1Status);
 
@@ -66,10 +71,10 @@ public class LobbyUI extends Application {
 
 
         //Code for Player 2
-        Label p2Name = new Label("Player: " + "Name2"); //<-- Change to players name
+        p2Name = new Label("Player: " + "Not connected"); //<-- Change to players name
 
         Label p2Status = new Label("Status: ");
-        Label display2Status = new Label("Not Ready"); //<-- Change to players status
+        display2Status = new Label("Not Ready"); //<-- Change to players status
         HBox status2 = new HBox();
         status2.getChildren().addAll(p2Status, display2Status);
 
@@ -82,10 +87,10 @@ public class LobbyUI extends Application {
 
 
         //Code for Player 3
-        Label p3Name = new Label("Player: " + "Name3"); //<-- Change to players name
+        p3Name = new Label("Player: " + "Not connected"); //<-- Change to players name
 
         Label p3Status = new Label("Status: ");
-        Label display3Status = new Label("Not Ready"); //<-- Change to players status
+        display3Status = new Label("Not Ready"); //<-- Change to players status
         HBox status3 = new HBox();
         status3.getChildren().addAll(p3Status, display3Status);
 
@@ -98,10 +103,10 @@ public class LobbyUI extends Application {
 
 
         //Code for Player 4
-        Label p4Name = new Label("Player: " + "Name4"); //<-- Change to players name
+        p4Name = new Label("Player: " + "Not connected"); //<-- Change to players name
 
         Label p4Status = new Label("Status: ");
-        Label display4Status = new Label("Not Ready"); //<-- Change to players status
+        display4Status = new Label("Not Ready"); //<-- Change to players status
         HBox status4 = new HBox();
         status4.getChildren().addAll(p4Status, display4Status);
 
@@ -138,10 +143,6 @@ public class LobbyUI extends Application {
         Layout.getChildren().addAll(header, participants, readyButton);
         Scene lobbyScene = new Scene(Layout, configureScreenSize.getHeight() * size,configureScreenSize.getHeight() * size);
 
-        LobbyStage.setScene(lobbyScene);
-        LobbyStage.show();
-    }
-    public static void main(String[] args) {
-        launch(args);
+        return lobbyScene;
     }
 }
