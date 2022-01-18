@@ -1,15 +1,14 @@
 package TapasGames.UI;
 
 import JspaceFiles.jspace.FormalField;
-import JspaceFiles.jspace.RemoteSpace;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.CurveFewer;
+import TapasGames.UiFiles.LobbyUI;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -47,6 +46,8 @@ public class UIController extends Application {
     VBox chatBoxG;
     VBox chatBoxT;
 
+    public String gameScene = "lobby";
+
     private SequentialSpace _clientSpace;
     private CurveFewer pm;
 
@@ -78,9 +79,8 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        pm = new CurveFewer();
-        gameStage.setScene(pm.start());
-        //TODO: IDEA: implement switch statements, with different scenes, like lobbyScene, CurveFewerScene and MineSweeperScene.
+        updateGameScene(gameScene);
+
         gameStage.show();
     }
 
@@ -396,6 +396,9 @@ public class UIController extends Application {
         System.out.println(test);
         Platform.runLater( () -> {
             chatBoxG.getChildren().add(new Label(name + " : " + message));
+            if (message.equals("curvefever")) updateGameScene("curvefever");
+            if (message.equals("lobby")) updateGameScene("lobby");
+            if (message.equals("minesweeper")) updateGameScene("minesweeper");
         });
 
         switch (id) {
@@ -403,8 +406,23 @@ public class UIController extends Application {
         }
     }
 
-    public void SetGameWindow() {
-
+    public void updateGameScene(String gameScene) {
+        try {
+            switch (gameScene) {
+                case "lobby" -> {
+                    LobbyUI ui = new LobbyUI();
+                    gameStage.setScene(ui.start());
+                }
+                case "curvefever" -> {
+                    pm = new CurveFewer();
+                    gameStage.setScene(pm.start());
+                }
+                case "minesweeper" -> {
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
@@ -431,7 +449,7 @@ class ClientReceiver implements Runnable {
                     case "AddChat" -> _uiController.AddChat(data[1]);
                     case "RemoveChat" -> _uiController.RemoveChat();
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
-                    case "SetGameWindow" -> _uiController.SetGameWindow();
+                    case "SetGameWindow" -> _uiController.updateGameScene("curvefever");
 
                 }
             } catch (InterruptedException e) {
