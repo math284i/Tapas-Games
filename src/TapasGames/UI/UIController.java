@@ -386,7 +386,7 @@ public class UIController extends Application {
             });
     }
 
-    public void RemoveChat() {
+    public void RemoveChat(String id) {
 
     }
 
@@ -450,7 +450,7 @@ class ClientReceiver implements Runnable {
                 String[] data = tuple[1].toString().split(",");
                 switch (tuple[0].toString()) {
                     case "AddChat" -> _uiController.AddChat(data[1]);
-                    case "RemoveChat" -> _uiController.RemoveChat();
+                    case "RemoveChat" -> _uiController.RemoveChat(data[1]);
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "SetGameWindow" -> _uiController.updateGameScene("curvefever");
 
