@@ -25,7 +25,7 @@ public class MineSweeper {
 
     private int[] size = { 16, 16 };
     private int mines = 51;
-    private String[] colors  = { "whitesmoke", "lightgreen", "dodgerblue", "purple", "magenta", "brown", "darkviolet", "darkturquoise", "slategrey" };
+    private String[] colors  = { "whitesmoke", "teal", "green", "maroon", "navy", "brown", "cyan", "black", "grey" };
     private Label minesLeft = new Label();
     private Board board = new Board(size[0], size[1], mines);
     private List<List<Button>> buttons = new ArrayList<List<Button>>();
