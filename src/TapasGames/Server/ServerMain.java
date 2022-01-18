@@ -33,6 +33,7 @@ public class ServerMain {
         _chatSpace = new SequentialSpace();
         _gameSpace = new SequentialSpace();
         _repository.add("clientServer", _clientSpace);
+        _repository.add("startUpServer",_startUpSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
@@ -40,23 +41,27 @@ public class ServerMain {
 
         createChatRoom("Global");
         _ui.start(new Stage());
-        new Thread(new ClientReceiver(this,_clientSpace)).start();
+        new Thread(new ClientReceiver(this, _clientSpace)).start();
+        new Thread(new StartUpReceiver(this, _startUpSpace)).start();
         new Thread(new GameReceiver(this, _gameSpace)).start();
     }
 
-    public void addClient(String name){
-        //TODO check if valid
-        System.out.println("Server adding: " + name);
-        _clients.add(name);
+    public void addClient(String name) {
         try {
-            SequentialSpace space = new SequentialSpace();
-            _repository.add("ChatToClient:" + name, space);
-            _clientSpace.get(new ActualField(name), new ActualField("ClientCreated"));
-            System.out.println("ServerMain received clientCreated!");
-            addClientToChatRoom(name, "Global");
-            addClientToGame(name);
-            //TODO check if client is added to chat room
-            //TODO write to client it has been added to chat room
+            if (_clients.contains(name)) {
+                System.out.println("Server not adding: " + name);
+                _startUpSpace.put("ServerBackToStartUp",_ipWithPort,false);
+            } else {
+                System.out.println("Server adding: " + name);
+                _clients.add(name);
+                SequentialSpace space = new SequentialSpace();
+                _repository.add("ChatToClient:" + name, space);
+                _startUpSpace.put("ServerBackToStartUp",_ipWithPort, true);
+                _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name), new ActualField("ClientCreated"));
+                System.out.println("ServerMain received clientCreated!");
+                addClientToChatRoom(name, "Global");
+                addClientToGame(name);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -76,12 +81,16 @@ public class ServerMain {
         }
     }
 
+    public void removeClient(String name){
+
+    }
+
     private void createChatRoom(String id) {
         try {
-            _chatSpace.put("fromServer","addChatRoom",id);
-            System.out.println("ServerMain asked chatRoom for: " + id);
-            _chatSpace.get(new ActualField ("fromChat"), new ActualField("chatRoomAdded"));
-            System.out.println("Server recieved chatRoomAdded!");
+            _chatSpace.put("ServerToChat", "addChatRoom", id);
+            System.out.println("ServerMain asked chat controller to create chat room: " + id);
+            _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomAdded"));
+            System.out.println("Server received chatRoomAdded!");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,14 +98,14 @@ public class ServerMain {
 
     public void addClientToChatRoom(String name, String id) {
         try {
-            System.out.println("Server Adding: " + name + " to: "+ id);
-            _chatSpace.put("fromServer","addClient",name+","+id);
-            _clientSpace.put(name,"addChatRoom",id); //TODO UPDATE
-            _chatSpace.get(new ActualField ("fromChat"), //was fromChatRoom
+            System.out.println("Server Adding: " + name + " to: " + id);
+            _chatSpace.put("ServeToChat", "addClient", name + "," + id);
+            _clientSpace.put("ServerToClient",name, "addChatRoom", id);
+            _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
             System.out.println("Client is added from serverMain");
-            //_clientSpace.get(new ActualField ("from" + name),
-            //        new ActualField("chatRoomAdded"));
+            _clientSpace.get(new ActualField ("ClientBackToServer"), new ActualField(name),
+                    new ActualField("ChatRoomAdded"));
             System.out.println("Everything is done in Server AddClientToChatRoom");
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,23 +114,27 @@ public class ServerMain {
 
     public void removeClientFromChatRoom(String name, String id) {
         try {
-            _repository.get("toChatRoom:" + id).put("removeClient",name,"");
-            _clientSpace.put(name,"",id); //TODO UPDATE
-            _chatSpace.get(new ActualField ("fromChatRoom"),
-                    new ActualField("clientRemoved"), new FormalField(String.class));
-            _clientSpace.get(new ActualField ("from" + name),
-                    new ActualField("chatRoomRemoved"));
+            System.out.println("Server Removing: " + name + " from: " + id);
+            _chatSpace.put("ServeToChat", "removeClient", name + "," + id);
+            _clientSpace.put("ServerToClient",name, "removeChatRoom", id);
+            _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
+                    new ActualField("ClientRemoved")); //Used to have small c, Used to have an extra field for a string.
+            System.out.println("Client is removed from serverMain");
+            _clientSpace.get(new ActualField ("ClientBackToServer"), new ActualField(name),
+                    new ActualField("ChatRoomRemoved"));
+            System.out.println("Everything is done in Server RemoveClientToChatRoom");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 }
-class ClientReceiver implements Runnable{
+
+class ClientReceiver implements Runnable {
     ServerMain _server;
     SequentialSpace _fromClientSpace;
 
-    public ClientReceiver(ServerMain server, SequentialSpace fromClientSpace){
+    public ClientReceiver(ServerMain server, SequentialSpace fromClientSpace) {
         _server = server;
         _fromClientSpace = fromClientSpace;
     }
@@ -131,16 +144,44 @@ class ClientReceiver implements Runnable{
         while (true) {
             try {
                 Object[] tuple = _fromClientSpace.get(
-                        new ActualField("toServer"), new FormalField(String.class)
+                        new ActualField("ClientToServer"), new FormalField(String.class)
                         , new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Someone wrote to serverSpace!, my space is: " + _fromClientSpace.toString());
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
+                    case "removeClient" -> {
+                        //System.out.println("Removing client!");
+                        //_server.removeClient(tuple[1].toString());
+                    }
+                }
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+}
+
+class StartUpReceiver implements Runnable {
+    ServerMain _server;
+    SequentialSpace _fromStartUpSpace;
+
+    public StartUpReceiver(ServerMain server, SequentialSpace fromStartUpSpace) {
+        _server = server;
+        _fromStartUpSpace = fromStartUpSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _fromStartUpSpace.get(
+                        new ActualField("StartUpToServer"), new FormalField(String.class)
+                        , new FormalField(String.class));
+                System.out.println("Startup wrote to serverSpace!, my space is: " + _fromStartUpSpace.toString());
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
                     case "addClient" -> {
-                        //System.out.println("Adding client!");
-                       //_fromClientSpace.put(tuple[1].toString(), "Test");
-                        _server.addClient(tuple[1].toString());
-                        }
+                        _server.addClient(data[0]);
+                    }
                 }
             } catch (InterruptedException ignored) {
             }

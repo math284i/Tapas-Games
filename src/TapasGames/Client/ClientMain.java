@@ -5,6 +5,7 @@ import TapasGames.UI.UIController;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ClientMain {
     private UIController _ui;
@@ -12,6 +13,7 @@ public class ClientMain {
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
+
     //tcp://localhost:31415/
     public ClientMain(UIController ui, String name, String serverIpWithPort, SequentialSpace uiSpace) throws IOException {
         _ui = ui;
@@ -21,18 +23,12 @@ public class ClientMain {
 
         try {
             _ui.start(new Stage());
-            _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer" + "?keep");
-            //_serverSpace = new RemoteSpace(serverIpWithPort + "clientServer");
-            System.out.println("Writing to serverspace: " + _serverSpace.toString());
-            _serverSpace.put("toServer", name, "addClient", "PlaceHolder,PlaceHolder");
-            //_serverSpace.get(new ActualField(name), new ActualField("Test"));
-
-            System.out.println("Have wrote to server!");
-            //TODO get from server, that we can continue
+            _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer?keep");
+            System.out.println("Writing to serverSpace: " + _serverSpace.toString());
             new Thread(new UIReceiver(this, uiSpace)).start();
             new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient:" + _name + "?keep"))).start();
             new Thread(new ServerReceiver(this, _serverSpace)).start();
-            _serverSpace.put(name, "ClientCreated");
+            _serverSpace.put("ClientBackToServer", name, "ClientCreated");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,9 +40,8 @@ public class ClientMain {
 
     public void addChatRoom(String id) {
         try {
-            _uiSpace.put("AddChat", "placeholder" + "," + id + "," + "placeholder");
-            //TODO get confirmation from chatRoom
-            //TODO Send to _chatSpace(new ActualField("from" + name), new ActualField("chatRoomAdded));
+            _uiSpace.put("ClientToUI", "AddChat", "" + id);
+            _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,15 +67,16 @@ public class ClientMain {
     }
 
     public void updateChatUI(String name, String id, String message) {
-        System.out.println("in "+id+": "+name + " Says: " + message);
+        System.out.println("in " + id + ": " + name + " Says: " + message);
         try {
-            _uiSpace.put("UpdateChat", name + "," + id + "," + message);
-        } catch(Exception ignored) {
+            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
+        } catch (Exception ignored) {
 
         }
     }
 
 }
+
 class ServerReceiver implements Runnable {
     private ClientMain _client;
     private RemoteSpace _fromServerSpace;
@@ -94,11 +90,11 @@ class ServerReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromServerSpace.get(
+                Object[] tuple = _fromServerSpace.get(new ActualField("ServerToClient"),
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Client recieved something from server!");
-                String[] data = tuple[2].toString().split(",");
-                switch (tuple[1].toString()) {
+                String[] data = tuple[3].toString().split(",");
+                switch (tuple[2].toString()) {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
                 }
             } catch (InterruptedException ignored) {
@@ -120,10 +116,10 @@ class UIReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromInputSpace.get(
+                Object[] tuple = _fromInputSpace.get(new ActualField("UIToClient"),
                         new FormalField(String.class), new FormalField(String.class));
-                String[] data = tuple[1].toString().split(",");
-                switch (tuple[0].toString()) {
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
                     case "chat" -> _client.sendDataToChatRoom(data[0], data[1]);
                     case "keyboardInput" -> _client.sendKeyboardInputToGame();
                     case "mouseInput" -> _client.sendMouseInputToGame();

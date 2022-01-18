@@ -1,4 +1,7 @@
  package TapasGames;
+import JspaceFiles.jspace.ActualField;
+import JspaceFiles.jspace.FormalField;
+import JspaceFiles.jspace.RemoteSpace;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Client.ClientMain;
 import TapasGames.Server.ServerMain;
@@ -19,6 +22,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
  public class MainController {
      //STARTUP UI
@@ -86,15 +90,25 @@ import java.io.IOException;
         done.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                dialog.close();
-                System.out.println("Client is being created! part 2");
-                SequentialSpace space = new SequentialSpace();
-                UIController ui = new UIController(space);
-                stage.close();
                 try {
-                    System.out.print("" + nameT.getText() + " " + ipT.getText());
-                    new ClientMain(ui, "" + nameT.getText(), "" + ipT.getText(), space);
-                } catch (IOException ignored) {
+                    System.out.println("Connecting to Server");
+                    RemoteSpace serverSpace = new RemoteSpace(ipT.getText()+"startUpServer?keep");
+                    serverSpace.put("toServer","addClient",nameT.getText());
+                    if ((boolean) serverSpace.get(new ActualField("ServerBackToStartUp"), new ActualField(ipT.getText()),new FormalField(boolean.class))[2]){
+                        dialog.close();
+                        System.out.println("Client is being created! part 2");
+                        SequentialSpace space = new SequentialSpace();
+                        UIController ui = new UIController(space);
+                        stage.close();
+                        try {
+                            System.out.print("" + nameT.getText() + " " + ipT.getText());
+                            new ClientMain(ui, "" + nameT.getText(), "" + ipT.getText(), space);
+                        } catch (IOException ignored) {
+                        }
+                    }
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                    //TODO say that server couldn't be found
                 }
             }
         });
