@@ -3,6 +3,7 @@ package TapasGames.UI;
 import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.CurveFewer;
+import TapasGames.Game.MiniGames.MineSweeper;
 import TapasGames.UiFiles.LobbyUI;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -418,6 +419,8 @@ public class UIController extends Application {
                     gameStage.setScene(pm.start());
                 }
                 case "minesweeper" -> {
+                    MineSweeper ms = new MineSweeper();
+                    gameStage.setScene(ms.start());
                 }
             }
         }catch (Exception e) {
