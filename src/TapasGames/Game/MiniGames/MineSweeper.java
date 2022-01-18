@@ -135,7 +135,7 @@ public class MineSweeper {
             else if (board.neighbors(x, y) > 0) {
                 for (int i = 1; i <= 8; ++i) {
                     if (board.neighbors(x, y) == i) {
-                        buttons.get(x).get(y).setStyle("-fx-background-color: " + colors[i]);
+                        buttons.get(x).get(y).setStyle("-fx-background-color: silver; -fx-text-fill: " + colors[i]);
                     }
                 }
                 buttons.get(x).get(y).setText(new StringBuilder().append(board.neighbors(x, y)).toString());
