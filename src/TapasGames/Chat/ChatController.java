@@ -47,13 +47,12 @@ public class ChatController {
     public void removeClient(String name, String id) {
         try {
             _repository.get("toChatRoom:" + id).put("removeClient", name);
-            _chatRoomSpace.get(new ActualField("ChatRoomBackToController" + id + name + "Removed"));
+            _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + name + "Removed"));
             _serverSpace.put("ChatBackToServer", "ClientRemoved");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }
 
 class ServerReceiver implements Runnable {

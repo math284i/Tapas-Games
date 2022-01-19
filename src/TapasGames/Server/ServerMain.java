@@ -80,7 +80,7 @@ public class ServerMain {
     public void addClientToChatRoom(String name, String id) {
         try {
             System.out.println("Server Adding: " + name + " to: " + id);
-            _chatSpace.put("ServeToChat", "addClient", name + "," + id);
+            _chatSpace.put("ServerToChat", "addClient", name + "," + id);
             _clientSpace.put("ServerToClient",name, "addChatRoom", id);
             _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
