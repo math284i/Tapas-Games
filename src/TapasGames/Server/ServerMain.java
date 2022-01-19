@@ -183,14 +183,14 @@ class ClientReceiver implements Runnable {
         while (true) {
             try {
                 Object[] tuple = _fromClientSpace.get(
-                        new ActualField("ClientToServer"), new FormalField(String.class) //TODO do we need all these strings?
+                        new ActualField("ClientToServer")
                         , new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Someone wrote to serverSpace!, my space is: " + _fromClientSpace.toString());
-                String[] data = tuple[3].toString().split(",");
-                switch (tuple[2].toString()) {
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
                     case "removeClient" -> {
                         //System.out.println("Removing client!");
-                        //_server.removeClient(tuple[1].toString());
+                        //_server.removeClient(data[0]);
                     }
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
                 }

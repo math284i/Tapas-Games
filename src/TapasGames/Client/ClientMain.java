@@ -56,7 +56,7 @@ public class ClientMain {
 
     public void sendDataToChatRoom(String id, String data) {
         try { //id = tap
-            System.out.println("Client recieved: " + id + " : " + data);
+            System.out.println("Client received: " + id + " : " + data);
             new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep")
                     .put("sendMessage", _name + "," + data);
         } catch (IOException | InterruptedException e) {
@@ -65,26 +65,19 @@ public class ClientMain {
     }
 
     public void sendDataToGameRoom(String name, String message) {
-        System.out.println("Client recieved data it should send to game: " + message);
+        System.out.println("Client received data it should send to game: " + message);
         try {
-            new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep").put("votingResult", name + "," + message);
+            new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep")
+                    .put("votingResult", name + "," + message);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void sendKeyboardInputToGame() {
-
-    }
-
-    public void sendMouseInputToGame() {
-
-    }
-
     public void updateChatUI(String name, String id, String message) {
         System.out.println("in " + id + ": " + name + " Says: " + message);
         try {
-            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message); //TODO PROTOCOL
+            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message); //TODO PROTOCOL no need
         } catch (Exception ignored) {
 
         }
@@ -112,7 +105,7 @@ public class ClientMain {
     public void sendImReady() {
         System.out.println(_name + " telling server im ready!");
         try {
-            _serverSpace.put("ClientToServer", _name, "clientIsReady", "" + _name); //TODO PROTOCOL - Also should name be here? (the first)
+            _serverSpace.put("ClientToServer", "clientIsReady", _name); //TODO PROTOCOL
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -179,8 +172,6 @@ class UIReceiver implements Runnable {
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "chat" -> _client.sendDataToChatRoom(data[0], data[1]);
-                    case "keyboardInput" -> _client.sendKeyboardInputToGame();
-                    case "mouseInput" -> _client.sendMouseInputToGame();
                     case "YouAreReady" -> _client.sendImReady();
                     case "tellGameMyVote" -> _client.tellGameMyVote(data[0], data[1]);
                 }
@@ -233,6 +224,7 @@ class GameReceiver implements Runnable {
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
                     case "votingTime" -> _client.votingTime();
+                    case "updateGame" -> _client.updateGame();
                 }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
