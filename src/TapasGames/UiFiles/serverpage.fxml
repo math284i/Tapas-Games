@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Scene xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TapasGames.MainController">
+<Scene xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TapasGames.Server.ServerUI">
     <AnchorPane prefHeight="480.0" prefWidth="640.0">
       <children>
          <HBox spacing="5.0">
@@ -52,7 +52,7 @@
                         </font>
                      </Label>
                      <Separator prefWidth="200.0" />
-                     <VBox prefHeight="450.0" prefWidth="210.0" />
+                     <VBox fx:id="vboxClientList" prefHeight="450.0" prefWidth="210.0" />
                   </children>
                </VBox>
                <VBox prefHeight="480.0" prefWidth="210.0">

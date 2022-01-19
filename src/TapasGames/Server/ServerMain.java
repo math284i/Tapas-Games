@@ -70,6 +70,7 @@ public class ServerMain {
                 System.out.println("ServerMain received clientCreated!");
                 addClientToChatRoom(name, "Global");
                 addClientToGame(name);
+                _ui.AddClient(name);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
