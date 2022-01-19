@@ -30,7 +30,7 @@ public class VotingUI {
         ms.setToggleGroup(tg);
         cv.setToggleGroup(tg);
         stop.setSelected(true);
-        HBox hbox = new HBox(stop,ms,cv);
+        HBox hbox = new HBox(20,stop,ms,cv);
         hbox.setAlignment(Pos.CENTER);
 
         Button ok = new Button("OK");
@@ -42,9 +42,6 @@ public class VotingUI {
         });
 
         VBox vbox = new VBox(title,hbox,ok);
-        vbox.setVgrow(hbox, Priority.ALWAYS);
-        vbox.setVgrow(title, Priority.ALWAYS);
-        vbox.setVgrow(ok, Priority.ALWAYS);
         vbox.setAlignment(Pos.CENTER);
 
         return new Scene(vbox);
