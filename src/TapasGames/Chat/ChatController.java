@@ -26,8 +26,8 @@ public class ChatController {
         _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace)));
         _rooms.get(id).start();
         try {
-            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + "Created"));
-            _serverSpace.put("fromChat","chatRoomAdded"); //THis is correct
+            _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + "Created"));
+            _serverSpace.put("ChatBackToServer", "ChatRoomAdded"); //THis is correct
             System.out.println("ChatController have created ChatRoom");
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,9 +36,10 @@ public class ChatController {
 
     public void addClient(String name, String id) {
         try {
-            _repository.get("toChatRoom:" + id).put("addClient",name);
-            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Added"));
-            _serverSpace.put("fromChat", "ClientAdded");
+            System.out.println("Chatcontroller adding client: " + name);
+            _repository.get("toChatRoom:" + id).put("addClient", name);
+            _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + name + "Added"));
+            _serverSpace.put("ChatBackToServer", "ClientAdded");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -46,9 +47,9 @@ public class ChatController {
 
     public void removeClient(String name, String id) {
         try {
-            _repository.get("toChatRoom:" + id).put("removeClient",name);
-            _chatRoomSpace.get(new ActualField("fromChatRoom" + id + name + "Removed"));
-            _serverSpace.put("fromChat", "ClientRemoved");
+            _repository.get("toChatRoom:" + id).put("removeClient", name);
+            _chatRoomSpace.get(new ActualField("ChatRoomBackToController" + id + name + "Removed"));
+            _serverSpace.put("ChatBackToServer", "ClientRemoved");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,12 +71,13 @@ class ServerReceiver implements Runnable {
         while (true) {
             try {
                 Object[] tuple = _serverSpace.get(
-                        new ActualField("fromServer"), new FormalField(String.class), new FormalField(String.class));
+                        new ActualField("ServerToChat"), new FormalField(String.class), new FormalField(String.class));
+                System.out.println("ChatController recieved something from server");
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "addChatRoom" -> _controller.addChatRoom(data[0]);
-                    case "addClient" -> _controller.addClient(data[0],data[1]);
-                    case "removeClient" -> _controller.removeClient(data[0],data[1]);
+                    case "addClient" -> _controller.addClient(data[0], data[1]);
+                    case "removeClient" -> _controller.removeClient(data[0], data[1]);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -98,7 +100,7 @@ class ChatRoom implements Runnable {
         _controllerSpace = controllerSpace;
         _clients = new ArrayList<>();
         try {
-            _controllerSpace.put("fromChatRoom" + _id + "Created");
+            _controllerSpace.put("ChatRoomBackToController", _id + "Created");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -108,8 +110,8 @@ class ChatRoom implements Runnable {
         System.out.println("ChatRoom adding client: " + client + " : " + _id);
         _clients.add(client);
         try {
-            _controllerSpace.put("fromChatRoom" + _id + client + "Added");
-        }catch (Exception e) {
+            _controllerSpace.put("ChatRoomBackToController", _id + client + "Added");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -118,8 +120,8 @@ class ChatRoom implements Runnable {
         _repository.remove("ChatToClient:" + client);
         _clients.remove(client);
         try {
-            _controllerSpace.put("fromChatRoom" + _id + "Removed");
-        }catch (Exception e) {
+            _controllerSpace.put("ChatRoomBackToController", _id + "Removed");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

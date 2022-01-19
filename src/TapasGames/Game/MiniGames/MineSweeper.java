@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.HPos;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.HBox;
-import javafx.scene.Node;
 import java.util.ArrayList;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -20,14 +19,13 @@ import javafx.scene.layout.GridPane;
 import java.util.List;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
-import javafx.application.Application;
 
 
 public class MineSweeper {
 
-    private int[] size = { 18, 14 };
-    private int mines = 40;
-    private String[] colors  = { "whitesmoke", "lightgreen", "dodgerblue", "purple", "magenta", "brown", "darkviolet", "darkturquoise", "slategrey" };
+    private int[] size = { 16, 16 };
+    private int mines = 51;
+    private String[] colors  = { "whitesmoke", "teal", "green", "maroon", "navy", "brown", "cyan", "black", "grey" };
     private Label minesLeft = new Label();
     private Board board = new Board(size[0], size[1], mines);
     private List<List<Button>> buttons = new ArrayList<List<Button>>();
@@ -75,8 +73,7 @@ public class MineSweeper {
                 button.setId(String.valueOf(i) + "," + j);
                 button.setOnMousePressed(this::mouseAction);
                 root.add(button, i, j);
-                button.setMaxWidth(Double.MAX_VALUE);
-                button.setMaxHeight(Double.MAX_VALUE);
+                button.setPrefSize(configureScreenSize.getWidth()/size[0],configureScreenSize.getHeight()/size[1]);
                 GridPane.setHgrow(button, Priority.ALWAYS);
                 GridPane.setVgrow(button, Priority.ALWAYS);
                 GridPane.setHalignment(button, HPos.CENTER);
@@ -138,7 +135,7 @@ public class MineSweeper {
             else if (board.neighbors(x, y) > 0) {
                 for (int i = 1; i <= 8; ++i) {
                     if (board.neighbors(x, y) == i) {
-                        buttons.get(x).get(y).setStyle("-fx-background-color: " + colors[i]);
+                        buttons.get(x).get(y).setStyle("-fx-background-color: silver; -fx-text-fill: " + colors[i]);
                     }
                 }
                 buttons.get(x).get(y).setText(new StringBuilder().append(board.neighbors(x, y)).toString());
