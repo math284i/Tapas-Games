@@ -5,6 +5,7 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,12 +108,14 @@ public class GamesController {
 
 class GameRoom implements Runnable {
     private HashMap<String, String> _playerDic;
+    private ArrayList<String> _votingList;
     private GamesController _gamescontroller; //TODO Not sure this is needed - figure out!
     private SequentialSpace _toGameRoomSpace;
     private SequentialSpace _controllerSpace; //TODO Not sure this is needed - figure out!
 
     public GameRoom(GamesController gamescontroller, SequentialSpace toGameRoomSpace, SequentialSpace gameRoomSpace) {
         _playerDic = new HashMap<>();
+        _votingList = new ArrayList<>();
         _gamescontroller = gamescontroller;
         _toGameRoomSpace = toGameRoomSpace;
         _controllerSpace = gameRoomSpace;
@@ -144,7 +147,26 @@ class GameRoom implements Runnable {
     }
 
     private void addVotingResult(String name, String result) {
+        _votingList.add(result);
         System.out.println("Game received: " + name + " chose: " + result);
+
+        if (_votingList.size() == _playerDic.size()) {
+            System.out.println("Game got all the votes needed!");
+            String newGame = _gamescontroller.mostCommon(_votingList);
+            System.out.println("Most voted game was: " + newGame);
+            _votingList.clear();
+
+            for (var entry : _playerDic.entrySet()) {
+                try {
+                    _toGameRoomSpace.put("GameRoomToClient",entry.getKey(), "newGame", newGame);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+
 
     }
 

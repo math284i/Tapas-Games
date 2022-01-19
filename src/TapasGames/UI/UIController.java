@@ -524,28 +524,30 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene) {
         //TODO STOP CURRENTLY RUNNING GAME
-        try {
-            switch (gameScene) {
-                case "lobby" -> {
-                    lobbyGame = new LobbyUI();
-                    gameStage.setScene(lobbyGame.start());
-                    controls.setImage(null);
-                    setUpReadyButton();
+        Platform.runLater( () -> {
+            try {
+                switch (gameScene.toLowerCase()) {
+                    case "lobby" -> {
+                        lobbyGame = new LobbyUI();
+                        gameStage.setScene(lobbyGame.start());
+                        controls.setImage(null);
+                        setUpReadyButton();
+                    }
+                    case "curvefever" -> {
+                        curvefeverGame = new CurveFewer();
+                        gameStage.setScene(curvefeverGame.start());
+                        controls.setImage(curvefeverI);
+                    }
+                    case "minesweeper" -> {
+                        minesweeperGame = new MineSweeper();
+                        gameStage.setScene(minesweeperGame.start());
+                        controls.setImage(minesweeperI);
+                    }
                 }
-                case "curvefever" -> {
-                    curvefeverGame = new CurveFewer();
-                    gameStage.setScene(curvefeverGame.start());
-                    controls.setImage(curvefeverI);
-                }
-                case "minesweeper" -> {
-                    minesweeperGame = new MineSweeper();
-                    gameStage.setScene(minesweeperGame.start());
-                    controls.setImage(minesweeperI);
-                }
+            }catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void updateGameScenes() {
@@ -609,6 +611,7 @@ class ClientReceiver implements Runnable {
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1], data[3]);
                     case "votingTime" -> _uiController.voteBox(data[0]);
+                    case "newGame" -> _uiController.updateGameScene(data[0]);
                     case "UpdatePlayers" -> {}
                 }
             } catch (InterruptedException e) {

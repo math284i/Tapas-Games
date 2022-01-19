@@ -28,7 +28,7 @@ public class CurveFewer {
     private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/player.png";
     private Image playerImage;
     private Node player;
-    private double angle = 0;
+    private double angle = -1.57;
     private double playerWidth = 25;
     private double playerHeight = 25;
 
