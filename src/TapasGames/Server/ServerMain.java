@@ -85,13 +85,13 @@ public class ServerMain {
                     , new ActualField(name + " has been added"), new FormalField(String.class));
             System.out.println(name + " has been added to game as number: " + tuple[2].toString());
 
-            //TODO send to all clients, name has been added as player number 1.
             for (String client: _clients) {
-                _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString());
+                _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString() + "," + "Not ready");
             }
 
             for (var entry : _clientsAndNumbers.entrySet()) {
-                _clientSpace.put("ServerToClient", name, "updateLobby", "" + entry.getKey() + "," + entry.getValue());
+                _clientSpace.put("ServerToClient", name, "updateLobby"
+                        , "" + entry.getKey() + "," + entry.getValue() + "," + "Not ready");
             }
             _clientsAndNumbers.put(name, tuple[2].toString());
 
@@ -145,6 +145,17 @@ public class ServerMain {
 
     public void clientIsReady(String name) {
         _readyClients.add(name);
+
+        String playerNumber = _clientsAndNumbers.get(name);
+
+        for (var entry : _clientsAndNumbers.entrySet()) {
+            try {
+                _clientSpace.put("ServerToClient", entry.getKey(), "updateLobby"
+                        , "" + name + "," + playerNumber + "," + "Ready");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (_readyClients.size() == _clients.size()) {
             System.out.println("All players are ready to RUUUUUMBLE!");

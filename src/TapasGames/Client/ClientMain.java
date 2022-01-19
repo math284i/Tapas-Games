@@ -64,10 +64,10 @@ public class ClientMain {
         }
     }
 
-    public void sendDataToGameRoom(String data) {
-        System.out.println("Client recieved: " + data);
+    public void sendDataToGameRoom(String name, String message) {
+        System.out.println("Client recieved data it should send to game: " + message);
         try {
-            new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep").put("temp");
+            new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep").put("votingResult", name + "," + message);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
@@ -90,10 +90,10 @@ public class ClientMain {
         }
     }
 
-    public void updateLobby(String name, String number) {
+    public void updateLobby(String name, String number, String readyStatus) {
         if (_name.equals(name)) _playerNumber = number;
         try {
-            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number); //TODO PROTOCOL
+            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus); //TODO PROTOCOL
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,8 +127,8 @@ public class ClientMain {
         }
     }
 
-    public void tellGameMyVote() {
-
+    public void tellGameMyVote(String name, String votingResult) {
+        sendDataToGameRoom(name, votingResult);
     }
 
 }
@@ -149,10 +149,10 @@ class ServerReceiver implements Runnable {
                 Object[] tuple = _fromServerSpace.get(new ActualField("ServerToClient"),
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Client recieved something from server!");
-                String[] data = tuple[3].toString().split(",");
+                String[] data = tuple[3].toString().split(","); //name, playerNumber, readyStatus
                 switch (tuple[2].toString()) {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
-                    case "updateLobby" -> _client.updateLobby(data[0], data[1]);
+                    case "updateLobby" -> _client.updateLobby(data[0], data[1], data[2]);
                     case "updatePlayers" -> _client.updatePlayers(data[0], data[1]);
                 }
             } catch (InterruptedException ignored) {
@@ -182,7 +182,7 @@ class UIReceiver implements Runnable {
                     case "keyboardInput" -> _client.sendKeyboardInputToGame();
                     case "mouseInput" -> _client.sendMouseInputToGame();
                     case "YouAreReady" -> _client.sendImReady();
-                    case "tellGameMyVote" -> _client.tellGameMyVote();
+                    case "tellGameMyVote" -> _client.tellGameMyVote(data[0], data[1]);
                 }
             } catch (Exception ignored) {
             }
