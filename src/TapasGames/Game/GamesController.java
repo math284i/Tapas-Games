@@ -122,6 +122,11 @@ class GameRoom implements Runnable {
         }
     }
 
+    private void addVotingResult(String name, String result) {
+        System.out.println("Game received: " + name + " chose: " + result);
+
+    }
+
     @Override
     public void run() {
         while (true) {
@@ -133,6 +138,7 @@ class GameRoom implements Runnable {
                     case "addPlayer" -> addPlayer(data[0], _playerDic.get(data[0]));
                     case "removePlayer" -> removePlayer(data[0]);
                     case "votingTime" -> votingTime();
+                    case "votingResult" -> addVotingResult(data[0], data[1]);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

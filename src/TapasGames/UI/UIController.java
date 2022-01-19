@@ -461,6 +461,11 @@ public class UIController extends Application {
                 });
             }
         }
+        try {
+            _clientSpace.put("temp");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void voteBox(String name) {
@@ -520,20 +525,24 @@ public class UIController extends Application {
 
     }
 
-    public void updateLobby(String name, String number) {
+    public void updateLobby(String name, String number, String readyStatus) {
 
         switch (number) {
             case "1" -> {Platform.runLater( () -> {
                 lobbyGame.p1Name.setText("Player1: " + name);
+                lobbyGame.display1Status.setText("Status: " + readyStatus);
             });}
             case "2" -> {Platform.runLater( () -> {
                 lobbyGame.p2Name.setText("Player2: " + name);
+                lobbyGame.display2Status.setText("Status: " + readyStatus);
             });}
             case "3" -> {Platform.runLater( () -> {
                 lobbyGame.p3Name.setText("Player3: " + name);
+                lobbyGame.display3Status.setText("Status: " + readyStatus);
             });}
             case "4" -> {Platform.runLater( () -> {
                 lobbyGame.p4Name.setText("Player4: " + name);
+                lobbyGame.display4Status.setText("Status: " + readyStatus);
             });}
         }
 
@@ -557,7 +566,12 @@ public class UIController extends Application {
     public void sendVoting(ActionEvent actionEvent) {
         RadioButton selected = (RadioButton) tgGames.getSelectedToggle();
         System.out.println("Client chose: " + selected.getText());
+        try {
 
+            //_clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
@@ -580,7 +594,7 @@ class ClientReceiver implements Runnable {
                     case "AddChat" -> _uiController.AddChat(data[0]);
                     case "RemoveChat" -> _uiController.RemoveChat(data[0]);
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
-                    case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1]);
+                    case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1], data[3]);
                     case "votingTime" -> _uiController.voteBox(data[0]);
                     case "UpdatePlayers" -> {}
                 }
