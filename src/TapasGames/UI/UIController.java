@@ -293,10 +293,11 @@ public class UIController extends Application {
         vts.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                //TODO output message from Space
-                chatBoxG.getChildren().add(new Label("I vote to skip"));
-                score1++;
-                team1S.setText("" + score1);
+                try {
+                    _clientSpace.put("UIToClient", "rockTheVote", "");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

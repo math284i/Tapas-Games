@@ -139,6 +139,14 @@ public class ClientMain {
         }
     }
 
+    public void rockTheVote() {
+        try {
+            _serverSpace.put("ClientToServer", "", "rockTheVote", _name);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 class ServerReceiver implements Runnable {
@@ -191,6 +199,7 @@ class UIReceiver implements Runnable {
                     case "mouseInput" -> _client.sendMouseInputToGame();
                     case "YouAreReady" -> _client.sendImReady();
                     case "tellGameMyVote" -> _client.tellGameMyVote(data[0], data[1]);
+                    case "rockTheVote" -> _client.rockTheVote();
                 }
             } catch (Exception ignored) {
             }
