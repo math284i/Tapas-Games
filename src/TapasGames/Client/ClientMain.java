@@ -12,6 +12,8 @@ public class ClientMain {
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
     private SequentialSpace _uiSpace;
+    private String _playerNumber = "0";
+
     //tcp://localhost:31415/
     public ClientMain(UIController ui, String name, String serverIpWithPort, SequentialSpace uiSpace) throws IOException {
         _ui = ui;
@@ -21,18 +23,14 @@ public class ClientMain {
 
         try {
             _ui.start(new Stage());
-            _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer" + "?keep");
-            //_serverSpace = new RemoteSpace(serverIpWithPort + "clientServer");
-            System.out.println("Writing to serverspace: " + _serverSpace.toString());
-            _serverSpace.put("toServer", name, "addClient", "PlaceHolder,PlaceHolder");
-            //_serverSpace.get(new ActualField(name), new ActualField("Test"));
-
-            System.out.println("Have wrote to server!");
-            //TODO get from server, that we can continue
+            _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer?keep");
+            System.out.println("Writing to serverSpace: " + _serverSpace.toString());
             new Thread(new UIReceiver(this, uiSpace)).start();
             new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient:" + _name + "?keep"))).start();
             new Thread(new ServerReceiver(this, _serverSpace)).start();
-            _serverSpace.put(name, "ClientCreated");
+            new Thread(new GameReceiver(this, new RemoteSpace(_serverIpWithPort + "toGameRoom:?keep"))).start();
+            _serverSpace.put("ClientBackToServer", name, "ClientCreated");
+            System.out.println("Client wrote to serverSpace its been Created!");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -42,11 +40,14 @@ public class ClientMain {
         return _name;
     }
 
+    public String getPlayerNumber() {
+        return _playerNumber;
+    }
+
     public void addChatRoom(String id) {
         try {
-            _uiSpace.put("AddChat", "placeholder" + "," + id + "," + "placeholder");
-            //TODO get confirmation from chatRoom
-            //TODO Send to _chatSpace(new ActualField("from" + name), new ActualField("chatRoomAdded));
+            _uiSpace.put("ClientToUI", "AddChat", "" + id);
+            _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,6 +64,15 @@ public class ClientMain {
         }
     }
 
+    public void sendDataToGameRoom(String data) {
+        System.out.println("Client recieved: " + data);
+        try {
+            new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep").put("temp");
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendKeyboardInputToGame() {
 
     }
@@ -72,15 +82,57 @@ public class ClientMain {
     }
 
     public void updateChatUI(String name, String id, String message) {
-        System.out.println("in "+id+": "+name + " Says: " + message);
+        System.out.println("in " + id + ": " + name + " Says: " + message);
         try {
-            _uiSpace.put("UpdateChat", name + "," + id + "," + message);
-        } catch(Exception ignored) {
+            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message); //TODO PROTOCOL
+        } catch (Exception ignored) {
 
         }
     }
 
+    public void updateLobby(String name, String number) {
+        if (_name.equals(name)) _playerNumber = number;
+        try {
+            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number); //TODO PROTOCOL
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updatePlayers(String name, String number) {
+        System.out.println("Client udating: " + name + " he/she is: " + number);
+        try {
+            _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number); //TODO PROTOCOL
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void sendImReady() {
+        System.out.println(_name + " telling server im ready!");
+        try {
+            _serverSpace.put("ClientToServer", _name, "clientIsReady", "" + _name); //TODO PROTOCOL - Also should name be here? (the first)
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void votingTime() {
+        System.out.println("Im about to make my vote! #trumpsupporter");
+        try {
+            _uiSpace.put("ClientToUI", "votingTime", "");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void tellGameMyVote() {
+
+    }
+
 }
+
 class ServerReceiver implements Runnable {
     private ClientMain _client;
     private RemoteSpace _fromServerSpace;
@@ -94,12 +146,14 @@ class ServerReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromServerSpace.get(
+                Object[] tuple = _fromServerSpace.get(new ActualField("ServerToClient"),
                         new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Client recieved something from server!");
-                String[] data = tuple[2].toString().split(",");
-                switch (tuple[1].toString()) {
+                String[] data = tuple[3].toString().split(",");
+                switch (tuple[2].toString()) {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
+                    case "updateLobby" -> _client.updateLobby(data[0], data[1]);
+                    case "updatePlayers" -> _client.updatePlayers(data[0], data[1]);
                 }
             } catch (InterruptedException ignored) {
             }
@@ -120,13 +174,15 @@ class UIReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromInputSpace.get(
+                Object[] tuple = _fromInputSpace.get(new ActualField("UIToClient"),
                         new FormalField(String.class), new FormalField(String.class));
-                String[] data = tuple[1].toString().split(",");
-                switch (tuple[0].toString()) {
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
                     case "chat" -> _client.sendDataToChatRoom(data[0], data[1]);
                     case "keyboardInput" -> _client.sendKeyboardInputToGame();
                     case "mouseInput" -> _client.sendMouseInputToGame();
+                    case "YouAreReady" -> _client.sendImReady();
+                    case "tellGameMyVote" -> _client.tellGameMyVote();
                 }
             } catch (Exception ignored) {
             }
@@ -171,10 +227,13 @@ class GameReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromGameSpace.get(new ActualField(_client.getName()), new FormalField(String.class));
+                Object[] tuple = _fromGameSpace.get(new ActualField("GameRoomToClient")
+                        , new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 System.out.println("I recieved something in my receiver from game.");
-                String[] data = tuple[1].toString().split(",");
-                _client.updateChatUI(data[0], data[1], data[2]);
+                String[] data = tuple[3].toString().split(",");
+                switch (tuple[2].toString()) {
+                    case "votingTime" -> _client.votingTime();
+                }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
             }

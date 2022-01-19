@@ -236,7 +236,7 @@ public class UIController extends Application {
         controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
         minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
-        curvefeverI = new Image(new FileInputStream("src/TapasGames/Ressources/CurveFeverControls.png"));
+        curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
         //controls.setImage(minesweeperI);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
@@ -392,7 +392,7 @@ public class UIController extends Application {
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
                 try {
-                    String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
+                    //String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
                     _clientSpace.put("UIToClient","chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
