@@ -61,6 +61,10 @@ public class UIController extends Application {
     Tab teamChat2 = new Tab("Team 2");
     Tab globalChat = new Tab("Global");
 
+    ImageView controls = new ImageView();
+    Image minesweeperI;
+    Image curvefeverI;
+
     public String gameScene = "lobby";
 
     private SequentialSpace _clientSpace;
@@ -148,7 +152,6 @@ public class UIController extends Application {
         HBox teams = new HBox();
         Label points = new Label("Points");
         VBox score = new VBox();
-        ImageView controls = new ImageView();
 
         exit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         settings.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -231,9 +234,10 @@ public class UIController extends Application {
         con.setAlignment(Pos.CENTER);
         controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
         controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
-        //Image minesweeper = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
-        Image minesweeper = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
-        controls.setImage(minesweeper);
+        //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
+        minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
+        curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
+        //controls.setImage(minesweeperI);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
         controls.setCache(true);
@@ -388,6 +392,7 @@ public class UIController extends Application {
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
                 try {
+                    //String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
                     _clientSpace.put("UIToClient","chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -492,15 +497,18 @@ public class UIController extends Application {
                 case "lobby" -> {
                     lobbyGame = new LobbyUI();
                     gameStage.setScene(lobbyGame.start());
+                    controls.setImage(null);
                     setUpReadyButton();
                 }
                 case "curvefever" -> {
                     curvefeverGame = new CurveFewer();
                     gameStage.setScene(curvefeverGame.start());
+                    controls.setImage(curvefeverI);
                 }
                 case "minesweeper" -> {
                     minesweeperGame = new MineSweeper();
                     gameStage.setScene(minesweeperGame.start());
+                    controls.setImage(minesweeperI);
                 }
             }
         }catch (Exception e) {
