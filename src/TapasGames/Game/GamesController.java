@@ -6,6 +6,8 @@ import JspaceFiles.jspace.SequentialSpace;
 import JspaceFiles.jspace.SpaceRepository;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GamesController {
     private HashMap<String, String> playerDic;
@@ -69,6 +71,25 @@ public class GamesController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    //CODE COMES FROM: https://stackoverflow.com/questions/19031213/java-get-most-common-element-in-a-list
+    public <T> T mostCommon(List<T> list) {
+        Map<T, Integer> map = new HashMap<>();
+
+        for (T t : list) {
+            Integer val = map.get(t);
+            map.put(t, val == null ? 1 : val + 1);
+        }
+
+        Map.Entry<T, Integer> max = null;
+
+        for (Map.Entry<T, Integer> e : map.entrySet()) {
+            if (max == null || e.getValue() > max.getValue())
+                max = e;
+        }
+
+        return max == null ? null : max.getKey();
     }
 
     public void UpdatePlayers(String data) {

@@ -43,7 +43,7 @@ public class UIController extends Application {
     Stage gameStage;
     Stage menuStage;
     Stage chatStage;
-    VotingUI votingWindow = new VotingUI();
+    VotingUI votingWindow;
 
     public String _playerName;
 
@@ -114,8 +114,6 @@ public class UIController extends Application {
         gameStage.setY(configureScreenSize.getHeight() * 0.15);
 
         gameStage.setResizable(false);
-
-        setUpVoting();
 
         updateGameScene(gameScene);
 
@@ -482,9 +480,11 @@ public class UIController extends Application {
 
     public void voteBox(String name) {
         _playerName = name;
+        votingWindow = new VotingUI();
             Platform.runLater( () -> {
                 try {
                     gameStage.setScene(votingWindow.start());
+                    setUpVoting();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -492,7 +492,19 @@ public class UIController extends Application {
     }
 
     private void setUpVoting() {
+        votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                RadioButton selected =(RadioButton) votingWindow.tgGames.getSelectedToggle();
+                System.out.println("Client chose: " + selected.getText());
+                try {
 
+                    _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void setUpReadyButton() {
@@ -573,21 +585,6 @@ public class UIController extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    @FXML
-    private ToggleGroup tgGames;
-
-
-    public void sendVoting(ActionEvent actionEvent) {
-        RadioButton selected = (RadioButton) tgGames.getSelectedToggle();
-        System.out.println("Client chose: " + selected.getText());
-        try {
-
-            _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
 
