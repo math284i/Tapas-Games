@@ -36,6 +36,7 @@ public class ChatController {
 
     public void addClient(String name, String id) {
         try {
+            System.out.println("Chatcontroller adding client: " + name);
             _repository.get("toChatRoom:" + id).put("addClient", name);
             _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + name + "Added"));
             _serverSpace.put("ChatBackToServer", "ClientAdded");
@@ -70,6 +71,7 @@ class ServerReceiver implements Runnable {
             try {
                 Object[] tuple = _serverSpace.get(
                         new ActualField("ServerToChat"), new FormalField(String.class), new FormalField(String.class));
+                System.out.println("ChatController recieved something from server");
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "addChatRoom" -> _controller.addChatRoom(data[0]);

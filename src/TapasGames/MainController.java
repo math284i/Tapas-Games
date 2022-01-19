@@ -38,6 +38,8 @@ import java.net.UnknownHostException;
     //if server
     //New ServerMain(NEW UICONTROLLER(SERVER UI), repository)
 
+
+
     public void onPressClient(ActionEvent actionEvent) throws IOException {
         System.out.println("Client is being created! part 1");
 
@@ -93,8 +95,11 @@ import java.net.UnknownHostException;
                 try {
                     System.out.println("Connecting to Server");
                     RemoteSpace serverSpace = new RemoteSpace(ipT.getText()+"startUpServer?keep");
-                    serverSpace.put("toServer","addClient",nameT.getText());
-                    if ((boolean) serverSpace.get(new ActualField("ServerBackToStartUp"), new ActualField(ipT.getText()),new FormalField(boolean.class))[2]){
+                    serverSpace.put("StartUpToServer","addClient",nameT.getText());
+                    String bool = serverSpace.get(new ActualField("ServerBackToStartUp"), new ActualField(ipT.getText()),new FormalField(String.class))[2].toString();
+                    boolean b = Boolean.parseBoolean(bool);
+                    System.out.println("At b");
+                    if (b){
                         dialog.close();
                         System.out.println("Client is being created! part 2");
                         SequentialSpace space = new SequentialSpace();
@@ -127,4 +132,4 @@ import java.net.UnknownHostException;
             e.printStackTrace();
         }
     }
-}
+ }
