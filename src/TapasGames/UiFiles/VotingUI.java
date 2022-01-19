@@ -1,13 +1,17 @@
 package TapasGames.UiFiles;
 
-import javafx.application.Application;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.stage.Stage;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -15,14 +19,35 @@ import java.util.ResourceBundle;
 public class VotingUI {
 
     public Scene start() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("../UiFiles/voting.fxml"));
-            return new Scene(root);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Label title = new Label("Vote for the game you want to play!");
+        title.setFont(new Font(19));
 
-        return null;
+        ToggleGroup tg = new ToggleGroup();
+        RadioButton stop = new RadioButton("Stop");
+        RadioButton ms = new RadioButton("Minesweeper");
+        RadioButton cv = new RadioButton("Curvefever");
+        stop.setToggleGroup(tg);
+        ms.setToggleGroup(tg);
+        cv.setToggleGroup(tg);
+        stop.setSelected(true);
+        HBox hbox = new HBox(stop,ms,cv);
+        hbox.setAlignment(Pos.CENTER);
+
+        Button ok = new Button("OK");
+        ok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+            }
+        });
+
+        VBox vbox = new VBox(title,hbox,ok);
+        vbox.setVgrow(hbox, Priority.ALWAYS);
+        vbox.setVgrow(title, Priority.ALWAYS);
+        vbox.setVgrow(ok, Priority.ALWAYS);
+        vbox.setAlignment(Pos.CENTER);
+
+        return new Scene(vbox);
     }
 
 }
