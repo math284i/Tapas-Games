@@ -5,6 +5,7 @@ import TapasGames.UI.UIController;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 public class ClientMain {
     private UIController _ui;
@@ -64,10 +65,20 @@ public class ClientMain {
         }
     }
 
-    public void sendDataToGameRoom(String name, String message) {
-        System.out.println("Client received data it should send to game: " + message);
+    public void sendDataToGameRoom(String data) {
+        System.out.println("Client received data it should send to game: " + data);
         try {
             new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep")
+                    .put("ClientToGameRoom",_name,data);
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendVote(String name, String message) {
+        System.out.println("Client received data it should send to game: " + message);
+        try {
+            new RemoteSpace(_serverIpWithPort + "toVoting:" + "?keep")
                     .put("votingResult", name + "," + message);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
@@ -77,16 +88,21 @@ public class ClientMain {
     public void updateChatUI(String name, String id, String message) {
         System.out.println("in " + id + ": " + name + " Says: " + message);
         try {
-            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message); //TODO PROTOCOL no need
+            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
         } catch (Exception ignored) {
 
         }
     }
 
+    public void updateGame(String data){ // data:    name;left;right;up;down;m1;x;y : name;left;right;up;down;m1;x;y
+        System.out.println(_name + "has gotten the game data and is sending it to UI");
+        //TODO send data to UI/Client side game
+    }
+
     public void updateLobby(String name, String number, String readyStatus) {
         if (_name.equals(name)) _playerNumber = number;
         try {
-            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus); //TODO PROTOCOL
+            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,10 +136,6 @@ public class ClientMain {
         }
     }
 
-    public void tellGameMyVote(String name, String votingResult) {
-        sendDataToGameRoom(name, votingResult);
-    }
-
     public void newGame(String newGame) {
         try {
             _uiSpace.put("ClientToUI", "newGame", newGame);
@@ -134,8 +146,9 @@ public class ClientMain {
 
     public void rockTheVote() {
         try {
-            _serverSpace.put("ClientToServer", "", "rockTheVote", _name);
-        } catch (InterruptedException e) {
+            new RemoteSpace(_serverIpWithPort + "toVoting:" + "?keep")
+                    .put("rockTheVote", _name);
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -189,8 +202,9 @@ class UIReceiver implements Runnable {
                 switch (tuple[1].toString()) {
                     case "chat" -> _client.sendDataToChatRoom(data[0], data[1]);
                     case "YouAreReady" -> _client.sendImReady();
-                    case "tellGameMyVote" -> _client.tellGameMyVote(data[0], data[1]);
+                    case "tellGameMyVote" -> _client.sendVote(data[0], data[1]);
                     case "rockTheVote" -> _client.rockTheVote();
+                    case "gameInput" -> _client.sendDataToGameRoom(data[0]);
                 }
             } catch (Exception ignored) {
             }
@@ -242,7 +256,7 @@ class GameReceiver implements Runnable {
                 switch (tuple[2].toString()) {
                     case "votingTime" -> _client.votingTime();
                     case "newGame" -> _client.newGame(data[0]);
-                    case "updateGame" -> _client.updateGame();
+                    case "updateGame" -> _client.updateGame(data[0]);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
