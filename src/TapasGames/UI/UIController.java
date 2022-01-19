@@ -43,7 +43,7 @@ public class UIController extends Application {
     Stage gameStage;
     Stage menuStage;
     Stage chatStage;
-    VotingUI votingWindow;
+    VotingUI votingWindow = new VotingUI();
 
     public String _playerName;
 
@@ -114,6 +114,8 @@ public class UIController extends Application {
         gameStage.setY(configureScreenSize.getHeight() * 0.15);
 
         gameStage.setResizable(false);
+
+        setUpVoting();
 
         updateGameScene(gameScene);
 
@@ -480,7 +482,6 @@ public class UIController extends Application {
 
     public void voteBox(String name) {
         _playerName = name;
-        votingWindow = new VotingUI();
             Platform.runLater( () -> {
                 try {
                     gameStage.setScene(votingWindow.start());
@@ -488,6 +489,10 @@ public class UIController extends Application {
                     e.printStackTrace();
                 }
             });
+    }
+
+    private void setUpVoting() {
+
     }
 
     private void setUpReadyButton() {
