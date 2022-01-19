@@ -36,6 +36,9 @@ public class LobbyUI {
     public Label p4Name;
     public Label display4Status;
 
+    //Dont do this at home
+    public Button readyButton;
+
     public Scene start() throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
@@ -55,7 +58,7 @@ public class LobbyUI {
 
 
         //Code for Player 1
-        p1Name = new Label("Player: " + "Not connected"); //<-- Change to players name
+        p1Name = new Label("Player1: " + "Not connected"); //<-- Change to players name
 
         Label p1Status = new Label("Status: ");
         display1Status = new Label("Not Ready"); //<-- Change to players status
@@ -71,7 +74,7 @@ public class LobbyUI {
 
 
         //Code for Player 2
-        p2Name = new Label("Player: " + "Not connected"); //<-- Change to players name
+        p2Name = new Label("Player2: " + "Not connected"); //<-- Change to players name
 
         Label p2Status = new Label("Status: ");
         display2Status = new Label("Not Ready"); //<-- Change to players status
@@ -87,7 +90,7 @@ public class LobbyUI {
 
 
         //Code for Player 3
-        p3Name = new Label("Player: " + "Not connected"); //<-- Change to players name
+        p3Name = new Label("Player3: " + "Not connected"); //<-- Change to players name
 
         Label p3Status = new Label("Status: ");
         display3Status = new Label("Not Ready"); //<-- Change to players status
@@ -103,7 +106,7 @@ public class LobbyUI {
 
 
         //Code for Player 4
-        p4Name = new Label("Player: " + "Not connected"); //<-- Change to players name
+        p4Name = new Label("Player4: " + "Not connected"); //<-- Change to players name
 
         Label p4Status = new Label("Status: ");
         display4Status = new Label("Not Ready"); //<-- Change to players status
@@ -135,7 +138,7 @@ public class LobbyUI {
 
 
         //Ready Button
-        Button readyButton = new Button("Ready");
+        readyButton = new Button("Ready");
         readyButton.setFont(new Font(30));
         readyButton.setMaxWidth(300);
 

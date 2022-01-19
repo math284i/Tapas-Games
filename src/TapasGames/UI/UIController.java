@@ -7,6 +7,7 @@ import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.CurveFewer;
 import TapasGames.Game.MiniGames.MineSweeper;
 import TapasGames.UiFiles.LobbyUI;
+import TapasGames.UiFiles.VotingUI;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -15,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -31,6 +33,7 @@ import javafx.stage.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 public class UIController extends Application {
@@ -40,6 +43,9 @@ public class UIController extends Application {
     Stage gameStage;
     Stage menuStage;
     Stage chatStage;
+    VotingUI votingWindow;
+
+    public String _playerName;
 
     int score1 = 0;
     int score2 = 0;
@@ -58,7 +64,14 @@ public class UIController extends Application {
     public String gameScene = "lobby";
 
     private SequentialSpace _clientSpace;
-    private CurveFewer pm;
+
+    public LobbyUI lobbyGame;
+    public MineSweeper minesweeperGame;
+    public CurveFewer curvefeverGame;
+
+    public UIController() {
+
+    }
 
     public UIController(SequentialSpace clientSpace) {
         _clientSpace = clientSpace;
@@ -248,7 +261,7 @@ public class UIController extends Application {
         exit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                pm.stop();
+                curvefeverGame.stop();
                 gameStage.close();
                 Stage stage = new Stage();
                 try {
@@ -310,6 +323,7 @@ public class UIController extends Application {
         chatHeader.setAlignment(Pos.TOP_CENTER);
 
         chatBoxT1 = new VBox();
+        chatBoxT2 = new VBox();
         chatBoxG = new VBox();
         chatTabs = new TabPane();
 
@@ -395,42 +409,36 @@ public class UIController extends Application {
 
     public void AddChat(String id) {
         System.out.println("UiController adding chat to ui: " + id);
-        if(id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)){
-            chatTabs.getTabs().add(teamChat1);
-        }else if(id.equals("Team 2") && !chatTabs.getTabs().contains(teamChat2)){
-            chatTabs.getTabs().add(teamChat2);
-        }else if(id.equals("Global") && !chatTabs.getTabs().contains(globalChat)){
-            chatTabs.getTabs().add(globalChat);
-        }else{
-            System.out.println("No tab found with id: " + id);
-        }
+        Platform.runLater(() -> {
+            if (id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)) {
+                chatTabs.getTabs().add(teamChat1);
+            } else if (id.equals("Team 2") && !chatTabs.getTabs().contains(teamChat2)) {
+                chatTabs.getTabs().add(teamChat2);
+            } else if (id.equals("Global") && !chatTabs.getTabs().contains(globalChat)) {
+                chatTabs.getTabs().add(globalChat);
+            } else {
+                System.out.println("No tab found with id: " + id);
+            }
+        });
     }
 
     public void RemoveChat(String id) {
         System.out.println("UiController removing chat from ui: " + id);
-        if(id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)){
-            chatTabs.getTabs().remove(teamChat1);
-        }else if(id.equals("Team 2") && chatTabs.getTabs().contains(teamChat2)){
-            chatTabs.getTabs().remove(teamChat2);
-        }else if(id.equals("Global") && chatTabs.getTabs().contains(globalChat)){
-            chatTabs.getTabs().remove(globalChat);
-        }else{
-            System.out.println("No tab found with id: " + id);
-        }
+        Platform.runLater(() -> {
+            if (id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)) {
+                chatTabs.getTabs().remove(teamChat1);
+            } else if (id.equals("Team 2") && chatTabs.getTabs().contains(teamChat2)) {
+                chatTabs.getTabs().remove(teamChat2);
+            } else if (id.equals("Global") && chatTabs.getTabs().contains(globalChat)) {
+                chatTabs.getTabs().remove(globalChat);
+            } else {
+                System.out.println("No tab found with id: " + id);
+            }
+        });
     }
 
     public void UpdateChat(String name, String id, String message) {
-        ObservableList<Tab> list = chatTabs.getTabs();
-        Tab test = list.get(0);
         System.out.println("Updating ui!");
-        System.out.println(test);
-        Platform.runLater(() -> {
-            chatBoxG.getChildren().add(new Label(name + " : " + message));
-            if (message.equals("curvefever")) updateGameScene("curvefever");
-            if (message.equals("lobby")) updateGameScene("lobby");
-            if (message.equals("minesweeper")) updateGameScene("minesweeper");
-        });
-
         switch (id) {
             case "Team 1" -> {
                 Platform.runLater( () -> {
@@ -450,20 +458,49 @@ public class UIController extends Application {
         }
     }
 
+    public void voteBox(String name) {
+        _playerName = name;
+        votingWindow = new VotingUI();
+            Platform.runLater( () -> {
+                try {
+                    gameStage.setScene(votingWindow.start());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+    }
+
+    private void setUpReadyButton() {
+        lobbyGame.readyButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                lobbyGame.readyButton.setStyle("-fx-background-color: #00FF00;");
+                lobbyGame.readyButton.setDisable(true);
+                try {
+                    _clientSpace.put("UIToClient", "YouAreReady", "");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     public void updateGameScene(String gameScene) {
+        //TODO STOP CURRENTLY RUNNING GAME
         try {
             switch (gameScene) {
                 case "lobby" -> {
-                    LobbyUI ui = new LobbyUI();
-                    gameStage.setScene(ui.start());
+                    lobbyGame = new LobbyUI();
+                    gameStage.setScene(lobbyGame.start());
+                    setUpReadyButton();
                 }
                 case "curvefever" -> {
-                    pm = new CurveFewer();
-                    gameStage.setScene(pm.start());
+                    curvefeverGame = new CurveFewer();
+                    gameStage.setScene(curvefeverGame.start());
                 }
                 case "minesweeper" -> {
-                    MineSweeper ms = new MineSweeper();
-                    gameStage.setScene(ms.start());
+                    minesweeperGame = new MineSweeper();
+                    gameStage.setScene(minesweeperGame.start());
                 }
             }
         }catch (Exception e) {
@@ -471,8 +508,48 @@ public class UIController extends Application {
         }
     }
 
+    public void updateGameScenes() {
+
+    }
+
+    public void updateLobby(String name, String number) {
+
+        switch (number) {
+            case "1" -> {Platform.runLater( () -> {
+                lobbyGame.p1Name.setText("Player1: " + name);
+            });}
+            case "2" -> {Platform.runLater( () -> {
+                lobbyGame.p2Name.setText("Player2: " + name);
+            });}
+            case "3" -> {Platform.runLater( () -> {
+                lobbyGame.p3Name.setText("Player3: " + name);
+            });}
+            case "4" -> {Platform.runLater( () -> {
+                lobbyGame.p4Name.setText("Player4: " + name);
+            });}
+        }
+
+    }
+
+    private void updateCurvefever() {
+
+    }
+
+    private void updateMinesweeper() {
+
+    }
+
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @FXML
+    private ToggleGroup tgGames;
+
+    public void sendVoting(ActionEvent actionEvent) {
+        RadioButton selected = (RadioButton) tgGames.getSelectedToggle();
+        System.out.println("Client chose: " + selected.getText());
+
     }
 }
 
@@ -495,8 +572,9 @@ class ClientReceiver implements Runnable {
                     case "AddChat" -> _uiController.AddChat(data[0]);
                     case "RemoveChat" -> _uiController.RemoveChat(data[0]);
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
-                    case "SetGameWindow" -> _uiController.updateGameScene("curvefever");
-
+                    case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1]);
+                    case "votingTime" -> _uiController.voteBox(data[0]);
+                    case "UpdatePlayers" -> {}
                 }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");

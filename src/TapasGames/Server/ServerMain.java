@@ -9,6 +9,7 @@ import TapasGames.Game.GamesController;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ServerMain {
     private ServerUI _ui;
@@ -16,9 +17,12 @@ public class ServerMain {
     private String _port;
     private String _ipWithPort;
     private ArrayList<String> _clients;
+    private HashMap<String, String> _clientsAndNumbers;
+    private ArrayList<String> _readyClients;
     private SequentialSpace _clientSpace;
     private SequentialSpace _chatSpace;
     private SequentialSpace _gameSpace;
+    private SequentialSpace _startUpSpace;
     private SpaceRepository _repository;
     private ChatController _chatController;
     private GamesController _gamesController;
@@ -32,12 +36,15 @@ public class ServerMain {
         _clientSpace = new SequentialSpace();
         _chatSpace = new SequentialSpace();
         _gameSpace = new SequentialSpace();
+        _startUpSpace = new SequentialSpace();
         _repository.add("clientServer", _clientSpace);
         _repository.add("startUpServer",_startUpSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
+        _readyClients = new ArrayList<>();
+        _clientsAndNumbers = new HashMap<>();
         _chatController = new ChatController(_repository, _chatSpace);
-        _gamesController = new GamesController(_gameSpace);
+        _gamesController = new GamesController(_repository, _gameSpace);
 
         createChatRoom("Global");
         _ui.start(new Stage());
@@ -50,13 +57,13 @@ public class ServerMain {
         try {
             if (_clients.contains(name)) {
                 System.out.println("Server not adding: " + name);
-                _startUpSpace.put("ServerBackToStartUp",_ipWithPort,false);
+                _startUpSpace.put("ServerBackToStartUp",_ipWithPort,"false");
             } else {
                 System.out.println("Server adding: " + name);
                 _clients.add(name);
                 SequentialSpace space = new SequentialSpace();
                 _repository.add("ChatToClient:" + name, space);
-                _startUpSpace.put("ServerBackToStartUp",_ipWithPort, true);
+                _startUpSpace.put("ServerBackToStartUp",_ipWithPort, "true");
                 _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name), new ActualField("ClientCreated"));
                 System.out.println("ServerMain received clientCreated!");
                 addClientToChatRoom(name, "Global");
@@ -75,6 +82,14 @@ public class ServerMain {
             System.out.println(name + " has been added to game as number: " + tuple[2].toString());
 
             //TODO send to all clients, name has been added as player number 1.
+            for (String client: _clients) {
+                _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString());
+            }
+
+            for (var entry : _clientsAndNumbers.entrySet()) {
+                _clientSpace.put("ServerToClient", name, "updateLobby", "" + entry.getKey() + "," + entry.getValue());
+            }
+            _clientsAndNumbers.put(name, tuple[2].toString());
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -99,7 +114,7 @@ public class ServerMain {
     public void addClientToChatRoom(String name, String id) {
         try {
             System.out.println("Server Adding: " + name + " to: " + id);
-            _chatSpace.put("ServeToChat", "addClient", name + "," + id);
+            _chatSpace.put("ServerToChat", "addClient", name + "," + id);
             _clientSpace.put("ServerToClient",name, "addChatRoom", id);
             _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
@@ -128,6 +143,19 @@ public class ServerMain {
         }
     }
 
+    public void clientIsReady(String name) {
+        _readyClients.add(name);
+
+        if (_readyClients.size() == _clients.size()) {
+            System.out.println("All players are ready to RUUUUUMBLE!");
+            try {
+                _gameSpace.put("ServerToGame", "votingTime", "");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
 
 class ClientReceiver implements Runnable {
@@ -144,7 +172,7 @@ class ClientReceiver implements Runnable {
         while (true) {
             try {
                 Object[] tuple = _fromClientSpace.get(
-                        new ActualField("ClientToServer"), new FormalField(String.class)
+                        new ActualField("ClientToServer"), new FormalField(String.class) //TODO do we need all these strings?
                         , new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Someone wrote to serverSpace!, my space is: " + _fromClientSpace.toString());
                 String[] data = tuple[3].toString().split(",");
@@ -153,6 +181,7 @@ class ClientReceiver implements Runnable {
                         //System.out.println("Removing client!");
                         //_server.removeClient(tuple[1].toString());
                     }
+                    case "clientIsReady" -> _server.clientIsReady(data[0]);
                 }
             } catch (InterruptedException ignored) {
             }
