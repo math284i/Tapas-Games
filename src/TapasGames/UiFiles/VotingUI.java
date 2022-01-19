@@ -18,30 +18,27 @@ import java.util.ResourceBundle;
 
 public class VotingUI {
 
+    public Button btnOk;
+    public ToggleGroup tgGames;
+
     public Scene start() {
         Label title = new Label("Vote for the game you want to play!");
         title.setFont(new Font(19));
 
-        ToggleGroup tg = new ToggleGroup();
+        tgGames = new ToggleGroup();
         RadioButton stop = new RadioButton("Stop");
         RadioButton ms = new RadioButton("Minesweeper");
         RadioButton cv = new RadioButton("Curvefever");
-        stop.setToggleGroup(tg);
-        ms.setToggleGroup(tg);
-        cv.setToggleGroup(tg);
+        stop.setToggleGroup(tgGames);
+        ms.setToggleGroup(tgGames);
+        cv.setToggleGroup(tgGames);
         stop.setSelected(true);
-        HBox hbox = new HBox(20,stop,ms,cv);
+        HBox hbox = new HBox(20, stop, ms, cv);
         hbox.setAlignment(Pos.CENTER);
 
-        Button ok = new Button("OK");
-        ok.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
+        btnOk = new Button("OK");
 
-            }
-        });
-
-        VBox vbox = new VBox(title,hbox,ok);
+        VBox vbox = new VBox(70, title, hbox, btnOk);
         vbox.setAlignment(Pos.CENTER);
 
         return new Scene(vbox);

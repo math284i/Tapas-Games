@@ -28,7 +28,7 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
          <children>
-            <Button fx:id="btnVoteOk" mnemonicParsing="false" onAction="#sendVoting" text="Ok" />
+            <Button fx:id="btnVoteOk" mnemonicParsing="false" text="Ok" />
          </children>
       </HBox>
    </children>

@@ -22,7 +22,7 @@ public class ClientMain {
         _uiSpace = uiSpace;
 
         try {
-            _ui.start(new Stage());
+            _ui.start(new Stage(), _uiSpace);
             _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer?keep");
             System.out.println("Writing to serverSpace: " + _serverSpace.toString());
             new Thread(new UIReceiver(this, uiSpace)).start();
@@ -131,6 +131,14 @@ public class ClientMain {
         sendDataToGameRoom(name, votingResult);
     }
 
+    public void newGame(String newGame) {
+        try {
+            _uiSpace.put("ClientToUI", "newGame", newGame);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 class ServerReceiver implements Runnable {
@@ -233,6 +241,7 @@ class GameReceiver implements Runnable {
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
                     case "votingTime" -> _client.votingTime();
+                    case "newGame" -> _client.newGame(data[0]);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
