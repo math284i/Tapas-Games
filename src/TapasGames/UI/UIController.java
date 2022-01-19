@@ -251,8 +251,8 @@ public class UIController extends Application {
                 settingsDialog.initModality(Modality.APPLICATION_MODAL);
                 settingsDialog.initOwner(menuStage);
                 VBox content = new VBox();
-                content.getChildren().add(new Label("Ulrik dum"));
-                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 2);
+                content.getChildren().add(new Label("Here, settings will be added along side more complex games, which have setting that could warrant a change. An example could be changing between using mouse-buttons and wasd-controls for movement or to control sound."));
+                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 3);
                 settingsDialog.setScene(settingsScene);
                 settingsDialog.setResizable(false);
                 settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
