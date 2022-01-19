@@ -245,8 +245,8 @@ public class UIController extends Application {
         controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
         controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
-        minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
-        curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
+        minesweeperI = new Image("TapasGames/Ressources/MineSweeperControls.png");
+        curvefeverI = new Image("TapasGames/Ressources/CurveFeverControls.png");
         //controls.setImage(minesweeperI);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
@@ -261,8 +261,8 @@ public class UIController extends Application {
                 settingsDialog.initModality(Modality.APPLICATION_MODAL);
                 settingsDialog.initOwner(menuStage);
                 VBox content = new VBox();
-                content.getChildren().add(new Label("Ulrik dum"));
-                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 2);
+                content.getChildren().add(new Label("Here, settings will be added along side more complex games, which have setting that could warrant a change. An example could be changing between using mouse-buttons and wasd-controls for movement or to control sound."));
+                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 3);
                 settingsDialog.setScene(settingsScene);
                 settingsDialog.setResizable(false);
                 settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
