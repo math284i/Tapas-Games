@@ -22,7 +22,7 @@ public class ClientMain {
         _uiSpace = uiSpace;
 
         try {
-            _ui.start(new Stage());
+            _ui.start(new Stage(), _uiSpace);
             _serverSpace = new RemoteSpace(serverIpWithPort + "clientServer?keep");
             System.out.println("Writing to serverSpace: " + _serverSpace.toString());
             new Thread(new UIReceiver(this, uiSpace)).start();

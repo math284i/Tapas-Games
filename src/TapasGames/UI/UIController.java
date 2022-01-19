@@ -93,6 +93,16 @@ public class UIController extends Application {
         gameStage.toFront();
     }
 
+    public void start(Stage stage, SequentialSpace clientSpace) throws Exception {
+        configureScreenSize = Screen.getPrimary().getBounds();
+        _clientSpace = clientSpace;
+
+        GameScene();
+        MenuScene();
+        ChatScene();
+        gameStage.toFront();
+    }
+
     public void GameScene() throws Exception {
         gameStage = new Stage();
         gameStage.setTitle("Game Window");
@@ -563,12 +573,13 @@ public class UIController extends Application {
     @FXML
     private ToggleGroup tgGames;
 
+
     public void sendVoting(ActionEvent actionEvent) {
         RadioButton selected = (RadioButton) tgGames.getSelectedToggle();
         System.out.println("Client chose: " + selected.getText());
         try {
 
-            //_clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+            _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
         } catch (Exception e) {
             e.printStackTrace();
         }
