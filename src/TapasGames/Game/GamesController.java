@@ -160,7 +160,6 @@ class ServerReceiver implements Runnable {
                 switch (tuple[1].toString()) {
                     case "addNewPlayer" -> _gamesController.AddNewPlayer(data[0]);
                     case "removePlayer" -> _gamesController.RemovePlayer(data[0]);
-                    case "updateMovement" -> { }
                     case "votingTime" -> _gamesController.votingTime();
                 }
             } catch (InterruptedException ignored) {

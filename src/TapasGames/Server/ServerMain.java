@@ -74,6 +74,10 @@ public class ServerMain {
         }
     }
 
+    public void removeClient(String name){
+
+    }
+
     public void addClientToGame(String name) {
         try {
             _gameSpace.put("ServerToGame", "addNewPlayer", name);
@@ -94,10 +98,6 @@ public class ServerMain {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public void removeClient(String name){
-
     }
 
     private void createChatRoom(String id) {

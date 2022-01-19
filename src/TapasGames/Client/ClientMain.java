@@ -119,7 +119,7 @@ public class ClientMain {
     }
 
     public void votingTime() {
-        System.out.println("Im about to make my vote! #trumpsupporter");
+        System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
         try {
             _uiSpace.put("ClientToUI", "votingTime", "");
         } catch (InterruptedException e) {
