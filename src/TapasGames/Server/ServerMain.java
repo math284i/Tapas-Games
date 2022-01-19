@@ -43,7 +43,6 @@ public class ServerMain {
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _readyClients = new ArrayList<>();
-        _peopleThatWantToSkipGame = new ArrayList<>();
         _clientsAndNumbers = new HashMap<>();
         _chatController = new ChatController(_repository, _chatSpace);
         _gamesController = new GamesController(_repository, _gameSpace);
@@ -77,6 +76,10 @@ public class ServerMain {
         }
     }
 
+    public void removeClient(String name){
+
+    }
+
     public void addClientToGame(String name) {
         try {
             _gameSpace.put("ServerToGame", "addNewPlayer", name);
@@ -97,10 +100,6 @@ public class ServerMain {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public void removeClient(String name){
-
     }
 
     private void createChatRoom(String id) {
@@ -170,26 +169,6 @@ public class ServerMain {
         }
     }
 
-    public void serverRockTheVote(String name) {
-        if (_peopleThatWantToSkipGame.contains(name)) System.out.println("You have already voted from server");
-        else {
-            _peopleThatWantToSkipGame.add(name);
-
-            if (_peopleThatWantToSkipGame.size() == _clients.size()) {
-                System.out.println("Everyone wants to skip!");
-                try {
-                    _gameSpace.put("ServerToGame", "votingTime", "");
-                    _peopleThatWantToSkipGame.clear();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("There is: " + _peopleThatWantToSkipGame.size() + " ready to vote out of: " + _clients.size());
-            }
-
-        }
-    }
-
 }
 
 class ClientReceiver implements Runnable {
@@ -206,17 +185,17 @@ class ClientReceiver implements Runnable {
         while (true) {
             try {
                 Object[] tuple = _fromClientSpace.get(
-                        new ActualField("ClientToServer"), new FormalField(String.class) //TODO do we need all these strings?
+                        new ActualField("ClientToServer")
                         , new FormalField(String.class), new FormalField(String.class));
                 System.out.println("Someone wrote to serverSpace!, my space is: " + _fromClientSpace.toString());
-                String[] data = tuple[3].toString().split(",");
-                switch (tuple[2].toString()) {
+                String[] data = tuple[2].toString().split(",");
+                switch (tuple[1].toString()) {
                     case "removeClient" -> {
                         //System.out.println("Removing client!");
-                        //_server.removeClient(tuple[1].toString());
+                        //_server.removeClient(data[0]);
                     }
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
-                    case "rockTheVote" -> _server.serverRockTheVote(data[0]);
+
                 }
             } catch (InterruptedException ignored) {
             }
