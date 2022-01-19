@@ -100,7 +100,7 @@ public class MineSweeper {
         if (event.getButton().equals((Object)MouseButton.PRIMARY)) {
             checkMines(x, y,true);
         }
-        if(foundP1 == mines/2+1 || foundP2 == mines/2+1){
+        if(foundP1 == mines/2+1 || foundP2 == mines/2+1){ //TODO: Her vinder man
             final Stage settingsDialog = new Stage();
             settingsDialog.initModality(Modality.APPLICATION_MODAL);
             VBox content = new VBox();

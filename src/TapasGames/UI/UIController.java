@@ -93,6 +93,16 @@ public class UIController extends Application {
         gameStage.toFront();
     }
 
+    public void start(Stage stage, SequentialSpace clientSpace) throws Exception {
+        configureScreenSize = Screen.getPrimary().getBounds();
+        _clientSpace = clientSpace;
+
+        GameScene();
+        MenuScene();
+        ChatScene();
+        gameStage.toFront();
+    }
+
     public void GameScene() throws Exception {
         gameStage = new Stage();
         gameStage.setTitle("Game Window");
@@ -235,8 +245,8 @@ public class UIController extends Application {
         controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
         controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
-        minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
-        curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
+        minesweeperI = new Image("TapasGames/Ressources/MineSweeperControls.png");
+        curvefeverI = new Image("TapasGames/Ressources/CurveFeverControls.png");
         //controls.setImage(minesweeperI);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
@@ -251,8 +261,8 @@ public class UIController extends Application {
                 settingsDialog.initModality(Modality.APPLICATION_MODAL);
                 settingsDialog.initOwner(menuStage);
                 VBox content = new VBox();
-                content.getChildren().add(new Label("Ulrik dum"));
-                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 2);
+                content.getChildren().add(new Label("Here, settings will be added along side more complex games, which have setting that could warrant a change. An example could be changing between using mouse-buttons and wasd-controls for movement or to control sound."));
+                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 3);
                 settingsDialog.setScene(settingsScene);
                 settingsDialog.setResizable(false);
                 settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
@@ -283,10 +293,11 @@ public class UIController extends Application {
         vts.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                //TODO output message from Space
-                chatBoxG.getChildren().add(new Label("I vote to skip"));
-                score1++;
-                team1S.setText("" + score1);
+                try {
+                    _clientSpace.put("UIToClient", "rockTheVote", "");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -474,10 +485,27 @@ public class UIController extends Application {
             Platform.runLater( () -> {
                 try {
                     gameStage.setScene(votingWindow.start());
+                    setUpVoting();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
+    }
+
+    private void setUpVoting() {
+        votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                RadioButton selected =(RadioButton) votingWindow.tgGames.getSelectedToggle();
+                System.out.println("Client chose: " + selected.getText());
+                try {
+
+                    _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void setUpReadyButton() {
@@ -497,28 +525,30 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene) {
         //TODO STOP CURRENTLY RUNNING GAME
-        try {
-            switch (gameScene) {
-                case "lobby" -> {
-                    lobbyGame = new LobbyUI();
-                    gameStage.setScene(lobbyGame.start());
-                    controls.setImage(null);
-                    setUpReadyButton();
+        Platform.runLater( () -> {
+            try {
+                switch (gameScene.toLowerCase()) {
+                    case "lobby" -> {
+                        lobbyGame = new LobbyUI();
+                        gameStage.setScene(lobbyGame.start());
+                        controls.setImage(null);
+                        setUpReadyButton();
+                    }
+                    case "curvefever" -> {
+                        curvefeverGame = new CurveFewer();
+                        gameStage.setScene(curvefeverGame.start());
+                        controls.setImage(curvefeverI);
+                    }
+                    case "minesweeper" -> {
+                        minesweeperGame = new MineSweeper();
+                        gameStage.setScene(minesweeperGame.start());
+                        controls.setImage(minesweeperI);
+                    }
                 }
-                case "curvefever" -> {
-                    curvefeverGame = new CurveFewer();
-                    gameStage.setScene(curvefeverGame.start());
-                    controls.setImage(curvefeverI);
-                }
-                case "minesweeper" -> {
-                    minesweeperGame = new MineSweeper();
-                    gameStage.setScene(minesweeperGame.start());
-                    controls.setImage(minesweeperI);
-                }
+            }catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void updateGameScenes() {
@@ -559,20 +589,6 @@ public class UIController extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-    @FXML
-    private ToggleGroup tgGames;
-
-    public void sendVoting(ActionEvent actionEvent) {
-        RadioButton selected = (RadioButton) tgGames.getSelectedToggle();
-        System.out.println("Client chose: " + selected.getText());
-        try {
-
-            //_clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
 
 class ClientReceiver implements Runnable {
@@ -596,6 +612,7 @@ class ClientReceiver implements Runnable {
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1], data[3]);
                     case "votingTime" -> _uiController.voteBox(data[0]);
+                    case "newGame" -> _uiController.updateGameScene(data[0]);
                     case "UpdatePlayers" -> {}
                 }
             } catch (InterruptedException e) {

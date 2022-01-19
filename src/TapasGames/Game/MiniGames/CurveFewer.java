@@ -24,8 +24,8 @@ public class CurveFewer {
     private static final double W = configureScreenSize.getWidth() * size * 0.75
             , H = configureScreenSize.getHeight() * size * 0.75;
 
-    //private static final String PLAYER_IMAGE_LOC = "src/TapasGames/Ressources/player.png";
-    private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/player.png";
+    private static final String PLAYER_IMAGE_LOC = "TapasGames/Ressources/Player1cf.png";
+    //private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/Player1cf.png";
     private Image playerImage;
     private Node player;
     private double angle = 0;
@@ -47,7 +47,8 @@ public class CurveFewer {
     }
 
     public Scene start() throws Exception {
-        playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
+        //playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
+        playerImage = new Image(PLAYER_IMAGE_LOC);
         ImageView playerView = new ImageView(playerImage);
         playerView.setPreserveRatio(true);
         playerView.setFitHeight(playerHeight);
@@ -94,7 +95,7 @@ public class CurveFewer {
                 if (goLeft) angle -= 0.025;
                 dy = Math.sin(angle);
                 dx = Math.cos(angle);
-
+                player.setRotate(angle * (180/Math.PI));
                 movePlayerBy(dx, dy);
             }
         };

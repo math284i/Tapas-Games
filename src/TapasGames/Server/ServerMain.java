@@ -17,6 +17,7 @@ public class ServerMain {
     private String _port;
     private String _ipWithPort;
     private ArrayList<String> _clients;
+    private ArrayList<String> _peopleThatWantToSkipGame;
     private HashMap<String, String> _clientsAndNumbers;
     private ArrayList<String> _readyClients;
     private SequentialSpace _clientSpace;
@@ -42,6 +43,7 @@ public class ServerMain {
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _readyClients = new ArrayList<>();
+        _peopleThatWantToSkipGame = new ArrayList<>();
         _clientsAndNumbers = new HashMap<>();
         _chatController = new ChatController(_repository, _chatSpace);
         _gamesController = new GamesController(_repository, _gameSpace);
@@ -167,6 +169,26 @@ public class ServerMain {
         }
     }
 
+    public void serverRockTheVote(String name) {
+        if (_peopleThatWantToSkipGame.contains(name)) System.out.println("You have already voted from server");
+        else {
+            _peopleThatWantToSkipGame.add(name);
+
+            if (_peopleThatWantToSkipGame.size() == _clients.size()) {
+                System.out.println("Everyone wants to skip!");
+                try {
+                    _gameSpace.put("ServerToGame", "votingTime", "");
+                    _peopleThatWantToSkipGame.clear();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("There is: " + _peopleThatWantToSkipGame.size() + " ready to vote out of: " + _clients.size());
+            }
+
+        }
+    }
+
 }
 
 class ClientReceiver implements Runnable {
@@ -193,6 +215,7 @@ class ClientReceiver implements Runnable {
                         //_server.removeClient(data[0]);
                     }
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
+                    case "rockTheVote" -> _server.serverRockTheVote(data[0]);
                 }
             } catch (InterruptedException ignored) {
             }
