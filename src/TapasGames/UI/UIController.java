@@ -245,8 +245,8 @@ public class UIController extends Application {
         controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
         controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
-        minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
-        curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
+        //minesweeperI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/MineSweeperControls.png"));
+        //curvefeverI = new Image(new FileInputStream("/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/CurveFeverControls.png"));
         //controls.setImage(minesweeperI);
         controls.setPreserveRatio(true);
         controls.setSmooth(true);
