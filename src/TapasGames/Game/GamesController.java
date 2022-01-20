@@ -46,7 +46,7 @@ public class GamesController {
         return _playerDic;
     }
 
-    public void AddNewPlayer(String name) {
+    public void AddNewPlayer(String name) throws InterruptedException {
         for (int i = 0; i < 4; i++) {
             if (indexs[i] == 0) {
                 _playerDic.put(name, "" + (i + 1));
@@ -54,36 +54,24 @@ public class GamesController {
                 break;
             }
         }
-        try {
-            _serverSpace.put("GameBackToServer", name + " has been added", "" + _playerDic.get(name));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        _serverSpace.put("GameBackToServer", name + " has been added", "" + _playerDic.get(name));
     }
 
-    public void RemovePlayer(String name) {
+    public void RemovePlayer(String name) throws InterruptedException {
         String value = _playerDic.get(name);
         _playerDic.remove(name);
         indexs[(Integer.parseInt(value) - 1)] -= 1;
-        try {
-            _serverSpace.put("GameBackToServer", name + " has been removed");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        _serverSpace.put("GameBackToServer", name + " has been removed");
 
     }
 
-    public void sendUpdateToAll(String data) {
+    public void sendUpdateToAll(String data) throws InterruptedException {
         for (var entry : _playerDic.entrySet()) {
-            try {
                 _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    public void gameOver(String playersWon){
+    public void gameOver(String playersWon) throws InterruptedException {
         for (var player : playersWon.split(":")){
             if (player.equals("")) break;
             scoreBoard[Integer.parseInt(player)] += 1;
@@ -91,23 +79,19 @@ public class GamesController {
         votingTime();
     }
 
-    public void votingTime() {
+    public void votingTime() throws InterruptedException {
         System.out.println("GameRoom telling everyone its votingtime!");
         for (var entry : _playerDic.entrySet()) {
-            try {
                 System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
                 StringBuilder scores = new StringBuilder();
                 for (int x : scoreBoard){
                     scores.append(x).append(":");
                 }
                 _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    public void addVotingResult(String name, String result) {
+    public void addVotingResult(String name, String result) throws InterruptedException {
         _votingList.add(result);
         System.out.println("Game received: " + name + " chose: " + result);
 
@@ -123,20 +107,16 @@ public class GamesController {
             }
             _toGameRoomSpace.getAll();
             for (var entry : _playerDic.entrySet()) {
-                try {
                     _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
                     if(newGame.equals("Minesweeper")) {
                         _toGameRoomSpace.put("GameRoomToClient",entry.getKey(),"sendBoard",board);
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
 
         }
     }
 
-    public void rockTheVote(String name){
+    public void rockTheVote(String name) throws InterruptedException {
         if (_peopleThatWantToSkipGame.contains(name)) System.out.println("You have already voted from server");
         else {
             _peopleThatWantToSkipGame.add(name);
@@ -200,8 +180,8 @@ class GameRoom implements Runnable {
                         e.printStackTrace();
                     }
                 }
-                _gamescontroller.sendUpdateToAll(data.toString());
                 try {
+                    _gamescontroller.sendUpdateToAll(data.toString());
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -261,7 +241,8 @@ class ServerReceiver implements Runnable {
                     case "removePlayer" -> _gamesController.RemovePlayer(data[0]);
                     case "gameOver" -> _gamesController.gameOver(data[0]);
                 }
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

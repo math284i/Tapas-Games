@@ -53,127 +53,70 @@ public class ClientMain {
         return _playerNumber;
     }
 
-    public void addChatRoom(String id) {
-        try {
+    public void addChatRoom(String id) throws InterruptedException, IOException {
             _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
             _uiSpace.put("ClientToUI", "AddChat", "" + id);
             _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
-    public void sendDataToChatRoom(String id, String data) {
-        try { //id = tap
+    public void sendDataToChatRoom(String id, String data) throws InterruptedException {
             System.out.println("Client received: " + id + " : " + data);
             _chatSpaces.get(id).put("sendMessage", _name + "," + data);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void sendDataToGameRoom(String data) {
-        //System.out.println("Client received data it should send to game: " + data);
-        try {
+    public void sendDataToGameRoom(String data) throws InterruptedException {
             _gameSpace.put("ClientToGameRoom", _name, data);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void sendVote(String name, String message) {
-        System.out.println("Client received data it should send to game: " + message);
-        try {
+    public void sendVote(String name, String message) throws InterruptedException {
             _voteSpace.put("votingResult", name + "," + message);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void updateChatUI(String name, String id, String message) {
+    public void updateChatUI(String name, String id, String message) throws InterruptedException {
         System.out.println("in " + id + ": " + name + " Says: " + message);
-        try {
             _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
-        } catch (Exception ignored) {
-
-        }
     }
 
-    public void updateGame(String data) { // data:    playerNumber;left;right;up;down;m1;x;y : playerNumber;left;right;up;down;m1;x;y
+    public void updateGame(String data) throws InterruptedException { // data:    playerNumber;left;right;up;down;m1;x;y : playerNumber;left;right;up;down;m1;x;y
         //System.out.println(_name + "has gotten the game data and is sending it to UI: " + data);
         //TODO send data to UI/Client side game
-        try {
             _uiSpace.put("ClientToUI", "UpdateGame", data);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void updateLobby(String name, String number, String readyStatus) {
+    public void updateLobby(String name, String number, String readyStatus) throws InterruptedException {
         if (_name.equals(name)) _playerNumber = number;
-        try {
             _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    public void updatePlayers(String name, String number) {
+    public void updatePlayers(String name, String number) throws InterruptedException {
         System.out.println("Client udating: " + name + " he/she is: " + number);
-        try {
             _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number); //TODO PROTOCOL
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
-    public void sendImReady() {
+    public void sendImReady() throws InterruptedException {
         System.out.println(_name + " telling server im ready!");
-        try {
             _serverSpace.put("ClientToServer", "clientIsReady", _name); //TODO PROTOCOL
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void votingTime(String score) {
+    public void votingTime(String score) throws InterruptedException {
         System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
-        try {
             _uiSpace.put("ClientToUI", "votingTime", "");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void newGame(String newGame, String playerAmount) {
-        try {
+    public void newGame(String newGame, String playerAmount) throws InterruptedException {
             if (newGame.equals("Minesweeper")) {
                 Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"), new ActualField(_name), new ActualField("sendBoard"), new FormalField(Board.class))[3];
                 _uiSpace.put("ClientToUI", "sendBoard", board);
             }
             _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
-    public void rockTheVote() {
-        try {
-            _voteSpace.put("rockTheVote", _name);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void rockTheVote() throws InterruptedException {
+        _voteSpace.put("rockTheVote", _name);
     }
 
-    public void tellServerGameOver(String playersWon) {
-        try {
-            _serverSpace.put("ClientToServer", "gameOver", playersWon);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    public void tellServerGameOver(String playersWon) throws InterruptedException {
+        _serverSpace.put("ClientToServer", "gameOver", playersWon);
     }
 }
 
@@ -199,7 +142,8 @@ class ServerReceiver implements Runnable {
                     case "updateLobby" -> _client.updateLobby(data[0], data[1], data[2]);
                     case "updatePlayers" -> _client.updatePlayers(data[0], data[1]);
                 }
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -229,7 +173,8 @@ class UIReceiver implements Runnable {
                     case "gameInput" -> _client.sendDataToGameRoom(data[0]);
                     case "gameOver" -> _client.tellServerGameOver(data[0]);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
