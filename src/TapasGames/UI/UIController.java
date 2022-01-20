@@ -460,7 +460,7 @@ public class UIController extends Application {
 
     public void voteBox(String newScoreBoard) {
         String[] scores = newScoreBoard.split(":");
-
+        //0:2
         Platform.runLater(() -> {
             for (int i = 0; i < scores.length; i++) {
                 switch ("" + (i+1)) {
