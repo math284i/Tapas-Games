@@ -44,6 +44,7 @@ public class ServerMain {
         _clients = new ArrayList<>();
         _readyClients = new ArrayList<>();
         _clientsAndNumbers = new HashMap<>();
+        _peopleThatWantToSkipGame = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
         _gamesController = new GamesController(_repository, _gameSpace);
 

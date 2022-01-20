@@ -27,6 +27,7 @@ public class GamesController {
         _votingList = new ArrayList<>();
         _peopleThatWantToSkipGame = new ArrayList<>();
         _toGameRoomSpace = new SequentialSpace();
+        _toVotingSpace = new SequentialSpace();
         _repository.add("toGameRoom:", _toGameRoomSpace);
         _repository.add("toVoting:", _toVotingSpace);
         new Thread(new ServerReceiver(this, _serverSpace)).start();
@@ -71,10 +72,8 @@ public class GamesController {
     }
 
     public void sendUpdateToAll(String data) {
-        System.out.println("GameRoom sending to all: " + data);
         for (var entry : _playerDic.entrySet()) {
             try {
-                System.out.println("GameRoom sending: " + entry.getKey() + "the data" + data);
                 _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -106,7 +105,7 @@ public class GamesController {
 
             for (var entry : _playerDic.entrySet()) {
                 try {
-                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame);
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -170,16 +169,23 @@ class GameRoom implements Runnable {
     public void run() {
         while (true) {
             StringBuilder data = new StringBuilder();
-            for (var entry : _gamescontroller.getPlayerDic().entrySet()) {
+            if (_gamescontroller.getPlayerDic().size() > 0) {
+                for (var entry : _gamescontroller.getPlayerDic().entrySet()) {
+                    try {
+                        Object[] tuple = _toGameRoomSpace.get(new ActualField("ClientToGameRoom"),
+                                new ActualField(entry.getKey()), new FormalField(String.class));
+                        data.append(tuple[2].toString()).append(":");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                _gamescontroller.sendUpdateToAll(data.toString());
                 try {
-                    Object[] tuple = _toGameRoomSpace.get(new ActualField("ClientToGameRoom"),
-                            new ActualField(entry.getKey()), new FormalField(String.class));
-                    data.append(tuple[2].toString());
-                } catch (Exception e) {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            _gamescontroller.sendUpdateToAll(data.toString());
         }
     }
 }

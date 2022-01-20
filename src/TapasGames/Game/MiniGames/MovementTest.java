@@ -13,6 +13,9 @@ import javafx.stage.Stage;
 
 public class MovementTest extends Application {
     Path path;
+    public double mouseX;
+    public double mouseY;
+    public String mouseClicked;
 
     public static void main(String[] args) {
         launch(args);
@@ -28,12 +31,7 @@ public class MovementTest extends Application {
         path.setStroke(Color.BLACK);
 
         scene.setOnMouseClicked(mouseHandler);
-        scene.setOnMouseDragged(mouseHandler);
-        scene.setOnMouseEntered(mouseHandler);
-        scene.setOnMouseExited(mouseHandler);
-        scene.setOnMouseMoved(mouseHandler);
         scene.setOnMousePressed(mouseHandler);
-        scene.setOnMouseReleased(mouseHandler);
 
         root.getChildren().add(path);
         primaryStage.setScene(scene);
@@ -44,17 +42,11 @@ public class MovementTest extends Application {
 
         @Override
         public void handle(MouseEvent mouseEvent) {
-            if (mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                path.getElements().clear();
-                path.getElements()
-                        .add(new MoveTo(mouseEvent.getX(), mouseEvent.getY()));
-            } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                path.getElements()
-                        .add(new LineTo(mouseEvent.getX(), mouseEvent.getY()));
+            mouseX = mouseEvent.getX();
+            mouseY = mouseEvent.getY();
+            mouseClicked = "1";
+            System.out.println("Mouse is clicked!: " + mouseX + " : " + mouseY);
             }
-
-        }
-
     };
 
 }

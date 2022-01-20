@@ -115,13 +115,9 @@ public class ServerUI extends Application {
         Scene output = new Scene(outerH);
     }
 
-    @FXML
-    private VBox vboxClientList;
-
     public void AddClient(String clientName) {
         Label newName = new Label(clientName);
         _clientList.put(clientName, newName);
-        vboxClientList.getChildren().add(newName);
     }
 
     public void RemoveClient(String clientName) {

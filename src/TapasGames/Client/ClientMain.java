@@ -66,7 +66,7 @@ public class ClientMain {
     }
 
     public void sendDataToGameRoom(String data) {
-        System.out.println("Client received data it should send to game: " + data);
+        //System.out.println("Client received data it should send to game: " + data);
         try {
             new RemoteSpace(_serverIpWithPort + "toGameRoom:" + "?keep")
                     .put("ClientToGameRoom",_name,data);
@@ -94,9 +94,14 @@ public class ClientMain {
         }
     }
 
-    public void updateGame(String data){ // data:    name;left;right;up;down;m1;x;y : name;left;right;up;down;m1;x;y
-        System.out.println(_name + "has gotten the game data and is sending it to UI");
+    public void updateGame(String data){ // data:    playerNumber;left;right;up;down;m1;x;y : playerNumber;left;right;up;down;m1;x;y
+        //System.out.println(_name + "has gotten the game data and is sending it to UI: " + data);
         //TODO send data to UI/Client side game
+        try {
+            _uiSpace.put("ClientToUI", "UpdateGame", data);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateLobby(String name, String number, String readyStatus) {
@@ -136,9 +141,9 @@ public class ClientMain {
         }
     }
 
-    public void newGame(String newGame) {
+    public void newGame(String newGame, String playerAmount) {
         try {
-            _uiSpace.put("ClientToUI", "newGame", newGame);
+            _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -251,11 +256,10 @@ class GameReceiver implements Runnable {
             try {
                 Object[] tuple = _fromGameSpace.get(new ActualField("GameRoomToClient")
                         , new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
-                System.out.println("I recieved something in my receiver from game.");
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
                     case "votingTime" -> _client.votingTime();
-                    case "newGame" -> _client.newGame(data[0]);
+                    case "newGame" -> _client.newGame(data[0], data[1]);
                     case "updateGame" -> _client.updateGame(data[0]);
                 }
             } catch (InterruptedException e) {

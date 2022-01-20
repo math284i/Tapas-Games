@@ -1,7 +1,10 @@
 package TapasGames.Game.MiniGames;
 
+import java.util.HashMap;
 import java.util.Random;
 
+import TapasGames.UI.UIController;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -30,32 +33,89 @@ public class MineSweeper {
     private Board board = new Board(size[0], size[1], mines);
     private List<List<Button>> buttons = new ArrayList<List<Button>>();
     private GridPane root = new GridPane();
+    private HashMap<String, Integer> _teamDic;
 
     private int currentPlayer = 1;
     private int foundP1 = 0;
     private int foundP2 = 0;
-    private Label player1 = new Label();
-    private Label player2 = new Label();
+    private Label team1 = new Label();
+    private Label team2 = new Label();
     private Rectangle2D configureScreenSize;
     private int minesCurrent = mines;
 
+    public boolean GameOver = false;
+    public String playersWon;
+
+    public Scene _scene;
+    public int mouseX = -10;
+    public int mouseY = -10;
+    public String mouseClicked = "0";
+
+    public MineSweeper(int playerAmount) {
+        _teamDic = new HashMap<>();
+
+        switch (playerAmount) {
+            case 1 -> {
+                GameOver = true;
+                playersWon = "Invalid";
+            }
+            case 2 -> {
+                _teamDic.put("1", 1); //Player1 is Team1
+                _teamDic.put("2", 2); //Player2 is Team2
+            }
+            case 3 -> {
+                //Could be random
+                _teamDic.put("1", 1); //Player 1 is Team 1
+                _teamDic.put("2", 2); //Player 2 is Team 2
+                _teamDic.put("3", 1); //Player 3 is Team 1
+            }
+            case 4 -> {
+                //Could be random
+                _teamDic.put("1", 1); //Player 1 is Team 1
+                _teamDic.put("2", 2); //Player 2 is Team 2
+                _teamDic.put("3", 1); //Player 3 is Team 1
+                _teamDic.put("4", 2); //Player 4 is Team 2
+            }
+        }
+
+    }
+
     public Scene start() {
         configureScreenSize = Screen.getPrimary().getBounds();
-        HBox info = new HBox(minesLeft, player1, player2);
+        HBox info = new HBox(minesLeft, team1, team2);
         info.setStyle("-fx-background-color: lightgray");
         minesLeft.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(minesLeft, Priority.ALWAYS);
-        player1.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(player1, Priority.ALWAYS);
-        player2.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(player2, Priority.ALWAYS);
+        team1.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(team1, Priority.ALWAYS);
+        team2.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(team2, Priority.ALWAYS);
         root.setStyle("-fx-background-color: " + this.colors[0]);
         VBox vbox = new VBox(info,root);
         vbox.setFillWidth(true);
         VBox.setVgrow(root, Priority.ALWAYS);
         restart();
+        _scene = new Scene(vbox);
+        return _scene;
+    }
 
-        return new Scene(vbox);
+    public void mouseHandler(MouseEvent mouseEvent) {
+        String text = ((Button)mouseEvent.getSource()).getId();
+        int n = 0;
+        String xS = "";
+        String yS = "";
+        while (text.charAt(n) != ',') {
+            xS = String.valueOf(xS) + text.charAt(n);
+            ++n;
+        }
+        for (int i = n + 1; i < text.length(); ++i) {
+            yS = String.valueOf(yS) + text.charAt(i);
+        }
+        mouseX = Integer.parseInt(xS);
+        mouseY = Integer.parseInt(yS);
+
+        mouseClicked = "1";
+        System.out.println("Mouse is clicked!: " + mouseX + " : " + mouseY);
     }
 
     public void restart() {
@@ -64,14 +124,15 @@ public class MineSweeper {
         foundP2 = 0;
         buttons.clear();
         minesLeft.setText("Mines left: " + mines);
-        player1.setText("-> Player 1: " + foundP1);
-        player2.setText("Player 2: " + foundP2);
+        team1.setText("-> Team 1: " + foundP1);
+        team2.setText("Team 2: " + foundP2);
         for (int i = 0; i < size[0]; ++i) {
             buttons.add(new ArrayList<Button>());
             for (int j = 0; j < size[1]; ++j) {
                 Button button = new Button("  ");
                 button.setId(String.valueOf(i) + "," + j);
-                button.setOnMousePressed(this::mouseAction);
+                button.setStyle("-fx-background-color: gray");
+                button.setOnMousePressed(this::mouseHandler);
                 root.add(button, i, j);
                 button.setPrefSize(configureScreenSize.getWidth()/size[0],configureScreenSize.getHeight()/size[1]);
                 GridPane.setHgrow(button, Priority.ALWAYS);
@@ -83,40 +144,38 @@ public class MineSweeper {
         }
     }
 
-    public void mouseAction(final MouseEvent event) {
-        String text = ((Button)event.getSource()).getId();
-        int n = 0;
-        String xS = "";
-        String yS = "";
-        while (text.charAt(n) != ',') {
-            xS = String.valueOf(xS) + text.charAt(n);
-            ++n;
+    public boolean mouseAction(String playerNumber, boolean clicked, int x, int y) {
+        if (currentPlayer != _teamDic.get(playerNumber)) return false;
+
+        if (clicked) checkMines(x, y,true);
+
+        if(foundP1 == mines/2+1){
+            GameOver = true;
+            playersWon = "";
+
+            for (var entry: _teamDic.entrySet()) {
+                if (entry.getValue() == 1) {
+                    playersWon += entry.getKey() + ":";
+                }
+            }
+
         }
-        for (int i = n + 1; i < text.length(); ++i) {
-            yS = String.valueOf(yS) + text.charAt(i);
+        else if (foundP2 == mines/2+1) {
+            GameOver = true;
+            playersWon = "";
+
+            for (var entry: _teamDic.entrySet()) {
+                if (entry.getValue() == 2) {
+                    playersWon += entry.getKey() + ":";
+                }
+            }
         }
-        int x = Integer.parseInt(xS);
-        int y = Integer.parseInt(yS);
-        if (event.getButton().equals((Object)MouseButton.PRIMARY)) {
-            checkMines(x, y,true);
-        }
-        if(foundP1 == mines/2+1 || foundP2 == mines/2+1){ //TODO: Her vinder man
-            final Stage settingsDialog = new Stage();
-            settingsDialog.initModality(Modality.APPLICATION_MODAL);
-            VBox content = new VBox();
-            content.getChildren().add(new Label("Ulrik dum"));
-            Scene settingsScene = new Scene(content,configureScreenSize.getWidth()/4,configureScreenSize.getHeight()/2);
-            settingsDialog.setScene(settingsScene);
-            settingsDialog.setResizable(false);
-            settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue)
-                    settingsDialog.setMaximized(false);
-            });
-            settingsDialog.show();
-        }
+
+        return true;
     }
 
     public void checkMines(final int x, final int y, boolean firstClick) {
+        System.out.println("CheckMines: " + x + " : " + y);
         if (!board.getGrid(x, y).isPressed()) {
             board.getGrid(x, y).setPressed();
             if (board.getGrid(x, y).isMine()) {
@@ -124,11 +183,11 @@ public class MineSweeper {
                 minesLeft.setText("Mines left: " + minesCurrent);
                 if(currentPlayer == 1){
                     foundP1 ++;
-                    player1.setText("-> Player 1: " + foundP1);
+                    team1.setText("-> Player 1: " + foundP1);
                     buttons.get(x).get(y).setStyle("-fx-background-color: red");
                 }else{
                     foundP2++;
-                    player2.setText("-> Player 2: " + foundP2);
+                    team2.setText("-> Player 2: " + foundP2);
                     buttons.get(x).get(y).setStyle("-fx-background-color: blue");
                 }
             }
@@ -141,12 +200,12 @@ public class MineSweeper {
                 buttons.get(x).get(y).setText(new StringBuilder().append(board.neighbors(x, y)).toString());
                 if(currentPlayer == 1 && firstClick){
                     currentPlayer = 2;
-                    player2.setText("-> Player 2: " + foundP2);
-                    player1.setText("Player 1: " + foundP1);
+                    team2.setText("-> Player 2: " + foundP2);
+                    team1.setText("Player 1: " + foundP1);
                 }else if(firstClick){
                     currentPlayer = 1;
-                    player1.setText("-> Player 1: " + foundP1);
-                    player2.setText("Player 2: " + foundP2);
+                    team1.setText("-> Player 1: " + foundP1);
+                    team2.setText("Player 2: " + foundP2);
                 }
             }
             else {
@@ -160,12 +219,12 @@ public class MineSweeper {
                 }
                 if(currentPlayer == 1 && firstClick){
                     currentPlayer = 2;
-                    player2.setText("-> Player 2: " + foundP2);
-                    player1.setText("Player 1: " + foundP1);
+                    team2.setText("-> Player 2: " + foundP2);
+                    team1.setText("Player 1: " + foundP1);
                 }else if(firstClick){
                     currentPlayer = 1;
-                    player1.setText("-> Player 1: " + foundP1);
-                    player2.setText("Player 2: " + foundP2);
+                    team1.setText("-> Player 1: " + foundP1);
+                    team2.setText("Player 2: " + foundP2);
                 }
             }
         }
@@ -177,6 +236,7 @@ class Board {
     private int mines;
 
     public Board(int sizeX, int sizeY, int mines) {
+        System.out.println("Board is beeing created!");
         if (sizeX < 1 || sizeY < 1 || mines < 0 || sizeX * sizeY < mines) {
             throw new IllegalArgumentException("Size and mines aren't properly defined");
         }

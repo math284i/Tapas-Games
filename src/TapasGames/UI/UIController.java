@@ -2,7 +2,6 @@ package TapasGames.UI;
 
 import JspaceFiles.jspace.ActualField;
 import JspaceFiles.jspace.FormalField;
-import JspaceFiles.jspace.RemoteSpace;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.CurveFewer;
 import TapasGames.Game.MiniGames.MineSweeper;
@@ -12,11 +11,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -27,13 +23,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
 import javafx.scene.text.Font;
 import javafx.stage.*;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 
 public class UIController extends Application {
@@ -46,6 +43,7 @@ public class UIController extends Application {
     VotingUI votingWindow;
 
     public String _playerName;
+    public String _playerNumber = "0";
 
     int score1 = 0;
     int score2 = 0;
@@ -65,12 +63,13 @@ public class UIController extends Application {
     Image minesweeperI;
     Image curvefeverI;
 
-    public String gameScene = "lobby";
+    public String _gameScene = "lobby";
 
     private SequentialSpace _clientSpace;
 
     public LobbyUI lobbyGame;
     public MineSweeper minesweeperGame;
+    public Scene minesweeperScene;
     public CurveFewer curvefeverGame;
 
     public UIController() {
@@ -115,7 +114,7 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        updateGameScene(gameScene);
+        updateGameScene(_gameScene, "0", "1");
 
         gameStage.show();
     }
@@ -523,11 +522,12 @@ public class UIController extends Application {
         });
     }
 
-    public void updateGameScene(String gameScene) {
-        //TODO STOP CURRENTLY RUNNING GAME
+    public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
+        _playerNumber = playerNumber;
+        _gameScene = gameScene;
         Platform.runLater( () -> {
             try {
-                switch (gameScene.toLowerCase()) {
+                switch (_gameScene.toLowerCase()) {
                     case "lobby" -> {
                         lobbyGame = new LobbyUI();
                         gameStage.setScene(lobbyGame.start());
@@ -540,9 +540,11 @@ public class UIController extends Application {
                         controls.setImage(curvefeverI);
                     }
                     case "minesweeper" -> {
-                        minesweeperGame = new MineSweeper();
-                        gameStage.setScene(minesweeperGame.start());
+                        minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
+                        minesweeperScene = minesweeperGame.start();
+                        gameStage.setScene(minesweeperScene);
                         controls.setImage(minesweeperI);
+                        sendMinesweeperData();
                     }
                 }
             }catch (Exception e) {
@@ -551,7 +553,56 @@ public class UIController extends Application {
         });
     }
 
-    public void updateGameScenes() {
+
+    public void updateGame(String data) {
+        Platform.runLater( () -> {
+            switch (_gameScene.toLowerCase()) {
+                case "curvefever" -> {updateCurvefever(data);}
+                case "minesweeper" -> {updateMinesweeper(data);}
+            }
+        });
+        //System.out.println("UiController updatingGame!");
+    }
+
+    public void updateMinesweeper(String data) {
+
+        boolean success = false;
+
+        for (var entry: data.split(":")) {
+            //playerNumber;m1;x;y
+            String[] inputs = entry.split(";");
+            //System.out.println("Player: " + inputs[0]);
+            success = minesweeperGame.mouseAction(inputs[0]
+                    , Integer.parseInt(inputs[1]) == 1
+                    , Double.valueOf(inputs[2]).intValue()
+                    , Double.valueOf(inputs[3]).intValue());
+            if (success) {
+                //System.out.println("New player in minesweeper!");
+                break;
+            }
+        }
+
+        //check if game is over
+
+        //if not
+        sendMinesweeperData();
+
+    }
+
+    public void sendMinesweeperData() {
+        String dataOut = _playerNumber + ";" + minesweeperGame.mouseClicked + ";" + minesweeperGame.mouseX + ";" + minesweeperGame.mouseY;
+        try {
+            _clientSpace.put("UIToClient", "gameInput", dataOut);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        minesweeperGame.mouseClicked = "0";
+        minesweeperGame.mouseX = -10;
+        minesweeperGame.mouseY = -10;
+    }
+
+    public void updateCurvefever(String data) {
 
     }
 
@@ -612,8 +663,8 @@ class ClientReceiver implements Runnable {
                     case "UpdateChat" -> _uiController.UpdateChat(data[0], data[1], data[2]);
                     case "UpdateLobby" -> _uiController.updateLobby(data[0], data[1], data[3]);
                     case "votingTime" -> _uiController.voteBox(data[0]);
-                    case "newGame" -> _uiController.updateGameScene(data[0]);
-                    case "UpdatePlayers" -> {}
+                    case "newGame" -> _uiController.updateGameScene(data[0], data[1], data[2]);
+                    case "UpdateGame" -> _uiController.updateGame(data[0]);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Receiver caught an error!");
