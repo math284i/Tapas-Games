@@ -5,7 +5,7 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.Board;
 import TapasGames.Game.MiniGames.CurveFewer;
-import TapasGames.Game.MiniGames.MineSweeper;
+import TapasGames.Game.MiniGames.MovementTest;
 import TapasGames.UiFiles.LobbyUI;
 import TapasGames.UiFiles.VotingUI;
 import javafx.application.Application;
@@ -24,10 +24,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.text.Font;
 import javafx.stage.*;
 
@@ -73,7 +70,7 @@ public class UIController extends Application {
     private SequentialSpace _clientSpace;
 
     public LobbyUI lobbyGame;
-    public MineSweeper minesweeperGame;
+    public MovementTest.MineSweeper minesweeperGame;
     public Scene minesweeperScene;
     public CurveFewer curvefeverGame;
 
@@ -112,11 +109,11 @@ public class UIController extends Application {
         gameStage = new Stage();
         gameStage.setTitle("Game Window");
 
-        gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
-        gameStage.setHeight(configureScreenSize.getHeight() * size * 0.75);
+        gameStage.setWidth(1008);
+        gameStage.setHeight(567);
 
-        gameStage.setX(configureScreenSize.getWidth() * 0.15);
-        gameStage.setY(configureScreenSize.getHeight() * 0.15);
+        gameStage.setX(250);
+        gameStage.setY(150);
 
         gameStage.setResizable(false);
 
@@ -130,11 +127,11 @@ public class UIController extends Application {
     public void MenuScene() throws FileNotFoundException {
         menuStage = new Stage();
         menuStage.setTitle("Menu Window");
-        menuStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
-        menuStage.setHeight(configureScreenSize.getHeight() * size * 0.25);
+        menuStage.setWidth(1008);
+        menuStage.setHeight(189);
 
-        menuStage.setX(configureScreenSize.getWidth() * 0.15);
-        menuStage.setY(configureScreenSize.getHeight() * 0.15 + configureScreenSize.getHeight() * size * 0.75);
+        menuStage.setX(250);
+        menuStage.setY(717);
 
         menuStage.initOwner(gameStage);
         menuStage.setResizable(false);
@@ -293,11 +290,11 @@ public class UIController extends Application {
         chatStage = new Stage();
         chatStage.setTitle("Chat Window");
 
-        chatStage.setWidth(configureScreenSize.getWidth() * 0.7 * 0.25);
-        chatStage.setHeight(configureScreenSize.getHeight() * 0.70);
+        chatStage.setWidth(336);
+        chatStage.setHeight(756);
 
-        chatStage.setX(configureScreenSize.getWidth() * 0.15 + configureScreenSize.getWidth() * 0.7 * 0.75);
-        chatStage.setY(configureScreenSize.getHeight() * 0.15);
+        chatStage.setX(1258);
+        chatStage.setY(150);
 
         chatStage.setResizable(false);
         chatStage.setOnCloseRequest(evt -> {
@@ -548,7 +545,7 @@ public class UIController extends Application {
                     }
                     case "minesweeper" -> {
                         Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
-                        minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
+                        minesweeperGame = new MovementTest.MineSweeper(Integer.parseInt(playerAmount));
                         minesweeperScene = minesweeperGame.start(board);
                         gameStage.setScene(minesweeperScene);
                         controls.setImage(minesweeperI);
