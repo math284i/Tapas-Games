@@ -77,8 +77,9 @@ public class UIController extends Application {
 
     }
 
-    public UIController(SequentialSpace clientSpace) {
+    public UIController(SequentialSpace clientSpace, String playerName) {
         _clientSpace = clientSpace;
+        _playerName = playerName;
 
         new Thread(new ClientReceiver(this, _clientSpace)).start();
     }
@@ -220,8 +221,8 @@ public class UIController extends Application {
         team3.setMaxHeight(Double.MAX_VALUE);
         team4.setMaxHeight(Double.MAX_VALUE);
         teams.getChildren().addAll(team1, separatorV1, team2);
-        teams.getChildren().addAll(separatorV2,team3); //Adds team 3
-        teams.getChildren().addAll(separatorV3,team4); //Adds team 4
+        teams.getChildren().addAll(separatorV2, team3); //Adds team 3
+        teams.getChildren().addAll(separatorV3, team4); //Adds team 4
 
         score.setVgrow(teams, Priority.ALWAYS);
         score.setVgrow(points, Priority.NEVER);
@@ -340,13 +341,13 @@ public class UIController extends Application {
         chatBoxT1.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT1.setVvalue((Double)newValue );
+                chatPaneT1.setVvalue((Double) newValue);
             }
         });
         chatBoxT2.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT2.setVvalue((Double)newValue );
+                chatPaneT2.setVvalue((Double) newValue);
             }
         });
         chatBoxG.heightProperty().addListener(new ChangeListener() {
@@ -379,7 +380,7 @@ public class UIController extends Application {
                 System.out.println("message: " + message);
                 try {
                     //String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
-                    _clientSpace.put("UIToClient","chat", "Global," + message); //TODO replace id with current tap
+                    _clientSpace.put("UIToClient", "chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -432,17 +433,17 @@ public class UIController extends Application {
         System.out.println("Updating ui!");
         switch (id) {
             case "Team 1" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxT1.getChildren().add(new Label(name + " : " + message));
                 });
             }
             case "Team 2" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxT2.getChildren().add(new Label(name + " : " + message));
                 });
             }
             case "Global" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxG.getChildren().add(new Label(name + " : " + message));
                 });
             }
@@ -454,24 +455,24 @@ public class UIController extends Application {
         }
     }
 
-    public void voteBox(String name) {
-        _playerName = name;
+    public void voteBox(String newScoreBoard) {
+        //TODO change scoreboard to the given
         votingWindow = new VotingUI();
-            Platform.runLater( () -> {
-                try {
-                    gameStage.setScene(votingWindow.start());
-                    setUpVoting();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+        Platform.runLater(() -> {
+            try {
+                gameStage.setScene(votingWindow.start());
+                setUpVoting();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void setUpVoting() {
         votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                RadioButton selected =(RadioButton) votingWindow.tgGames.getSelectedToggle();
+                RadioButton selected = (RadioButton) votingWindow.tgGames.getSelectedToggle();
                 System.out.println("Client chose: " + selected.getText());
                 try {
 
@@ -501,7 +502,7 @@ public class UIController extends Application {
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
         _gameScene = gameScene;
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             try {
                 switch (_gameScene.toLowerCase()) {
                     case "lobby" -> {
@@ -516,7 +517,7 @@ public class UIController extends Application {
                         controls.setImage(curvefeverI);
                     }
                     case "minesweeper" -> {
-                        Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"),new ActualField("sendBoard"),new FormalField(Board.class))[2];
+                        Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
                         minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
                         minesweeperScene = minesweeperGame.start(board);
                         gameStage.setScene(minesweeperScene);
@@ -524,7 +525,7 @@ public class UIController extends Application {
                         sendMinesweeperData();
                     }
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -532,10 +533,14 @@ public class UIController extends Application {
 
 
     public void updateGame(String data) {
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             switch (_gameScene.toLowerCase()) {
-                case "curvefever" -> {updateCurvefever(data);}
-                case "minesweeper" -> {updateMinesweeper(data);}
+                case "curvefever" -> {
+                    updateCurvefever(data);
+                }
+                case "minesweeper" -> {
+                    updateMinesweeper(data);
+                }
             }
         });
         //System.out.println("UiController updatingGame!");
@@ -545,7 +550,7 @@ public class UIController extends Application {
 
         boolean success = false;
 
-        for (var entry: data.split(":")) {
+        for (var entry : data.split(":")) {
             //playerNumber;m1;x;y
             String[] inputs = entry.split(";");
             //System.out.println("Player: " + inputs[0]);
@@ -559,11 +564,15 @@ public class UIController extends Application {
             }
         }
 
-        //check if game is over
-
-        //if not
-        sendMinesweeperData();
-
+        if (minesweeperGame.GameOver) {
+            try {
+                _clientSpace.put("UIToClient", "gameOver", minesweeperGame.playersWon);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            sendMinesweeperData();
+        }
     }
 
     public void sendMinesweeperData() {
@@ -586,22 +595,30 @@ public class UIController extends Application {
     public void updateLobby(String name, String number, String readyStatus) {
 
         switch (number) {
-            case "1" -> {Platform.runLater( () -> {
-                lobbyGame.p1Name.setText("Player1: " + name);
-                lobbyGame.display1Status.setText("Status: " + readyStatus);
-            });}
-            case "2" -> {Platform.runLater( () -> {
-                lobbyGame.p2Name.setText("Player2: " + name);
-                lobbyGame.display2Status.setText("Status: " + readyStatus);
-            });}
-            case "3" -> {Platform.runLater( () -> {
-                lobbyGame.p3Name.setText("Player3: " + name);
-                lobbyGame.display3Status.setText("Status: " + readyStatus);
-            });}
-            case "4" -> {Platform.runLater( () -> {
-                lobbyGame.p4Name.setText("Player4: " + name);
-                lobbyGame.display4Status.setText("Status: " + readyStatus);
-            });}
+            case "1" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p1Name.setText("Player1: " + name);
+                    lobbyGame.display1Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "2" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p2Name.setText("Player2: " + name);
+                    lobbyGame.display2Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "3" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p3Name.setText("Player3: " + name);
+                    lobbyGame.display3Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "4" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p4Name.setText("Player4: " + name);
+                    lobbyGame.display4Status.setText("Status: " + readyStatus);
+                });
+            }
         }
 
     }

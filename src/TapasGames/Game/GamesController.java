@@ -11,6 +11,7 @@ import java.util.Map;
 public class GamesController {
     private HashMap<String, String> _playerDic;
     private int[] indexs = new int[4];
+    private int[] scoreBoard = new int[4];
     private SpaceRepository _repository;
     private SequentialSpace _serverSpace;
     private SequentialSpace _toVotingSpace;
@@ -82,12 +83,23 @@ public class GamesController {
         }
     }
 
+    public void gameOver(String playersWon){
+        for (var player : playersWon.split(":")){
+            scoreBoard[Integer.parseInt(player)] += 1;
+        }
+        votingTime();
+    }
+
     public void votingTime() {
         System.out.println("GameRoom telling everyone its votingtime!");
         for (var entry : _playerDic.entrySet()) {
             try {
                 System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
-                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", "");
+                StringBuilder scores = new StringBuilder();
+                for (int x : scoreBoard){
+                    scores.append(x).append(":");
+                }
+                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -101,14 +113,18 @@ public class GamesController {
         if (_votingList.size() == _playerDic.size()) {
             System.out.println("Game got all the votes needed!");
             String newGame = mostCommon(_votingList);
+            _currentlyPlaying = newGame;
             System.out.println("Most voted game was: " + newGame);
             _votingList.clear();
-            Board board = new Board(16,16,51);
-
+            Board board = null;
+            if(newGame.equals("Minesweeper")) {
+                board = new Board(16,16,51);
+            }
+            _toGameRoomSpace.getAll();
             for (var entry : _playerDic.entrySet()) {
                 try {
                     _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
-                    if(newGame.equals("minesweeper")) {
+                    if(newGame.equals("Minesweeper")) {
                         _toGameRoomSpace.put("GameRoomToClient",entry.getKey(),"sendBoard",board);
                     }
                 } catch (InterruptedException e) {
@@ -215,7 +231,6 @@ class VoteController implements Runnable {
                     case "votingTime" -> _gamescontroller.votingTime();
                     case "votingResult" -> _gamescontroller.addVotingResult(data[0], data[1]);
                     case "rockTheVote" -> _gamescontroller.rockTheVote(data[0]);
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -243,7 +258,7 @@ class ServerReceiver implements Runnable {
                 switch (tuple[1].toString()) {
                     case "addNewPlayer" -> _gamesController.AddNewPlayer(data[0]);
                     case "removePlayer" -> _gamesController.RemovePlayer(data[0]);
-                    case "votingTime" -> _gamesController.votingTime();
+                    case "gameOver" -> _gamesController.gameOver(data[0]);
                 }
             } catch (InterruptedException ignored) {
             }

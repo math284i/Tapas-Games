@@ -135,7 +135,7 @@ public class ClientMain {
         }
     }
 
-    public void votingTime() {
+    public void votingTime(String score) {
         System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
         try {
             _uiSpace.put("ClientToUI", "votingTime", "");
@@ -146,7 +146,7 @@ public class ClientMain {
 
     public void newGame(String newGame, String playerAmount) {
         try {
-            if(newGame.equals("minesweeper")){
+            if(newGame.equals("Minesweeper")){
                 Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"),new ActualField(_name),new ActualField("sendBoard"),new FormalField(Board.class))[3];
                 _uiSpace.put("ClientToUI","sendBoard",board);
             }
@@ -165,6 +165,14 @@ public class ClientMain {
         }
     }
 
+    public void tellServerGameOver(String playersWon) {
+        try{
+            _serverSpace.put("ClientToServer", "gameOver", playersWon);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
 
 class ServerReceiver implements Runnable {
@@ -217,6 +225,7 @@ class UIReceiver implements Runnable {
                     case "tellGameMyVote" -> _client.sendVote(data[0], data[1]);
                     case "rockTheVote" -> _client.rockTheVote();
                     case "gameInput" -> _client.sendDataToGameRoom(data[0]);
+                    case "gameOver" -> _client.tellServerGameOver(data[0]);
                 }
             } catch (Exception ignored) {
             }
@@ -265,7 +274,7 @@ class GameReceiver implements Runnable {
                         , new ActualField(_client.getName()), new FormalField(String.class), new FormalField(String.class));
                 String[] data = tuple[3].toString().split(",");
                 switch (tuple[2].toString()) {
-                    case "votingTime" -> _client.votingTime();
+                    case "votingTime" -> _client.votingTime(data[0]);
                     case "newGame" -> _client.newGame(data[0], data[1]);
                     case "updateGame" -> _client.updateGame(data[0]);
                 }
