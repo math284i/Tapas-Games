@@ -43,17 +43,18 @@ public class ServerUI extends Application {
         _clientList = new HashMap<>();
 
         Label statusL = new Label("Status:");
-        statusL.setAlignment(Pos.CENTER);
         statusL.setFont(new Font(20));
         Separator sep1h = new Separator(Orientation.HORIZONTAL);
         Pane statusP = new Pane();
         statusP.setPrefHeight(150);
         statusP.setStyle("-fx-border-color: black;");
+        statusP.setPadding(new Insets(10, 10, 10, 10));
         Label online = new Label("Server online");
         online.setFont(new Font(18));
-        online.setAlignment(Pos.CENTER);
         statusP.getChildren().add(online);
+        online.setAlignment(Pos.CENTER);
         VBox status = new VBox(statusL,sep1h,statusP);
+        statusL.setAlignment(Pos.CENTER);
 
         Label clientsS = new Label("Client list");
         clientsS.setFont(new Font(20));

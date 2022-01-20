@@ -26,6 +26,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.*;
 
 import java.io.FileNotFoundException;
@@ -502,30 +503,32 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
+        Font bold = Font.font("Regular", FontWeight.BOLD,12);
+        Font font = Font.font("Regular", FontWeight.NORMAL,12);
         switch(_playerNumber){
             case "1" -> {
-                team1L.setStyle("-fx-font-weight: bold;");
-                team2L.setStyle("-fx-font-weight: regular;");
-                team3L.setStyle("-fx-font-weight: regular;");
-                team4L.setStyle("-fx-font-weight: regular;");
+                team1L.setFont(bold);
+                team2L.setFont(font);
+                team3L.setFont(font);
+                team4L.setFont(font);
             }
             case "2" -> {
-                team1L.setStyle("-fx-font-weight: regular;");
-                team2L.setStyle("-fx-font-weight: bold;");
-                team3L.setStyle("-fx-font-weight: regular;");
-                team4L.setStyle("-fx-font-weight: regular;");
+                team1L.setFont(font);
+                team2L.setFont(bold);
+                team3L.setFont(font);
+                team4L.setFont(font);
             }
             case "3" -> {
-                team1L.setStyle("-fx-font-weight: regular;");
-                team2L.setStyle("-fx-font-weight: regular;");
-                team3L.setStyle("-fx-font-weight: bold;");
-                team4L.setStyle("-fx-font-weight: regular;");
+                team1L.setFont(font);
+                team2L.setFont(font);
+                team3L.setFont(bold);
+                team4L.setFont(font);
             }
             case "4" -> {
-                team1L.setStyle("-fx-font-weight: regular;");
-                team2L.setStyle("-fx-font-weight: regular;");
-                team3L.setStyle("-fx-font-weight: regular;");
-                team4L.setStyle("-fx-font-weight: bold;");
+                team1L.setFont(font);
+                team2L.setFont(font);
+                team3L.setFont(font);
+                team4L.setFont(bold);
             }
         }
         _gameScene = gameScene;
