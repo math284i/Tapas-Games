@@ -123,10 +123,12 @@ public class UIController extends Application {
 
         updateGameScene(_gameScene, "0", "0");
 
-        gameStage.show();
-
         menuStage.initOwner(gameStage);
         chatStage.initOwner(gameStage);
+
+        chatStage.show();
+        menuStage.show();
+        gameStage.show();
 
     }
 
@@ -260,8 +262,11 @@ public class UIController extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 gameStage.close();
+                menuStage.close();
+                chatStage.close();
                 Stage stage = new Stage();
                 try {
+                    _clientSpace.put("UIToClient", "leaving", "");
                     Parent root = FXMLLoader.load(getClass().getResource("../UiFiles/frontpage.fxml"));
 
                     Scene scene = new Scene(root);
@@ -289,7 +294,6 @@ public class UIController extends Application {
         Scene menuScene = new Scene(combi, 1008, 189);
 
         menuStage.setScene(menuScene);
-        menuStage.show();
     }
 
     public void ChatScene() {
@@ -402,7 +406,6 @@ public class UIController extends Application {
 
         Scene chatScene = new Scene(layout);
         chatStage.setScene(chatScene);
-        chatStage.show();
     }
 
     public void AddChat(String id) {

@@ -59,6 +59,12 @@ public class ClientMain {
             _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
     }
 
+    public void removeChatRoom(String id) throws InterruptedException, IOException {
+        _chatSpaces.remove(id);
+        _uiSpace.put("ClientToUI", "RemoveChat", "" + id);
+        _serverSpace.put("ClientBackToServer", _name, "ChatRoomRemoved");
+    }
+
     public void sendDataToChatRoom(String id, String data) throws InterruptedException {
             System.out.println("Client received: " + id + " : " + data);
             _chatSpaces.get(id).put("sendMessage", _name + "," + data);
@@ -117,6 +123,10 @@ public class ClientMain {
     public void tellServerGameOver(String playersWon) throws InterruptedException {
         _serverSpace.put("ClientToServer", "gameOver", playersWon);
     }
+
+    public void tellServerImLeaving() throws InterruptedException {
+        _serverSpace.put("ClientToServer", "clientLeaving", _name);
+    }
 }
 
 class ServerReceiver implements Runnable {
@@ -140,6 +150,7 @@ class ServerReceiver implements Runnable {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
                     case "updateLobby" -> _client.updateLobby(data[0], data[1], data[2]);
                     case "updatePlayers" -> _client.updatePlayers(data[0], data[1]);
+                    case "removeChatRoom" -> _client.removeChatRoom(data[0]);
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -171,6 +182,7 @@ class UIReceiver implements Runnable {
                     case "rockTheVote" -> _client.rockTheVote();
                     case "gameInput" -> _client.sendDataToGameRoom(data[0]);
                     case "gameOver" -> _client.tellServerGameOver(data[0]);
+                    case "leaving" -> _client.tellServerImLeaving();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

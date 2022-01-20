@@ -77,7 +77,10 @@ public class ServerMain {
     }
 
     public void removeClient(String name) {
+        removeClientFromChatRoom(name, "Global");
 
+        _clients.remove(name);
+        _ui.RemoveClient(name);
     }
 
     public void addClientToGame(String name) {
@@ -133,7 +136,7 @@ public class ServerMain {
     public void removeClientFromChatRoom(String name, String id) {
         try {
             System.out.println("Server Removing: " + name + " from: " + id);
-            _chatSpace.put("ServeToChat", "removeClient", name + "," + id);
+            _chatSpace.put("ServerToChat", "removeClient", name + "," + id);
             _clientSpace.put("ServerToClient", name, "removeChatRoom", id);
             _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientRemoved")); //Used to have small c, Used to have an extra field for a string.
@@ -199,15 +202,12 @@ class ClientReceiver implements Runnable {
                 System.out.println("Someone wrote to serverSpace!, my space is: " + _fromClientSpace.toString());
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
-                    case "removeClient" -> {
-                        //System.out.println("Removing client!");
-                        //_server.removeClient(data[0]);
-                    }
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
                     case "gameOver" -> _server.gameOver(data[0]);
-
+                    case "clientLeaving" -> _server.removeClient(data[0]);
                 }
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
