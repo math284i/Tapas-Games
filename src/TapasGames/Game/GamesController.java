@@ -77,6 +77,7 @@ public class GamesController {
         if (!_currentlyPlaying.equals("voting")) {
             for (var player : playersWon.split(":")) {
                 if (player.equals("")) break;
+                if (player.equals("Invalid")) break;
                 scoreBoard[Integer.parseInt(player) - 1] += 1;
             }
             votingTime();

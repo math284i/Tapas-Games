@@ -15,6 +15,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.stage.Screen;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -33,8 +34,10 @@ public class CurveFewer {
     private double playerWidth = 25;
     private double playerHeight = 25;
 
-    int playersAlive;
+    int _playerAmount;
     public boolean GameOver;
+    public String playerWon = "Invalid";
+    private ArrayList<String> _playersAlive;
 
     private HashMap<String, String> spawnPos;  //Player 1 = x,y ...
     private HashMap<String, Path> playersPath;
@@ -44,11 +47,12 @@ public class CurveFewer {
     public boolean goLeft, goRight;
 
     public CurveFewer(int playerAmount) {
-        playersAlive = playerAmount;
+        _playerAmount = playerAmount;
         spawnPos = new HashMap<>();
         playersPath = new HashMap<>();
         players = new HashMap<>();
         playerAngels = new HashMap<>();
+        _playersAlive = new ArrayList<>();
         SpawnSetup();
         PathSetup();
         PlayerSetup();
@@ -121,7 +125,7 @@ public class CurveFewer {
     public Scene start() throws Exception {
         //playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
         Group dungeon = new Group();
-        for (int i = 0; i < playersAlive; i++) {
+        for (int i = 0; i < _playerAmount; i++) {
             Node player = players.get(("" + (i+1)));
             Path path = playersPath.get(("" + (i+1)));
             String[] data = spawnPos.get(("" + (i+1))).split(",");
@@ -129,7 +133,8 @@ public class CurveFewer {
             double spawnY = Double.parseDouble(data[1]);
             dungeon.getChildren().add(player);
             dungeon.getChildren().add(path);
-            movePlayerTo(player, spawnX, spawnY, 0, path);
+            _playersAlive.add(("" + (i+1)));
+            movePlayerTo(player, spawnX, spawnY, 0, path, ("" + (i+1)));
         }
 
         Scene scene = new Scene(dungeon, W, H, Color.WHITE);
@@ -159,25 +164,27 @@ public class CurveFewer {
     }
 
     public void UpdatePlayer(String playerNumber, boolean goLeft,  boolean goRight) {
-        Node player = players.get(playerNumber);
-        double angle = playerAngels.get(playerNumber);
-        Path path = playersPath.get(playerNumber);
+        if (_playersAlive.contains(playerNumber)) {
+            Node player = players.get(playerNumber);
+            double angle = playerAngels.get(playerNumber);
+            Path path = playersPath.get(playerNumber);
 
-        double dx = 0, dy = 0;
+            double dx = 0, dy = 0;
 
-        if (goRight) angle += 0.025;
-        if (goLeft) angle -= 0.025;
-        dy = Math.sin(angle);
-        dx = Math.cos(angle);
-        {dx *= 2; dy *= 2;}
+            if (goRight) angle += 0.025;
+            if (goLeft) angle -= 0.025;
+            dy = Math.sin(angle);
+            dx = Math.cos(angle);
+            {dx *= 2; dy *= 2;}
 
-        playerAngels.put(playerNumber, angle);
+            playerAngels.put(playerNumber, angle);
 
-        player.setRotate(angle * (180/Math.PI));
-        movePlayerBy(player, dx, dy, angle, path);
+            player.setRotate(angle * (180/Math.PI));
+            movePlayerBy(player, dx, dy, angle, path, playerNumber);
+        }
     }
 
-    private void movePlayerBy(Node player, double dx, double dy, double angle, Path path) {
+    private void movePlayerBy(Node player, double dx, double dy, double angle, Path path, String playerNumber) {
         if (dx == 0 && dy == 0) return;
 
         final double cx = player.getBoundsInLocal().getWidth() / 2;
@@ -186,10 +193,10 @@ public class CurveFewer {
         double x = cx + player.getLayoutX() + dx;
         double y = cy + player.getLayoutY() + dy;
 
-        movePlayerTo(player, x, y, angle, path);
+        movePlayerTo(player, x, y, angle, path, playerNumber);
     }
 
-    private void movePlayerTo(Node player, double x, double y, double angle, Path path) {
+    private void movePlayerTo(Node player, double x, double y, double angle, Path path, String playerNumber) {
         final double cx = player.getBoundsInLocal().getWidth() / 2; //Gives the middle of the player,
         final double cy = player.getBoundsInLocal().getHeight() / 2;
         double a = (player.getBoundsInLocal().getWidth() / 2) + (player.getLayoutX() + Math.cos(angle)*8) + Math.cos(angle);
@@ -197,8 +204,14 @@ public class CurveFewer {
 
         for (var entry: playersPath.entrySet()) {
             if (entry.getValue().contains(a - cx + playerWidth/2, b - cy + playerHeight/2)) {
-                //Player dead!
-                path.getElements().clear();
+                _playersAlive.remove(playerNumber);
+                if (_playersAlive.size() == 0) {
+                    GameOver = true;
+                    //Noone won - you played alone or it ended in a tie
+                } else if (_playersAlive.size() == 1) {
+                    GameOver = true;
+                    playerWon = _playersAlive.get(0);
+                }
         }
 
         }

@@ -640,7 +640,11 @@ public class UIController extends Application {
         }
 
         if (curvefeverGame.GameOver) {
-
+            try {
+                _clientSpace.put("UIToClient", "gameOver", curvefeverGame.playerWon);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
             sendCurveFeverData();
         }
