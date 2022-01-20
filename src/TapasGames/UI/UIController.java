@@ -5,7 +5,7 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.Board;
 import TapasGames.Game.MiniGames.CurveFewer;
-import TapasGames.Game.MiniGames.MineSweeper;
+import TapasGames.Game.MiniGames.MovementTest;
 import TapasGames.UiFiles.LobbyUI;
 import TapasGames.UiFiles.VotingUI;
 import javafx.application.Application;
@@ -24,10 +24,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.text.Font;
 import javafx.stage.*;
 
@@ -73,7 +70,7 @@ public class UIController extends Application {
     private SequentialSpace _clientSpace;
 
     public LobbyUI lobbyGame;
-    public MineSweeper minesweeperGame;
+    public MovementTest.MineSweeper minesweeperGame;
     public Scene minesweeperScene;
     public CurveFewer curvefeverGame;
 
@@ -548,7 +545,7 @@ public class UIController extends Application {
                     }
                     case "minesweeper" -> {
                         Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
-                        minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
+                        minesweeperGame = new MovementTest.MineSweeper(Integer.parseInt(playerAmount));
                         minesweeperScene = minesweeperGame.start(board);
                         gameStage.setScene(minesweeperScene);
                         controls.setImage(minesweeperI);
