@@ -99,7 +99,7 @@ public class ClientMain {
 
     public void votingTime(String score) throws InterruptedException {
         System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
-            _uiSpace.put("ClientToUI", "votingTime", "");
+            _uiSpace.put("ClientToUI", "votingTime", score);
     }
 
     public void newGame(String newGame, String playerAmount) throws InterruptedException {

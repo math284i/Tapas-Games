@@ -43,9 +43,6 @@ public class UIController extends Application {
     public String _playerName;
     public String _playerNumber = "0";
 
-    int score1 = 0;
-    int score2 = 0;
-
     TabPane chatTabs;
     ScrollPane chatPaneG;
     ScrollPane chatPaneT1;
@@ -60,6 +57,11 @@ public class UIController extends Application {
     Label team2L;
     Label team3L;
     Label team4L;
+
+    Label team1S;
+    Label team2S;
+    Label team3S;
+    Label team4S;
 
     ImageView controls = new ImageView();
     Image minesweeperI;
@@ -150,16 +152,16 @@ public class UIController extends Application {
         Separator separatorV3 = new Separator(Orientation.VERTICAL);
         VBox team1 = new VBox();
         team1L = new Label("Player 1");
-        Label team1S = new Label("" + score1);
+        team1S = new Label("0");
         VBox team2 = new VBox();
         team2L = new Label("Player 2");
-        Label team2S = new Label("" + score2);
+        team2S = new Label("0");
         VBox team3 = new VBox();
         team3L = new Label("Player 3");
-        Label team3S = new Label("0");
+        team3S = new Label("0");
         VBox team4 = new VBox();
         team4L = new Label("Player 4");
-        Label team4S = new Label("0");
+        team4S = new Label("0");
         HBox teams = new HBox();
         Label points = new Label("Points");
         VBox score = new VBox();
@@ -457,7 +459,19 @@ public class UIController extends Application {
     }
 
     public void voteBox(String newScoreBoard) {
-        //TODO change scoreboard to the given
+        String[] scores = newScoreBoard.split(":");
+
+        Platform.runLater(() -> {
+            for (int i = 0; i < scores.length; i++) {
+                switch ("" + (i+1)) {
+                    case "1" -> {team1S.setText(scores[i]);}
+                    case "2" -> {team2S.setText(scores[i]);}
+                    case "3" -> { team3S.setText(scores[i]);}
+                    case "4" -> { team4S.setText(scores[i]);}
+                }
+            }
+        });
+
         votingWindow = new VotingUI();
         Platform.runLater(() -> {
             try {
