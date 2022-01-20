@@ -503,32 +503,18 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
-        Font bold = Font.font("Regular", FontWeight.BOLD,12);
-        Font font = Font.font("Regular", FontWeight.NORMAL,12);
         switch(_playerNumber){
             case "1" -> {
-                team1L.setFont(bold);
-                team2L.setFont(font);
-                team3L.setFont(font);
-                team4L.setFont(font);
+                team1L.setStyle("-fx-text-fill: red");
             }
             case "2" -> {
-                team1L.setFont(font);
-                team2L.setFont(bold);
-                team3L.setFont(font);
-                team4L.setFont(font);
+                team2L.setStyle("-fx-text-fill: blue");
             }
             case "3" -> {
-                team1L.setFont(font);
-                team2L.setFont(font);
-                team3L.setFont(bold);
-                team4L.setFont(font);
+                team3L.setStyle("-fx-text-fill: green");
             }
             case "4" -> {
-                team1L.setFont(font);
-                team2L.setFont(font);
-                team3L.setFont(font);
-                team4L.setFont(bold);
+                team4L.setStyle("-fx-text-fill: yellow");
             }
         }
         _gameScene = gameScene;
