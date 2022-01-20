@@ -92,9 +92,9 @@ public class UIController extends Application {
     public void start(Stage stage) throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
-        GameScene();
         MenuScene();
         ChatScene();
+        GameScene();
         gameStage.toFront();
     }
 
@@ -102,9 +102,9 @@ public class UIController extends Application {
         configureScreenSize = Screen.getPrimary().getBounds();
         _clientSpace = clientSpace;
 
-        GameScene();
         MenuScene();
         ChatScene();
+        GameScene();
         gameStage.toFront();
     }
 

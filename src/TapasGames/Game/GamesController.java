@@ -85,6 +85,7 @@ public class GamesController {
 
     public void gameOver(String playersWon){
         for (var player : playersWon.split(":")){
+            if (player.equals("")) break;
             scoreBoard[Integer.parseInt(player)] += 1;
         }
         votingTime();
