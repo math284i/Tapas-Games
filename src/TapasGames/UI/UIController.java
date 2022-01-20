@@ -123,7 +123,7 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        updateGameScene(_gameScene, "0", "1");
+        updateGameScene(_gameScene, "0", "0");
 
         gameStage.show();
     }
@@ -258,7 +258,6 @@ public class UIController extends Application {
         exit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                curvefeverGame.stop();
                 gameStage.close();
                 Stage stage = new Stage();
                 try {
@@ -464,14 +463,14 @@ public class UIController extends Application {
 
     public void voteBox(String newScoreBoard) {
         String[] scores = newScoreBoard.split(":");
-        //0:2
+        //0:0:0:0
         Platform.runLater(() -> {
             for (int i = 0; i < scores.length; i++) {
-                switch ("" + (i+1)) {
-                    case "1" -> {team1S.setText(scores[i]);}
-                    case "2" -> {team2S.setText(scores[i]);}
-                    case "3" -> { team3S.setText(scores[i]);}
-                    case "4" -> { team4S.setText(scores[i]);}
+                switch ("" + (i)) {
+                    case "0" -> {team1S.setText(scores[i]);}
+                    case "1" -> {team2S.setText(scores[i]);}
+                    case "2" -> { team3S.setText(scores[i]);}
+                    case "3" -> { team4S.setText(scores[i]);}
                 }
             }
         });
@@ -488,6 +487,8 @@ public class UIController extends Application {
     }
 
     private void setUpVoting() {
+        votingWindow.btnOk.setDisable(false);
+        votingWindow.btnOk.setVisible(true);
         votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -496,6 +497,8 @@ public class UIController extends Application {
                 try {
 
                     _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+                    votingWindow.btnOk.setDisable(true);
+                    votingWindow.btnOk.setVisible(false);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -546,9 +549,10 @@ public class UIController extends Application {
                         setUpReadyButton();
                     }
                     case "curvefever" -> {
-                        curvefeverGame = new CurveFewer();
+                        curvefeverGame = new CurveFewer(Integer.parseInt(playerAmount));
                         gameStage.setScene(curvefeverGame.start());
                         controls.setImage(curvefeverI);
+                        sendCurveFeverData();
                     }
                     case "minesweeper" -> {
                         Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
@@ -623,7 +627,30 @@ public class UIController extends Application {
     }
 
     public void updateCurvefever(String data) {
+        for (var entry : data.split(":")) {
+            //playerNumber;goLeft,goRight
+            String[] inputs = entry.split(";");
+            boolean goLeft = Boolean.parseBoolean(inputs[1]);
+            boolean goRight = Boolean.parseBoolean(inputs[2]);
+            //System.out.println("Player: " + inputs[0]);
+            curvefeverGame.UpdatePlayer(inputs[0], goLeft, goRight);
+        }
 
+        if (curvefeverGame.GameOver) {
+
+        } else {
+            sendCurveFeverData();
+        }
+
+    }
+
+    public void sendCurveFeverData() {
+        String dataOut = _playerNumber + ";" + curvefeverGame.goLeft + ";" + curvefeverGame.goRight;
+        try {
+            _clientSpace.put("UIToClient", "gameInput", dataOut);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateLobby(String name, String number, String readyStatus) {

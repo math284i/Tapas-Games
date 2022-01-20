@@ -24,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 
 
+
 class Field {
     private boolean mine;
     private boolean pressed;

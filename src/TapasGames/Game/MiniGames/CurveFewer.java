@@ -22,51 +22,117 @@ public class CurveFewer {
     private static final Rectangle2D configureScreenSize = Screen.getPrimary().getBounds();
     private static final double size = 0.7;
     private static final Logger _logger = Logger.getLogger(CurveFewer.class.getName());
-    private static final double W = configureScreenSize.getWidth() * size * 0.75
-            , H = configureScreenSize.getHeight() * size * 0.75;
+    private static final double W = 1008
+            , H = 567;
 
-    private static final String PLAYER_IMAGE_LOC = "TapasGames/Ressources/Player1cf.png";
-    //private static final String PLAYER_IMAGE_LOC = "/Users/dyberg/Desktop/DTU/02148/Tapas-Games/src/TapasGames/Ressources/Player1cf.png";
-    private Image playerImage;
-    private Node player;
-    private double angle = 0;
+    private static final String PLAYER1_IMAGE_LOC = "TapasGames/Ressources/Player1cf.png";
+    private static final String PLAYER2_IMAGE_LOC = "TapasGames/Ressources/Player2cf.png";
+    private static final String PLAYER3_IMAGE_LOC = "TapasGames/Ressources/Player3cf.png";
+    private static final String PLAYER4_IMAGE_LOC = "TapasGames/Ressources/Player4cf.png";
+
     private double playerWidth = 25;
     private double playerHeight = 25;
 
-    private Path path = new Path();
-    private Color pathColor = Color.BLACK;
-    private double pathSize = 2;
+    int playersAlive;
+    public boolean GameOver;
 
-    boolean goLeft, goRight;
+    private HashMap<String, String> spawnPos;  //Player 1 = x,y ...
+    private HashMap<String, Path> playersPath;
+    private HashMap<String, Node> players;
+    private HashMap<String, Double> playerAngels;
 
-    private AnimationTimer timer;
-    //private Stage stage;
+    public boolean goLeft, goRight;
 
-    //private HashMap<String, (Integer, Integer)> spawnPos;  //Player 1 = x,y ...
+    public CurveFewer(int playerAmount) {
+        playersAlive = playerAmount;
+        spawnPos = new HashMap<>();
+        playersPath = new HashMap<>();
+        players = new HashMap<>();
+        playerAngels = new HashMap<>();
+        SpawnSetup();
+        PathSetup();
+        PlayerSetup();
+    }
 
-    public void stop() {
-        timer.stop();
-        //stage.close();
+    public void SpawnSetup() {
+        spawnPos.put("1", "" + W/4 + "," + H/4);
+        spawnPos.put("2", "" + W*3/4 + "," + H*3/4);
+        spawnPos.put("3", "" + W/4 + "," + H*3/4);
+        spawnPos.put("4", "" + W*3/4 + "," + H/4);
+
+        playerAngels.put("1", 0.0);
+        playerAngels.put("2", 0.0);
+        playerAngels.put("3", 0.0);
+        playerAngels.put("4", 0.0);
+    }
+
+    public void PathSetup() {
+        Path path1 = new Path();
+        path1.setStroke(Color.RED);
+        path1.setStrokeWidth(2);
+        Path path2 = new Path();
+        path2.setStroke(Color.BLUE);
+        path2.setStrokeWidth(2);
+        Path path3 = new Path();
+        path3.setStroke(Color.GREEN);
+        path3.setStrokeWidth(2);
+        Path path4 = new Path();
+        path4.setStroke(Color.YELLOW);
+        path4.setStrokeWidth(2);
+
+        playersPath.put("1", path1);
+        playersPath.put("2", path2);
+        playersPath.put("3", path3);
+        playersPath.put("4", path4);
+    }
+
+    public void PlayerSetup() {
+        Image player1Image = new Image(PLAYER1_IMAGE_LOC);
+        ImageView player1View = new ImageView(player1Image);
+        player1View.setPreserveRatio(true);
+        player1View.setFitHeight(playerHeight);
+        player1View.setFitWidth(playerWidth);
+        Node player1 = player1View;
+        Image player2Image = new Image(PLAYER2_IMAGE_LOC);
+        ImageView player2View = new ImageView(player2Image);
+        player2View.setPreserveRatio(true);
+        player2View.setFitHeight(playerHeight);
+        player2View.setFitWidth(playerWidth);
+        Node player2 = player2View;
+        Image player3Image = new Image(PLAYER3_IMAGE_LOC);
+        ImageView player3View = new ImageView(player3Image);
+        player3View.setPreserveRatio(true);
+        player3View.setFitHeight(playerHeight);
+        player3View.setFitWidth(playerWidth);
+        Node player3 = player3View;
+        Image player4Image = new Image(PLAYER4_IMAGE_LOC);
+        ImageView player4View = new ImageView(player4Image);
+        player4View.setPreserveRatio(true);
+        player4View.setFitHeight(playerHeight);
+        player4View.setFitWidth(playerWidth);
+        Node player4 = player4View;
+
+        players.put("1", player1);
+        players.put("2", player2);
+        players.put("3", player3);
+        players.put("4", player4);
     }
 
     public Scene start() throws Exception {
         //playerImage = new Image(new FileInputStream(PLAYER_IMAGE_LOC));
-        playerImage = new Image(PLAYER_IMAGE_LOC);
-        ImageView playerView = new ImageView(playerImage);
-        playerView.setPreserveRatio(true);
-        playerView.setFitHeight(playerHeight);
-        playerView.setFitWidth(playerWidth);
-        player = playerView;
-        Group dungeon = new Group(player);
-
-        movePlayerTo(W / 2, H / 2); //Move hero to center
+        Group dungeon = new Group();
+        for (int i = 0; i < playersAlive; i++) {
+            Node player = players.get(("" + (i+1)));
+            Path path = playersPath.get(("" + (i+1)));
+            String[] data = spawnPos.get(("" + (i+1))).split(",");
+            double spawnX = Double.parseDouble(data[0]);
+            double spawnY = Double.parseDouble(data[1]);
+            dungeon.getChildren().add(player);
+            dungeon.getChildren().add(path);
+            movePlayerTo(player, spawnX, spawnY, 0, path);
+        }
 
         Scene scene = new Scene(dungeon, W, H, Color.WHITE);
-
-        path.setStrokeWidth(pathSize);
-        path.setStroke(pathColor);
-
-        dungeon.getChildren().add(path);
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -89,25 +155,29 @@ public class CurveFewer {
             }
         });
 
-        AnimationTimer timer = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                double dx = 0, dy = 0;
-
-                if (goRight) angle += 0.025;
-                if (goLeft) angle -= 0.025;
-                dy = Math.sin(angle);
-                dx = Math.cos(angle);
-                player.setRotate(angle * (180/Math.PI));
-                movePlayerBy(dx, dy);
-            }
-        };
-        timer.start();
-        this.timer = timer;
         return scene;
     }
 
-    private void movePlayerBy(double dx, double dy) {
+    public void UpdatePlayer(String playerNumber, boolean goLeft,  boolean goRight) {
+        Node player = players.get(playerNumber);
+        double angle = playerAngels.get(playerNumber);
+        Path path = playersPath.get(playerNumber);
+
+        double dx = 0, dy = 0;
+
+        if (goRight) angle += 0.025;
+        if (goLeft) angle -= 0.025;
+        dy = Math.sin(angle);
+        dx = Math.cos(angle);
+        {dx *= 2; dy *= 2;}
+
+        playerAngels.put(playerNumber, angle);
+
+        player.setRotate(angle * (180/Math.PI));
+        movePlayerBy(player, dx, dy, angle, path);
+    }
+
+    private void movePlayerBy(Node player, double dx, double dy, double angle, Path path) {
         if (dx == 0 && dy == 0) return;
 
         final double cx = player.getBoundsInLocal().getWidth() / 2;
@@ -116,17 +186,20 @@ public class CurveFewer {
         double x = cx + player.getLayoutX() + dx;
         double y = cy + player.getLayoutY() + dy;
 
-        movePlayerTo(x, y);
+        movePlayerTo(player, x, y, angle, path);
     }
 
-    private void movePlayerTo(double x, double y) {
+    private void movePlayerTo(Node player, double x, double y, double angle, Path path) {
         final double cx = player.getBoundsInLocal().getWidth() / 2; //Gives the middle of the player,
         final double cy = player.getBoundsInLocal().getHeight() / 2;
         double a = (player.getBoundsInLocal().getWidth() / 2) + (player.getLayoutX() + Math.cos(angle)*8) + Math.cos(angle);
         double b = (player.getBoundsInLocal().getWidth() / 2) + (player.getLayoutY() + Math.sin(angle)*8) + Math.sin(angle);
 
-        if (path.contains(a - cx + playerWidth/2, b - cy + playerHeight/2)) {
-            path.getElements().clear();
+        for (var entry: playersPath.entrySet()) {
+            if (entry.getValue().contains(a - cx + playerWidth/2, b - cy + playerHeight/2)) {
+                //Player dead!
+                path.getElements().clear();
+        }
 
         }
         if (x - cx < 0) player.relocate(W - playerWidth, y - cy);
@@ -136,7 +209,6 @@ public class CurveFewer {
 
         else {
             player.relocate(x - cx, y - cy);
-            path.setStroke(pathColor);
             path.getElements()
                     .add(new MoveTo(x - cx + playerWidth/2, y - cy + playerHeight/2));
             path.getElements().add(new LineTo(x - cx + playerWidth/2, y - cy + playerHeight/2));

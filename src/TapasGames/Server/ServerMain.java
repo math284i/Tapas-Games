@@ -26,6 +26,7 @@ public class ServerMain {
     private SpaceRepository _repository;
     private ChatController _chatController;
     private GamesController _gamesController;
+    private boolean _inGame = false;
 
     public ServerMain(ServerUI ui, String ip, String port) throws Exception {
         _ui = ui;
@@ -169,12 +170,8 @@ public class ServerMain {
         }
     }
 
-    public void gameOver(String playersWon) {
-        try {
-            _gameSpace.put("ServerToGame", "gameOver", playersWon);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void gameOver(String playersWon) throws InterruptedException {
+        _gameSpace.put("ServerToGame", "gameOver", playersWon);
     }
 
     public void updateChat(String id, String name, String message) {

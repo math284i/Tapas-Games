@@ -74,15 +74,18 @@ public class GamesController {
     }
 
     public void gameOver(String playersWon) throws InterruptedException {
-        for (var player : playersWon.split(":")){
-            if (player.equals("")) break;
-            scoreBoard[Integer.parseInt(player)] += 1;
+        if (!_currentlyPlaying.equals("voting")) {
+            for (var player : playersWon.split(":")) {
+                if (player.equals("")) break;
+                scoreBoard[Integer.parseInt(player) - 1] += 1;
+            }
+            votingTime();
         }
-        votingTime();
     }
 
     public void votingTime() throws InterruptedException {
         System.out.println("GameRoom telling everyone its votingtime!");
+        _currentlyPlaying = "voting";
         for (var entry : _playerDic.entrySet()) {
                 System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
                 StringBuilder scores = new StringBuilder();
@@ -188,7 +191,7 @@ class GameRoom implements Runnable {
                 }
                 try {
                     _gamescontroller.sendUpdateToAll(data.toString());
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
