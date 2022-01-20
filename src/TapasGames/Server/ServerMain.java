@@ -53,6 +53,7 @@ public class ServerMain {
         new Thread(new ClientReceiver(this, _clientSpace)).start();
         new Thread(new StartUpReceiver(this, _startUpSpace)).start();
         new Thread(new GameReceiver(this, _gameSpace)).start();
+        new Thread(new ChatReceiver(this, _chatSpace)).start();
     }
 
     public void addClient(String name) {
@@ -109,6 +110,7 @@ public class ServerMain {
             System.out.println("ServerMain asked chat controller to create chat room: " + id);
             _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomAdded"));
             System.out.println("Server received chatRoomAdded!");
+            _ui.AddChat(id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,6 +170,11 @@ public class ServerMain {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void updateChat(String id, String name, String message) {
+        System.out.println("Server udating its own chat!");
+        _ui.UpdateChat(id, name, message);
     }
 
 }
@@ -233,6 +240,35 @@ class StartUpReceiver implements Runnable {
     }
 }
 
+class ChatReceiver implements Runnable {
+    ServerMain _server;
+    SequentialSpace _fromChatSpace;
+
+    public ChatReceiver(ServerMain server, SequentialSpace fromChatSpace) {
+        _server = server;
+        _fromChatSpace = fromChatSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _fromChatSpace.get(new ActualField("ChatToServer1")
+                        , new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[2].toString().split(",");
+                System.out.println("Server recieved something form chat");
+                switch (tuple[1].toString()) {
+                    case "sendMessage" -> _server.updateChat(data[0], data[1], data[2]);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
+
+//TODO CANT WE JUST REMOVE BELOW?
 class GameReceiver implements Runnable{
     ServerMain _server;
     SequentialSpace _fromGameSpace;

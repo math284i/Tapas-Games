@@ -15,6 +15,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.stage.Screen;
 import java.io.FileInputStream;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class CurveFewer {
@@ -40,6 +41,8 @@ public class CurveFewer {
 
     private AnimationTimer timer;
     //private Stage stage;
+
+    //private HashMap<String, (Integer, Integer)> spawnPos;  //Player 1 = x,y ...
 
     public void stop() {
         timer.stop();

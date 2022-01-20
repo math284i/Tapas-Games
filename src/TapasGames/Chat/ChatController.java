@@ -23,7 +23,7 @@ public class ChatController {
         System.out.println("ChatController creating new chatRoom id: " + id);
         SequentialSpace toChatRoomSpace = new SequentialSpace();
         _repository.add("toChatRoom:" + id, toChatRoomSpace);
-        _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace)));
+        _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace, _serverSpace)));
         _rooms.get(id).start();
         try {
             _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + "Created"));
@@ -90,13 +90,15 @@ class ChatRoom implements Runnable {
     private SpaceRepository _repository;
     private SequentialSpace _toChatRoomSpace;
     private SequentialSpace _controllerSpace;
+    private SequentialSpace _serverSpace;
     private String _id;
 
-    ChatRoom(String id, SpaceRepository repository, SequentialSpace toChatRoomSpace, SequentialSpace controllerSpace) {
+    ChatRoom(String id, SpaceRepository repository, SequentialSpace toChatRoomSpace, SequentialSpace controllerSpace, SequentialSpace serverSpace) {
         _id = id;
         _repository = repository;
         _toChatRoomSpace = toChatRoomSpace;
         _controllerSpace = controllerSpace;
+        _serverSpace = serverSpace;
         _clients = new ArrayList<>();
         try {
             _controllerSpace.put("ChatRoomBackToController", _id + "Created");
@@ -135,6 +137,12 @@ class ChatRoom implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            System.out.println("ChatRoom sending to server!");
+            _serverSpace.put("ChatToServer1", "sendMessage", _id + "," + name + "," + message);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
