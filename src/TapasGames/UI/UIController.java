@@ -604,13 +604,15 @@ public class UIController extends Application {
             //playerNumber;m1;x;y
             String[] inputs = entry.split(";");
             //System.out.println("Player: " + inputs[0]);
-            success = minesweeperGame.mouseAction(inputs[0]
-                    , Integer.parseInt(inputs[1]) == 1
-                    , Double.valueOf(inputs[2]).intValue()
-                    , Double.valueOf(inputs[3]).intValue());
-            if (success) {
-                //System.out.println("New player in minesweeper!");
-                break;
+            if(inputs[0].equals("minesweeper")){
+                success = minesweeperGame.mouseAction(inputs[1]
+                        , Integer.parseInt(inputs[2]) == 1
+                        , Double.valueOf(inputs[3]).intValue()
+                        , Double.valueOf(inputs[4]).intValue());
+                if (success) {
+                    //System.out.println("New player in minesweeper!");
+                    break;
+                }
             }
         }
 
@@ -626,7 +628,7 @@ public class UIController extends Application {
     }
 
     public void sendMinesweeperData() {
-        String dataOut = _playerNumber + ";" + minesweeperGame.mouseClicked + ";" + minesweeperGame.mouseX + ";" + minesweeperGame.mouseY;
+        String dataOut = "minesweeper;" + _playerNumber + ";" + minesweeperGame.mouseClicked + ";" + minesweeperGame.mouseX + ";" + minesweeperGame.mouseY;
         try {
             _clientSpace.put("UIToClient", "gameInput", dataOut);
         } catch (InterruptedException e) {
@@ -642,10 +644,12 @@ public class UIController extends Application {
         for (var entry : data.split(":")) {
             //playerNumber;goLeft,goRight
             String[] inputs = entry.split(";");
-            boolean goLeft = Boolean.parseBoolean(inputs[1]);
-            boolean goRight = Boolean.parseBoolean(inputs[2]);
-            //System.out.println("Player: " + inputs[0]);
-            curvefeverGame.UpdatePlayer(inputs[0], goLeft, goRight);
+            if(inputs[0].equals("curvefever")){
+                boolean goLeft = Boolean.parseBoolean(inputs[2]);
+                boolean goRight = Boolean.parseBoolean(inputs[3]);
+                //System.out.println("Player: " + inputs[0]);
+                curvefeverGame.UpdatePlayer(inputs[1], goLeft, goRight);
+            }
         }
 
         if (curvefeverGame.GameOver) {
@@ -661,7 +665,7 @@ public class UIController extends Application {
     }
 
     public void sendCurveFeverData() {
-        String dataOut = _playerNumber + ";" + curvefeverGame.goLeft + ";" + curvefeverGame.goRight;
+        String dataOut = "curvefever;" + _playerNumber + ";" + curvefeverGame.goLeft + ";" + curvefeverGame.goRight;
         try {
             _clientSpace.put("UIToClient", "gameInput", dataOut);
         } catch (InterruptedException e) {
