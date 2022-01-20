@@ -139,20 +139,36 @@ public class ServerUI extends Application {
 
     }
 
-    public void AddChat(String id) {
+    public void addChat(String id) {
         Platform.runLater(() -> {
             switch (id) {
-                case "Team 1" -> {
+                case "Team1" -> {
                     if (!_chatTabs.getTabs().contains(_team1Chat)) _chatTabs.getTabs().add(_team1Chat);
                 }
-                case "Team 2" -> {
+                case "Team2" -> {
                     if (!_chatTabs.getTabs().contains(_team2Chat)) _chatTabs.getTabs().add(_team2Chat);
                 }
                 case "Global" -> {
                     if (!_chatTabs.getTabs().contains(_globalChat)) _chatTabs.getTabs().add(_globalChat);
                 }
             }
+        });
 
+    }
+
+    public void removeChat(String id) {
+        Platform.runLater(() -> {
+            switch (id) {
+                case "Team1" -> {
+                    if (_chatTabs.getTabs().contains(_team1Chat)) _chatTabs.getTabs().remove(_team1Chat);
+                }
+                case "Team2" -> {
+                    if (_chatTabs.getTabs().contains(_team2Chat)) _chatTabs.getTabs().remove(_team2Chat);
+                }
+                case "Global" -> {
+                    if (_chatTabs.getTabs().contains(_globalChat)) _chatTabs.getTabs().remove(_globalChat);
+                }
+            }
         });
     }
 

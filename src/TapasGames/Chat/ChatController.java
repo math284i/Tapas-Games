@@ -26,8 +26,17 @@ public class ChatController {
         _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace, _serverSpace)));
         _rooms.get(id).start();
         _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + "Created"));
-        _serverSpace.put("ChatBackToServer", "ChatRoomAdded"); //THis is correct
+        _serverSpace.put("ChatBackToServer", "ChatRoomAdded");
         System.out.println("ChatController have created ChatRoom");
+    }
+
+    public void removeChatRoom(String id) throws InterruptedException {
+        System.out.println("ChatController removing chatRoom id: " + id);
+        _rooms.get(id).stop();
+        _rooms.remove(id);
+        _repository.remove("toChatRoom:" + id);
+        _serverSpace.put("ChatBackToServer", "ChatRoomRemoved");
+        System.out.println("ChatController have removed ChatRoom");
     }
 
     public void addClient(String name, String id) throws InterruptedException {
@@ -59,10 +68,11 @@ class ServerReceiver implements Runnable {
             try {
                 Object[] tuple = _serverSpace.get(
                         new ActualField("ServerToChat"), new FormalField(String.class), new FormalField(String.class));
-                System.out.println("ChatController recieved something from server");
+                System.out.println("ChatController received something from server");
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "addChatRoom" -> _controller.addChatRoom(data[0]);
+                    case "removeChatRoom" -> _controller.removeChatRoom(data[0]);
                     case "addClient" -> _controller.addClient(data[0], data[1]);
                     case "removeClient" -> _controller.removeClient(data[0], data[1]);
                 }
