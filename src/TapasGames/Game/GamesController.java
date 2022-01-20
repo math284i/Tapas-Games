@@ -19,6 +19,7 @@ public class GamesController {
     private String _currentlyPlaying;
     private ArrayList<String> _votingList;
     private ArrayList<String> _peopleThatWantToSkipGame;
+    private ArrayList<String> _haveVoted;
     private Thread _gameRoomThread;
 
     public GamesController(SpaceRepository repository, SequentialSpace serverSpace) {
@@ -27,6 +28,7 @@ public class GamesController {
         _playerDic = new HashMap<>();
         _currentlyPlaying = "lobby";
         _votingList = new ArrayList<>();
+        _haveVoted = new ArrayList<>();
         _peopleThatWantToSkipGame = new ArrayList<>();
         _toGameRoomSpace = new SequentialSpace();
         _toVotingSpace = new SequentialSpace();
@@ -92,7 +94,10 @@ public class GamesController {
     }
 
     public void addVotingResult(String name, String result) throws InterruptedException {
-        _votingList.add(result);
+        if (!_haveVoted.contains(name)) {
+            _haveVoted.add(name);
+            _votingList.add(result);
+        }
         System.out.println("Game received: " + name + " chose: " + result);
 
         if (_votingList.size() == _playerDic.size()) {
@@ -101,6 +106,7 @@ public class GamesController {
             _currentlyPlaying = newGame;
             System.out.println("Most voted game was: " + newGame);
             _votingList.clear();
+            _haveVoted.clear();
             Board board = null;
             if(newGame.equals("Minesweeper")) {
                 board = new Board(16,16,51);

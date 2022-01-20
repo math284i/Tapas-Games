@@ -74,13 +74,12 @@ public class ClientMain {
 
     public void updateChatUI(String name, String id, String message) throws InterruptedException {
         System.out.println("in " + id + ": " + name + " Says: " + message);
-            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
+        _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
     }
 
     public void updateGame(String data) throws InterruptedException { // data:    playerNumber;left;right;up;down;m1;x;y : playerNumber;left;right;up;down;m1;x;y
         //System.out.println(_name + "has gotten the game data and is sending it to UI: " + data);
-        //TODO send data to UI/Client side game
-            _uiSpace.put("ClientToUI", "UpdateGame", data);
+        _uiSpace.put("ClientToUI", "UpdateGame", data);
     }
 
     public void updateLobby(String name, String number, String readyStatus) throws InterruptedException {
@@ -90,12 +89,12 @@ public class ClientMain {
 
     public void updatePlayers(String name, String number) throws InterruptedException {
         System.out.println("Client udating: " + name + " he/she is: " + number);
-            _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number); //TODO PROTOCOL
+            _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number);
     }
 
     public void sendImReady() throws InterruptedException {
         System.out.println(_name + " telling server im ready!");
-            _serverSpace.put("ClientToServer", "clientIsReady", _name); //TODO PROTOCOL
+            _serverSpace.put("ClientToServer", "clientIsReady", _name);
     }
 
     public void votingTime(String score) throws InterruptedException {
