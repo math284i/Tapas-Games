@@ -59,6 +59,10 @@ public class UIController extends Application {
     Tab teamChat1 = new Tab("Team 1");
     Tab teamChat2 = new Tab("Team 2");
     Tab globalChat = new Tab("Global");
+    Label team1L;
+    Label team2L;
+    Label team3L;
+    Label team4L;
 
     ImageView controls = new ImageView();
     Image minesweeperI;
@@ -147,16 +151,16 @@ public class UIController extends Application {
         Separator separatorV2 = new Separator(Orientation.VERTICAL);
         Separator separatorV3 = new Separator(Orientation.VERTICAL);
         VBox team1 = new VBox();
-        Label team1L = new Label("Player 1");
+        team1L = new Label("Player 1");
         Label team1S = new Label("" + score1);
         VBox team2 = new VBox();
-        Label team2L = new Label("Player 2");
+        team2L = new Label("Player 2");
         Label team2S = new Label("" + score2);
         VBox team3 = new VBox();
-        Label team3L = new Label("Player 3");
+        team3L = new Label("Player 3");
         Label team3S = new Label("0");
         VBox team4 = new VBox();
-        Label team4L = new Label("Player 4");
+        team4L = new Label("Player 4");
         Label team4S = new Label("0");
         HBox teams = new HBox();
         Label points = new Label("Points");
@@ -500,6 +504,32 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
+        switch(_playerNumber){
+            case "1" -> {
+                team1L.setStyle("-fx-font-weight: bold");
+                team2L.setStyle("-fx-font-weight: regular");
+                team3L.setStyle("-fx-font-weight: regular");
+                team4L.setStyle("-fx-font-weight: regular");
+            }
+            case "2" -> {
+                team1L.setStyle("-fx-font-weight: regular");
+                team2L.setStyle("-fx-font-weight: bold");
+                team3L.setStyle("-fx-font-weight: regular");
+                team4L.setStyle("-fx-font-weight: regular");
+            }
+            case "3" -> {
+                team1L.setStyle("-fx-font-weight: regular");
+                team2L.setStyle("-fx-font-weight: regular");
+                team3L.setStyle("-fx-font-weight: bold");
+                team4L.setStyle("-fx-font-weight: regular");
+            }
+            case "4" -> {
+                team1L.setStyle("-fx-font-weight: regular");
+                team2L.setStyle("-fx-font-weight: regular");
+                team3L.setStyle("-fx-font-weight: regular");
+                team4L.setStyle("-fx-font-weight: bold");
+            }
+        }
         _gameScene = gameScene;
         Platform.runLater( () -> {
             try {
