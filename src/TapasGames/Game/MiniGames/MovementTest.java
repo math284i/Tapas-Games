@@ -83,6 +83,7 @@ public class MovementTest extends Application {
 
         public boolean GameOver = false;
         public String playersWon;
+        public String winningAmount = "10";
 
         public Scene _scene;
         public int mouseX = -10;

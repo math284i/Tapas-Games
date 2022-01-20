@@ -335,12 +335,12 @@ public class UIController extends Application {
 
         chatPaneT1 = new ScrollPane();
         chatPaneT1.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneT1.setContent(chatBoxG);
+        chatPaneT1.setContent(chatBoxT1);
         teamChat1.setContent(chatPaneT1);
 
         chatPaneT2 = new ScrollPane();
         chatPaneT2.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneT2.setContent(chatBoxG);
+        chatPaneT2.setContent(chatBoxT2);
         teamChat2.setContent(chatPaneT2);
 
         //chatTabs.getTabs().addAll(globalChat,teamChat);
@@ -389,6 +389,7 @@ public class UIController extends Application {
                 System.out.println("message: " + message);
                 try {
                     String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
+                    System.out.println("Selected Tab!: " + selectedTab);
                     _clientSpace.put("UIToClient", "chat", selectedTab + "," + message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -611,7 +612,7 @@ public class UIController extends Application {
 
         if (minesweeperGame.GameOver) {
             try {
-                _clientSpace.put("UIToClient", "gameOver", minesweeperGame.playersWon);
+                _clientSpace.put("UIToClient", "gameOver", minesweeperGame.playersWon + "," + minesweeperGame.winningAmount);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -645,7 +646,7 @@ public class UIController extends Application {
 
         if (curvefeverGame.GameOver) {
             try {
-                _clientSpace.put("UIToClient", "gameOver", curvefeverGame.playerWon);
+                _clientSpace.put("UIToClient", "gameOver", curvefeverGame.playerWon + "," + curvefeverGame.winningAmount);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

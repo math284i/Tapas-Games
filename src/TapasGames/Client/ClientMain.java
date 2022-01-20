@@ -122,8 +122,8 @@ public class ClientMain {
         _voteSpace.put("rockTheVote", _name);
     }
 
-    public void tellServerGameOver(String playersWon) throws InterruptedException {
-        _serverSpace.put("ClientToServer", "gameOver", playersWon);
+    public void tellServerGameOver(String playersWon, String winningAmount) throws InterruptedException {
+        _serverSpace.put("ClientToServer", "gameOver", playersWon + "," + winningAmount);
     }
 
     public void tellServerImLeaving() throws InterruptedException {
@@ -183,7 +183,7 @@ class UIReceiver implements Runnable {
                     case "tellGameMyVote" -> _client.sendVote(data[0], data[1]);
                     case "rockTheVote" -> _client.rockTheVote();
                     case "gameInput" -> _client.sendDataToGameRoom(data[0]);
-                    case "gameOver" -> _client.tellServerGameOver(data[0]);
+                    case "gameOver" -> _client.tellServerGameOver(data[0], data[1]);
                     case "leaving" -> _client.tellServerImLeaving();
                 }
             } catch (Exception e) {

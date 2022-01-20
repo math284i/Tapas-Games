@@ -141,13 +141,13 @@ public class ServerMain {
 
         if (_readyClients.size() == _clients.size()) {
             System.out.println("All players are ready to RUUUUUMBLE!");
-            _gameSpace.put("ServerToGame", "gameOver", "");
+            _gameSpace.put("ServerToGame", "gameOver", "0,0");
             _readyClients.clear();
         }
     }
 
-    public void gameOver(String playersWon) throws InterruptedException {
-        _gameSpace.put("ServerToGame", "gameOver", playersWon);
+    public void gameOver(String playersWon, String winningAmount) throws InterruptedException {
+        _gameSpace.put("ServerToGame", "gameOver", playersWon + "," + winningAmount);
     }
 
     public void updateChat(String id, String name, String message) {
@@ -185,7 +185,7 @@ class ClientReceiver implements Runnable {
                 String[] data = tuple[2].toString().split(",");
                 switch (tuple[1].toString()) {
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
-                    case "gameOver" -> _server.gameOver(data[0]);
+                    case "gameOver" -> _server.gameOver(data[0], data[1]);
                     case "clientLeaving" -> _server.removeClient(data[0]);
                 }
             } catch (InterruptedException e) {

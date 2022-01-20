@@ -73,12 +73,12 @@ public class GamesController {
         }
     }
 
-    public void gameOver(String playersWon) throws InterruptedException {
+    public void gameOver(String playersWon, String winningAmount) throws InterruptedException {
         if (!_currentlyPlaying.equals("voting")) {
             for (var player : playersWon.split(":")) {
-                if (player.equals("")) break;
+                if (player.equals("0")) break;
                 if (player.equals("Invalid")) break;
-                scoreBoard[Integer.parseInt(player) - 1] += 1;
+                scoreBoard[Integer.parseInt(player) - 1] += Integer.parseInt(winningAmount);
             }
             votingTime();
         }
@@ -309,7 +309,7 @@ class ServerReceiver implements Runnable {
                 switch (tuple[1].toString()) {
                     case "addNewPlayer" -> _gamesController.AddNewPlayer(data[0]);
                     case "removePlayer" -> _gamesController.RemovePlayer(data[0]);
-                    case "gameOver" -> _gamesController.gameOver(data[0]);
+                    case "gameOver" -> _gamesController.gameOver(data[0], data[1]);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -82,12 +82,12 @@ public class ServerUI extends Application {
 
         ScrollPane chatPaneT1 = new ScrollPane();
         chatPaneT1.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneT1.setContent(chatBoxG);
+        chatPaneT1.setContent(chatBoxT1);
         _team1Chat.setContent(chatPaneT1);
 
         ScrollPane chatPaneT2 = new ScrollPane();
         chatPaneT2.setPadding(new Insets(10, 10, 10, 10));
-        chatPaneT2.setContent(chatBoxG);
+        chatPaneT2.setContent(chatBoxT2);
         _team2Chat.setContent(chatPaneT2);
         chatBoxT1.heightProperty().addListener(new ChangeListener() {
             @Override
@@ -142,10 +142,10 @@ public class ServerUI extends Application {
     public void AddChat(String id) {
         Platform.runLater(() -> {
             switch (id) {
-                case "Team 1" -> {
+                case "Team1" -> {
                     if (!_chatTabs.getTabs().contains(_team1Chat)) _chatTabs.getTabs().add(_team1Chat);
                 }
-                case "Team 2" -> {
+                case "Team2" -> {
                     if (!_chatTabs.getTabs().contains(_team2Chat)) _chatTabs.getTabs().add(_team2Chat);
                 }
                 case "Global" -> {

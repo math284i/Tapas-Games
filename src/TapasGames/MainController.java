@@ -111,9 +111,8 @@ import java.net.UnknownHostException;
                         } catch (IOException ignored) {
                         }
                     }
-                } catch (IOException | InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    //TODO say that server couldn't be found
                 }
             }
         });

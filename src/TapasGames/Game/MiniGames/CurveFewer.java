@@ -37,6 +37,8 @@ public class CurveFewer {
     int _playerAmount;
     public boolean GameOver;
     public String playerWon = "Invalid";
+    public String winningAmount = "1";
+
     private ArrayList<String> _playersAlive;
 
     private HashMap<String, String> spawnPos;  //Player 1 = x,y ...
