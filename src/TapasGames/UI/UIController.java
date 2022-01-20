@@ -175,7 +175,7 @@ public class UIController extends Application {
         buttons.setHgrow(vts, Priority.ALWAYS);
         buttons.setVgap(5);
         buttons.setHgap(5);
-        buttons.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
+        buttons.setPrefSize(336, 151);
 
         team1.setVgrow(team1L, Priority.NEVER);
         team1.setVgrow(team1S, Priority.ALWAYS);
@@ -231,15 +231,15 @@ public class UIController extends Application {
         points.setMaxWidth(Double.MAX_VALUE);
         points.setAlignment(Pos.TOP_CENTER);
         score.getChildren().addAll(points, separatorH, teams);
-        score.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
+        score.setPrefSize(336, 151);
 
         StackPane con = new StackPane();
         //con.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
-        con.setMinWidth(configureScreenSize.getWidth() * size * 0.25);
-        con.setMinHeight(configureScreenSize.getHeight() * size * 0.2);
+        con.setMinWidth(366);
+        con.setMinHeight(151);
         con.setAlignment(Pos.CENTER);
-        controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
-        controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
+        controls.setFitWidth(336);
+        controls.setFitHeight(151);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
         minesweeperI = new Image("TapasGames/Ressources/MineSweeperControls.png");
         curvefeverI = new Image("TapasGames/Ressources/CurveFeverControls.png");
@@ -280,7 +280,7 @@ public class UIController extends Application {
 
         HBox combi = new HBox();
         combi.getChildren().addAll(buttons, con, separatorV, score);
-        Scene menuScene = new Scene(combi, configureScreenSize.getWidth() * size * 0.75, configureScreenSize.getHeight() * size * 0.25);
+        Scene menuScene = new Scene(combi, 1008, 189);
 
         menuStage.setScene(menuScene);
         menuStage.show();
