@@ -12,6 +12,7 @@ public class GamesController {
     private HashMap<String, String> _playerDic;
     private int[] indexs = new int[4];
     private int[] scoreBoard = new int[4];
+    private ArrayList<String> _teamGames;
     private SpaceRepository _repository;
     private SequentialSpace _serverSpace;
     private SequentialSpace _toVotingSpace;
@@ -26,6 +27,8 @@ public class GamesController {
         _repository = repository;
         _serverSpace = serverSpace;
         _playerDic = new HashMap<>();
+        _teamGames = new ArrayList<>();
+        _teamGames.add("Minesweeper");
         _currentlyPlaying = "lobby";
         _votingList = new ArrayList<>();
         _haveVoted = new ArrayList<>();
@@ -115,53 +118,15 @@ public class GamesController {
     }
 
     private void initializeGame(String game) throws InterruptedException {
-        _currentlyPlaying = game;
-        String name1 = "";
-        String name2 = "";
-        String name3 = "";
-        String name4 = "";
-
-        for (var entry : _playerDic.entrySet()) {
-            switch (entry.getValue()) {
-                case "1" -> name1 = entry.getKey();
-                case "2" -> name2 = entry.getKey();
-                case "3" -> name3 = entry.getKey();
-                case "4" -> name4 = entry.getKey();
-            }
+        if(_teamGames.contains(game)){
+            addTeamChat();
+        } else if(_teamGames.contains(_currentlyPlaying)){
+            removeTeamChat();
         }
+        _currentlyPlaying = game;
+
         switch (game) {
             case "Minesweeper" -> {
-                if (_playerDic.size() == 3) {
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team1");
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Team1Created"));
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name1 + "AddedToTeam1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name3 + "AddedToTeam1"));
-                } else if (_playerDic.size() == 4) {
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team1");
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team2");
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Team1Created"));
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Team2Created"));
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name2 + ",Team2");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name4 + ",Team2");
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name1 + "AddedToTeam1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name2 + "AddedToTeam2"));
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name3 + "AddedToTeam1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame")
-                            , new ActualField("Player" + name4 + "AddedToTeam2"));
-                }
-
                 Board board = new Board(16, 16, 51);
                 for (var entry : _playerDic.entrySet()) {
                     _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame"
@@ -183,6 +148,102 @@ public class GamesController {
                 }
                 _serverSpace.put("GameToServer", "gameChangedToLobby", "");
             }
+        }
+    }
+
+    public void addTeamChat() throws InterruptedException {
+        String name1 = "";
+        String name2 = "";
+        String name3 = "";
+        String name4 = "";
+
+        for (var entry : _playerDic.entrySet()) {
+            switch (entry.getValue()) {
+                case "1" -> name1 = entry.getKey();
+                case "2" -> name2 = entry.getKey();
+                case "3" -> name3 = entry.getKey();
+                case "4" -> name4 = entry.getKey();
+            }
+        }
+
+        if (_playerDic.size() == 3) {
+            _serverSpace.put("GameToServer", "createTeamChat", "Team1");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team1Created"));
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name1 + "AddedToTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name3 + "AddedToTeam1"));
+        } else if (_playerDic.size() == 4) {
+            _serverSpace.put("GameToServer", "createTeamChat", "Team1");
+            _serverSpace.put("GameToServer", "createTeamChat", "Team2");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team1Created"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team2Created"));
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name2 + ",Team2");
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
+            _serverSpace.put("GameToServer", "addPlayerToTeamChat", name4 + ",Team2");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name1 + "AddedToTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name2 + "AddedToTeam2"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name3 + "AddedToTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name4 + "AddedToTeam2"));
+        }
+    }
+
+    public void removeTeamChat() throws InterruptedException {
+        String name1 = "";
+        String name2 = "";
+        String name3 = "";
+        String name4 = "";
+
+        for (var entry : _playerDic.entrySet()) {
+            switch (entry.getValue()) {
+                case "1" -> name1 = entry.getKey();
+                case "2" -> name2 = entry.getKey();
+                case "3" -> name3 = entry.getKey();
+                case "4" -> name4 = entry.getKey();
+            }
+        }
+
+        if (_playerDic.size() == 3) {
+            _serverSpace.put("GameToServer", "removePlayerToTeamChat", name1 + ",Team1");
+            _serverSpace.put("GameToServer", "removePlayerToTeamChat", name3 + ",Team1");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name1 + "RemovedFromTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name3 + "RemovedFromTeam1"));
+
+            _serverSpace.put("GameToServer", "removeTeamChat", "Team1");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team1Removed"));
+        } else if (_playerDic.size() == 4) {
+            _serverSpace.put("GameToServer", "removePlayerFromTeamChat", name1 + ",Team1");
+            _serverSpace.put("GameToServer", "removePlayerFromTeamChat", name2 + ",Team2");
+            _serverSpace.put("GameToServer", "removePlayerFromTeamChat", name3 + ",Team1");
+            _serverSpace.put("GameToServer", "removePlayerFromTeamChat", name4 + ",Team2");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name1 + "RemovedFromTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name2 + "RemovedFromTeam2"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name3 + "RemovedFromTeam1"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Player" + name4 + "RemovedFromTeam2"));
+
+            _serverSpace.put("GameToServer", "removeTeamChat", "Team1");
+            _serverSpace.put("GameToServer", "removeTeamChat", "Team2");
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team1Removed"));
+            _serverSpace.get(new ActualField("ServerBackToGame")
+                    , new ActualField("Team1Removed"));
         }
     }
 

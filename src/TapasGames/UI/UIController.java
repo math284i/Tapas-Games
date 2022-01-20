@@ -411,14 +411,16 @@ public class UIController extends Application {
     public void AddChat(String id) throws InterruptedException {
         System.out.println("UiController adding chat to ui: " + id);
         Platform.runLater(() -> {
-            if (id.equals("Team1") && !chatTabs.getTabs().contains(teamChat1)) {
-                chatTabs.getTabs().add(teamChat1);
-            } else if (id.equals("Team2") && !chatTabs.getTabs().contains(teamChat2)) {
-                chatTabs.getTabs().add(teamChat2);
-            } else if (id.equals("Global") && !chatTabs.getTabs().contains(globalChat)) {
-                chatTabs.getTabs().add(globalChat);
-            } else {
-                System.out.println("No tab found with id: " + id);
+            switch (id) {
+                case "Team1" -> {
+                    if (!chatTabs.getTabs().contains(teamChat1)) chatTabs.getTabs().add(teamChat1);
+                }
+                case "Team2" -> {
+                    if (!chatTabs.getTabs().contains(teamChat2)) chatTabs.getTabs().add(teamChat2);
+                }
+                case "Global" -> {
+                    if (!chatTabs.getTabs().contains(globalChat)) chatTabs.getTabs().add(globalChat);
+                }
             }
         });
         _clientSpace.put("UIBackToClient", "ChatRoomAdded" + id);
@@ -427,14 +429,16 @@ public class UIController extends Application {
     public void RemoveChat(String id) throws InterruptedException {
         System.out.println("UiController removing chat from ui: " + id);
         Platform.runLater(() -> {
-            if (id.equals("Team1") && chatTabs.getTabs().contains(teamChat1)) {
-                chatTabs.getTabs().remove(teamChat1);
-            } else if (id.equals("Team2") && chatTabs.getTabs().contains(teamChat2)) {
-                chatTabs.getTabs().remove(teamChat2);
-            } else if (id.equals("Global") && chatTabs.getTabs().contains(globalChat)) {
-                chatTabs.getTabs().remove(globalChat);
-            } else {
-                System.out.println("No tab found with id: " + id);
+            switch (id) {
+                case "Team1" -> {
+                    if (chatTabs.getTabs().contains(teamChat1)) chatTabs.getTabs().remove(teamChat1);
+                }
+                case "Team2" -> {
+                    if (chatTabs.getTabs().contains(teamChat2)) chatTabs.getTabs().remove(teamChat2);
+                }
+                case "Global" -> {
+                    if (chatTabs.getTabs().contains(globalChat)) chatTabs.getTabs().remove(globalChat);
+                }
             }
         });
         _clientSpace.put("UIBackToClient", "ChatRoomRemoved" + id);

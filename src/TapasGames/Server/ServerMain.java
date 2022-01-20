@@ -102,7 +102,15 @@ public class ServerMain {
         System.out.println("ServerMain asked chat controller to create chat room: " + id);
         _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomAdded"));
         System.out.println("Server received chatRoomAdded!");
-        _ui.AddChat(id);
+        _ui.addChat(id);
+    }
+
+    public void removeChatRoom(String id) throws InterruptedException {
+        _chatSpace.put("ServerToChat", "removeChatRoom", id);
+        System.out.println("ServerMain asked chat controller to remove chat room: " + id);
+        _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomRemoved"));
+        System.out.println("Server received chatRoomRemoved!");
+        _ui.removeChat(id);
     }
 
     public void addClientToChatRoom(String name, String id) throws InterruptedException {
@@ -274,12 +282,19 @@ class GameReceiver implements Runnable {
                         _server.createChatRoom(data[0]);
                         _fromGameSpace.put("ServerBackToGame",data[0] + "Created");
                     }
+                    case "removeTeamChat" -> {
+                        _server.removeChatRoom(data[0]);
+                        _fromGameSpace.put("ServerBackToGame",data[0] + "Removed");
+                    }
                     case "addPlayerToTeamChat" -> {
                         _server.addClientToChatRoom(data[0], data[1]);
                         _fromGameSpace.put("ServerBackToGame","Player" + data[0] + "AddedTo" + data[1]);
                     }
+                    case "removePlayerFromTeamChat" -> {
+                        _server.addClientToChatRoom(data[0], data[1]);
+                        _fromGameSpace.put("ServerBackToGame","Player" + data[0] + "RemovedFrom" + data[1]);
+                    }
                     case "gameChangedToLobby" ->_server.gameChangedToLobby();
-
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

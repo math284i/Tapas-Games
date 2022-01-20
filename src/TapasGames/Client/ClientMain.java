@@ -63,7 +63,7 @@ public class ClientMain {
     public void removeChatRoom(String id) throws InterruptedException, IOException {
         _chatSpaces.remove(id);
         _uiSpace.put("ClientToUI", "RemoveChat", "" + id);
-        _uiSpace.get(new ActualField("UIBackToClient"),new ActualField("ChatRoomAdded" + id));
+        _uiSpace.get(new ActualField("UIBackToClient"),new ActualField("ChatRoomRemoved" + id));
         _serverSpace.put("ClientBackToServer", _name, "ChatRoomRemoved");
     }
 
