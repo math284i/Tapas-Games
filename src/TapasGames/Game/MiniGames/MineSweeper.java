@@ -30,7 +30,8 @@ public class MineSweeper {
     private int mines = 51;
     private String[] colors  = { "whitesmoke", "teal", "green", "maroon", "navy", "brown", "cyan", "black", "grey" };
     private Label minesLeft = new Label();
-    private Board board = new Board(size[0], size[1], mines);
+    //private Board board = new Board(size[0], size[1], mines);
+    private Board board;
     private List<List<Button>> buttons = new ArrayList<List<Button>>();
     private GridPane root = new GridPane();
     private HashMap<String, Integer> _teamDic;
@@ -80,7 +81,7 @@ public class MineSweeper {
 
     }
 
-    public Scene start() {
+    public Scene start(Board game) {
         configureScreenSize = Screen.getPrimary().getBounds();
         HBox info = new HBox(minesLeft, team1, team2);
         info.setStyle("-fx-background-color: lightgray");
@@ -94,7 +95,7 @@ public class MineSweeper {
         VBox vbox = new VBox(info,root);
         vbox.setFillWidth(true);
         VBox.setVgrow(root, Priority.ALWAYS);
-        restart();
+        restart(game);
         _scene = new Scene(vbox);
         return _scene;
     }
@@ -118,7 +119,8 @@ public class MineSweeper {
         System.out.println("Mouse is clicked!: " + mouseX + " : " + mouseY);
     }
 
-    public void restart() {
+    public void restart(Board game) {
+        this.board = game;
         minesCurrent = mines;
         foundP1 = 0;
         foundP2 = 0;
@@ -228,51 +230,6 @@ public class MineSweeper {
                 }
             }
         }
-    }
-}
-
-class Board {
-    private Field[][] grid;
-    private int mines;
-
-    public Board(int sizeX, int sizeY, int mines) {
-        System.out.println("Board is beeing created!");
-        if (sizeX < 1 || sizeY < 1 || mines < 0 || sizeX * sizeY < mines) {
-            throw new IllegalArgumentException("Size and mines aren't properly defined");
-        }
-        this.mines = mines;
-        this.grid = new Field[sizeX][sizeY];
-        for (int i = 0; i < sizeX; ++i) {
-            for (int j = 0; j < sizeY; ++j) {
-                this.grid[i][j] = new Field();
-            }
-        }
-        for (int i = 0; i < mines; ++i) {
-            Random r;
-            int r2;
-            int r3;
-            for (r = new Random(), r2 = r.nextInt(sizeX), r3 = r.nextInt(sizeY); this.grid[r2][r3].isMine(); r2 = r.nextInt(sizeX), r3 = r.nextInt(sizeY)) {}
-            this.grid[r2][r3].setMine();
-        }
-    }
-
-    public int neighbors(final int posX, final int posY) {
-        int temp = 0;
-        for (int i = -1; i <= 1; ++i) {
-            for (int j = -1; j <= 1; ++j) {
-                if ((i != 0 || j != 0) && posX + i >= 0 && posY + j >= 0 && posX + i < this.grid.length && posY + j < this.grid[0].length && this.grid[posX + i][posY + j].isMine()) {
-                    ++temp;
-                }
-            }
-        }
-        return temp;
-    }
-
-    public Field getGrid(final int x, final int y) {
-        if (x > this.grid.length || y > this.grid[0].length) {
-            return null;
-        }
-        return this.grid[x][y];
     }
 }
 

@@ -1,6 +1,7 @@
 package TapasGames.Client;
 
 import JspaceFiles.jspace.*;
+import TapasGames.Game.MiniGames.Board;
 import TapasGames.UI.UIController;
 import javafx.stage.Stage;
 
@@ -12,6 +13,7 @@ public class ClientMain {
     private String _name;
     private String _serverIpWithPort;
     private RemoteSpace _serverSpace;
+    private RemoteSpace _gameSpace;
     private SequentialSpace _uiSpace;
     private String _playerNumber = "0";
 
@@ -29,7 +31,8 @@ public class ClientMain {
             new Thread(new UIReceiver(this, uiSpace)).start();
             new Thread(new ChatReceiver(this, new RemoteSpace(_serverIpWithPort + "ChatToClient:" + _name + "?keep"))).start();
             new Thread(new ServerReceiver(this, _serverSpace)).start();
-            new Thread(new GameReceiver(this, new RemoteSpace(_serverIpWithPort + "toGameRoom:?keep"))).start();
+            _gameSpace = new RemoteSpace(_serverIpWithPort + "toGameRoom:?keep");
+            new Thread(new GameReceiver(this, _gameSpace)).start();
             _serverSpace.put("ClientBackToServer", name, "ClientCreated");
             System.out.println("Client wrote to serverSpace its been Created!");
         } catch (Exception e) {
@@ -143,6 +146,10 @@ public class ClientMain {
 
     public void newGame(String newGame, String playerAmount) {
         try {
+            if(newGame.equals("minesweeper")){
+                Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"),new ActualField(_name),new ActualField("sendBoard"),new FormalField(Board.class))[3];
+                _uiSpace.put("ClientToUI","sendBoard",board);
+            }
             _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -3,6 +3,7 @@ package TapasGames.UI;
 import JspaceFiles.jspace.ActualField;
 import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
+import TapasGames.Game.MiniGames.Board;
 import TapasGames.Game.MiniGames.CurveFewer;
 import TapasGames.Game.MiniGames.MineSweeper;
 import TapasGames.UiFiles.LobbyUI;
@@ -147,16 +148,16 @@ public class UIController extends Application {
         Separator separatorV2 = new Separator(Orientation.VERTICAL);
         Separator separatorV3 = new Separator(Orientation.VERTICAL);
         VBox team1 = new VBox();
-        Label team1L = new Label("Team 1");
+        Label team1L = new Label("Player 1");
         Label team1S = new Label("" + score1);
         VBox team2 = new VBox();
-        Label team2L = new Label("Team 2");
+        Label team2L = new Label("Player 2");
         Label team2S = new Label("" + score2);
         VBox team3 = new VBox();
-        Label team3L = new Label("Team 3");
+        Label team3L = new Label("Player 3");
         Label team3S = new Label("0");
         VBox team4 = new VBox();
-        Label team4L = new Label("Team 4");
+        Label team4L = new Label("Player 4");
         Label team4S = new Label("0");
         HBox teams = new HBox();
         Label points = new Label("Points");
@@ -224,9 +225,8 @@ public class UIController extends Application {
         team3.setMaxHeight(Double.MAX_VALUE);
         team4.setMaxHeight(Double.MAX_VALUE);
         teams.getChildren().addAll(team1, separatorV1, team2);
-        //teams.getChildren().addAll(separatorV2,team3); //Adds team 3
-        //teams.getChildren().addAll(separatorV3,team4); //Adds team 4
-        //teams.getChildren().removeAll(separatorV3,team4); //Removes team 4
+        teams.getChildren().addAll(separatorV2,team3); //Adds team 3
+        teams.getChildren().addAll(separatorV3,team4); //Adds team 4
 
         score.setVgrow(teams, Priority.ALWAYS);
         score.setVgrow(points, Priority.NEVER);
@@ -540,8 +540,9 @@ public class UIController extends Application {
                         controls.setImage(curvefeverI);
                     }
                     case "minesweeper" -> {
+                        Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"),new ActualField("sendBoard"),new FormalField(Board.class))[2];
                         minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
-                        minesweeperScene = minesweeperGame.start();
+                        minesweeperScene = minesweeperGame.start(board);
                         gameStage.setScene(minesweeperScene);
                         controls.setImage(minesweeperI);
                         sendMinesweeperData();

@@ -12,9 +12,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -44,14 +42,12 @@ public class ServerUI extends Application {
     public void start(Stage stage) throws Exception {
         _clientList = new HashMap<>();
 
-
-
-
         Label statusL = new Label("Status:");
         statusL.setAlignment(Pos.CENTER);
         statusL.setFont(new Font(20));
         Separator sep1h = new Separator(Orientation.HORIZONTAL);
         Pane statusP = new Pane();
+        statusP.setPrefHeight(150);
         statusP.setStyle("-fx-border-color: black;");
         Label online = new Label("Server online");
         online.setFont(new Font(18));
@@ -73,9 +69,9 @@ public class ServerUI extends Application {
         chatBoxT1 = new VBox();
         chatBoxT2 = new VBox();
         chatBoxG = new VBox();
-        _globalChat = new Tab();
-        _team1Chat = new Tab();
-        _team2Chat = new Tab();
+        _globalChat = new Tab("Global");
+        _team1Chat = new Tab("Team 1");
+        _team2Chat = new Tab("Team 2");
 
         ScrollPane chatPaneG = new ScrollPane();
         chatPaneG.setPadding(new Insets(10, 10, 10, 10));
@@ -109,10 +105,13 @@ public class ServerUI extends Application {
                 chatPaneG.setVvalue((Double) newValue);
             }
         });
-        //chatTabs.getTabs().addAll(globalChat,teamChat1,teamChat2);
+        //_chatTabs.getTabs().addAll(_globalChat,_team1Chat,_team2Chat);
 
         Separator sep1v = new Separator(Orientation.VERTICAL);
         HBox outerH = new HBox(5, status, sep1v, clients, _chatTabs);
+        outerH.setHgrow(status, Priority.ALWAYS);
+        outerH.setHgrow(clients,Priority.ALWAYS);
+        outerH.setHgrow(_chatTabs,Priority.ALWAYS);
 
         Scene output = new Scene(outerH, 480, 640);
         _stage = new Stage();

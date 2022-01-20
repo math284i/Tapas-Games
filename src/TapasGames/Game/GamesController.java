@@ -1,6 +1,7 @@
 package TapasGames.Game;
 
 import JspaceFiles.jspace.*;
+import TapasGames.Game.MiniGames.Board;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,10 +103,14 @@ public class GamesController {
             String newGame = mostCommon(_votingList);
             System.out.println("Most voted game was: " + newGame);
             _votingList.clear();
+            Board board = new Board(16,16,51);
 
             for (var entry : _playerDic.entrySet()) {
                 try {
                     _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
+                    if(newGame.equals("minesweeper")) {
+                        _toGameRoomSpace.put("GameRoomToClient",entry.getKey(),"sendBoard",board);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -125,7 +130,6 @@ public class GamesController {
             } else {
                 System.out.println("There is: " + _peopleThatWantToSkipGame.size() + " ready to vote out of: " + _playerDic.size());
             }
-
         }
     }
 
