@@ -19,40 +19,28 @@ public class ChatController {
         new Thread(new ServerReceiver(this, _serverSpace)).start();
     }
 
-    public void addChatRoom(String id) {
+    public void addChatRoom(String id) throws InterruptedException {
         System.out.println("ChatController creating new chatRoom id: " + id);
         SequentialSpace toChatRoomSpace = new SequentialSpace();
         _repository.add("toChatRoom:" + id, toChatRoomSpace);
         _rooms.put(id, new Thread(new ChatRoom(id, _repository, toChatRoomSpace, _chatRoomSpace, _serverSpace)));
         _rooms.get(id).start();
-        try {
-            _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + "Created"));
-            _serverSpace.put("ChatBackToServer", "ChatRoomAdded"); //THis is correct
-            System.out.println("ChatController have created ChatRoom");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + "Created"));
+        _serverSpace.put("ChatBackToServer", "ChatRoomAdded"); //THis is correct
+        System.out.println("ChatController have created ChatRoom");
     }
 
-    public void addClient(String name, String id) {
-        try {
+    public void addClient(String name, String id) throws InterruptedException {
             System.out.println("Chatcontroller adding client: " + name);
             _repository.get("toChatRoom:" + id).put("addClient", name);
             _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + name + "Added"));
             _serverSpace.put("ChatBackToServer", "ClientAdded");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    public void removeClient(String name, String id) {
-        try {
+    public void removeClient(String name, String id) throws InterruptedException {
             _repository.get("toChatRoom:" + id).put("removeClient", name);
             _chatRoomSpace.get(new ActualField("ChatRoomBackToController"), new ActualField(id + name + "Removed"));
             _serverSpace.put("ChatBackToServer", "ClientRemoved");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
 
@@ -107,43 +95,27 @@ class ChatRoom implements Runnable {
         }
     }
 
-    public void addClient(String client) {
+    public void addClient(String client) throws InterruptedException {
         System.out.println("ChatRoom adding client: " + client + " : " + _id);
         _clients.add(client);
-        try {
             _controllerSpace.put("ChatRoomBackToController", _id + client + "Added");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    public void removeClient(String client) {
+    public void removeClient(String client) throws InterruptedException {
         _repository.remove("ChatToClient:" + client);
         _clients.remove(client);
-        try {
             _controllerSpace.put("ChatRoomBackToController", _id + "Removed");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
-    private void sendMessageToAll(String name, String message) {
+    private void sendMessageToAll(String name, String message) throws InterruptedException {
         System.out.println("ChatRoom sending to all: " + name + " : " + message);
         for (String client : _clients) {
             Space toClientSpace = _repository.get("ChatToClient:" + client);
-            try {
                 System.out.println("Sending message from: " + name + " to: " + client);
                 toClientSpace.put(name + "," + _id + "," + message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        try {
             System.out.println("ChatRoom sending to server!");
             _serverSpace.put("ChatToServer1", "sendMessage", _id + "," + name + "," + message);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

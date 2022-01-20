@@ -17,7 +17,6 @@ public class ServerMain {
     private String _port;
     private String _ipWithPort;
     private ArrayList<String> _clients;
-    private ArrayList<String> _peopleThatWantToSkipGame;
     private HashMap<String, String> _clientsAndNumbers;
     private ArrayList<String> _readyClients;
     private SequentialSpace _clientSpace;
@@ -39,12 +38,11 @@ public class ServerMain {
         _gameSpace = new SequentialSpace();
         _startUpSpace = new SequentialSpace();
         _repository.add("clientServer", _clientSpace);
-        _repository.add("startUpServer",_startUpSpace);
+        _repository.add("startUpServer", _startUpSpace);
         _repository.addGate(_ipWithPort + "?keep");
         _clients = new ArrayList<>();
         _readyClients = new ArrayList<>();
         _clientsAndNumbers = new HashMap<>();
-        _peopleThatWantToSkipGame = new ArrayList<>();
         _chatController = new ChatController(_repository, _chatSpace);
         _gamesController = new GamesController(_repository, _gameSpace);
 
@@ -52,7 +50,6 @@ public class ServerMain {
         _ui.start(new Stage());
         new Thread(new ClientReceiver(this, _clientSpace)).start();
         new Thread(new StartUpReceiver(this, _startUpSpace)).start();
-        new Thread(new GameReceiver(this, _gameSpace)).start();
         new Thread(new ChatReceiver(this, _chatSpace)).start();
     }
 
@@ -60,13 +57,13 @@ public class ServerMain {
         try {
             if (_clients.contains(name)) {
                 System.out.println("Server not adding: " + name);
-                _startUpSpace.put("ServerBackToStartUp",_ipWithPort,"false");
+                _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "false");
             } else {
                 System.out.println("Server adding: " + name);
                 _clients.add(name);
                 SequentialSpace space = new SequentialSpace();
                 _repository.add("ChatToClient:" + name, space);
-                _startUpSpace.put("ServerBackToStartUp",_ipWithPort, "true");
+                _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "true");
                 _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name), new ActualField("ClientCreated"));
                 System.out.println("ServerMain received clientCreated!");
                 addClientToChatRoom(name, "Global");
@@ -78,7 +75,7 @@ public class ServerMain {
         }
     }
 
-    public void removeClient(String name){
+    public void removeClient(String name) {
 
     }
 
@@ -89,7 +86,7 @@ public class ServerMain {
                     , new ActualField(name + " has been added"), new FormalField(String.class));
             System.out.println(name + " has been added to game as number: " + tuple[2].toString());
 
-            for (String client: _clients) {
+            for (String client : _clients) {
                 _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString() + "," + "Not ready");
             }
 
@@ -120,11 +117,11 @@ public class ServerMain {
         try {
             System.out.println("Server Adding: " + name + " to: " + id);
             _chatSpace.put("ServerToChat", "addClient", name + "," + id);
-            _clientSpace.put("ServerToClient",name, "addChatRoom", id);
+            _clientSpace.put("ServerToClient", name, "addChatRoom", id);
             _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
             System.out.println("Client is added from serverMain");
-            _clientSpace.get(new ActualField ("ClientBackToServer"), new ActualField(name),
+            _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
                     new ActualField("ChatRoomAdded"));
             System.out.println("Everything is done in Server AddClientToChatRoom");
         } catch (Exception e) {
@@ -136,11 +133,11 @@ public class ServerMain {
         try {
             System.out.println("Server Removing: " + name + " from: " + id);
             _chatSpace.put("ServeToChat", "removeClient", name + "," + id);
-            _clientSpace.put("ServerToClient",name, "removeChatRoom", id);
+            _clientSpace.put("ServerToClient", name, "removeChatRoom", id);
             _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
                     new ActualField("ClientRemoved")); //Used to have small c, Used to have an extra field for a string.
             System.out.println("Client is removed from serverMain");
-            _clientSpace.get(new ActualField ("ClientBackToServer"), new ActualField(name),
+            _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
                     new ActualField("ChatRoomRemoved"));
             System.out.println("Everything is done in Server RemoveClientToChatRoom");
         } catch (Exception e) {
@@ -165,10 +162,18 @@ public class ServerMain {
         if (_readyClients.size() == _clients.size()) {
             System.out.println("All players are ready to RUUUUUMBLE!");
             try {
-                _gameSpace.put("ServerToGame", "votingTime", "");
+                _gameSpace.put("ServerToGame", "gameOver", "");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void gameOver(String playersWon) {
+        try {
+            _gameSpace.put("ServerToGame", "gameOver", playersWon);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -176,7 +181,6 @@ public class ServerMain {
         System.out.println("Server udating its own chat!");
         _ui.UpdateChat(id, name, message);
     }
-
 }
 
 class ClientReceiver implements Runnable {
@@ -203,6 +207,7 @@ class ClientReceiver implements Runnable {
                         //_server.removeClient(data[0]);
                     }
                     case "clientIsReady" -> _server.clientIsReady(data[0]);
+                    case "gameOver" -> _server.gameOver(data[0]);
 
                 }
             } catch (InterruptedException ignored) {
@@ -266,34 +271,4 @@ class ChatReceiver implements Runnable {
         }
     }
 
-}
-
-//TODO CANT WE JUST REMOVE BELOW?
-class GameReceiver implements Runnable{
-    ServerMain _server;
-    SequentialSpace _fromGameSpace;
-
-    public GameReceiver(ServerMain server, SequentialSpace fromGameSpace){
-        _server = server;
-        _fromGameSpace = fromGameSpace;
-    }
-
-    @Override
-    public void run() { //TODO everything below should be rewrote.
-        while (true) {
-            try {
-                Object[] tuple = _fromGameSpace.get(
-                        new ActualField("GameToServer"), new FormalField(String.class)
-                        , new FormalField(String.class), new FormalField(String.class));
-                System.out.println("Someone wrote to serverSpace!, my space is: " + _fromGameSpace.toString());
-                String[] data = tuple[3].toString().split(",");
-                switch (tuple[2].toString()) {
-                    case "addNewPlayer" -> { }
-                    case "removePlayer" -> { }
-                    case "updateMovement" -> {}
-                }
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
 }

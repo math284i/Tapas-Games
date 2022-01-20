@@ -103,7 +103,7 @@ import java.net.UnknownHostException;
                         dialog.close();
                         System.out.println("Client is being created! part 2");
                         SequentialSpace space = new SequentialSpace();
-                        UIController ui = new UIController(space);
+                        UIController ui = new UIController(space,nameT.getText());
                         stage.close();
                         try {
                             System.out.print("" + nameT.getText() + " " + ipT.getText());

@@ -14,7 +14,7 @@ public class Client {
         //RemoteSpace chat = new RemoteSpace("tcp://localhost:31415/AllChat?keep");
         System.out.println("Name".split(",")[0]);
 
-        String data = "hej:jeg:Rasmus:";
+        String data = "";
 
         for (var entry: data.split(":")
              ) {

@@ -5,7 +5,7 @@ import JspaceFiles.jspace.FormalField;
 import JspaceFiles.jspace.SequentialSpace;
 import TapasGames.Game.MiniGames.Board;
 import TapasGames.Game.MiniGames.CurveFewer;
-import TapasGames.Game.MiniGames.MineSweeper;
+import TapasGames.Game.MiniGames.MovementTest;
 import TapasGames.UiFiles.LobbyUI;
 import TapasGames.UiFiles.VotingUI;
 import javafx.application.Application;
@@ -24,10 +24,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.text.Font;
 import javafx.stage.*;
 
@@ -73,7 +70,7 @@ public class UIController extends Application {
     private SequentialSpace _clientSpace;
 
     public LobbyUI lobbyGame;
-    public MineSweeper minesweeperGame;
+    public MovementTest.MineSweeper minesweeperGame;
     public Scene minesweeperScene;
     public CurveFewer curvefeverGame;
 
@@ -81,8 +78,9 @@ public class UIController extends Application {
 
     }
 
-    public UIController(SequentialSpace clientSpace) {
+    public UIController(SequentialSpace clientSpace, String playerName) {
         _clientSpace = clientSpace;
+        _playerName = playerName;
 
         new Thread(new ClientReceiver(this, _clientSpace)).start();
     }
@@ -91,9 +89,9 @@ public class UIController extends Application {
     public void start(Stage stage) throws Exception {
         configureScreenSize = Screen.getPrimary().getBounds();
 
-        GameScene();
         MenuScene();
         ChatScene();
+        GameScene();
         gameStage.toFront();
     }
 
@@ -101,9 +99,9 @@ public class UIController extends Application {
         configureScreenSize = Screen.getPrimary().getBounds();
         _clientSpace = clientSpace;
 
-        GameScene();
         MenuScene();
         ChatScene();
+        GameScene();
         gameStage.toFront();
     }
 
@@ -111,11 +109,11 @@ public class UIController extends Application {
         gameStage = new Stage();
         gameStage.setTitle("Game Window");
 
-        gameStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
-        gameStage.setHeight(configureScreenSize.getHeight() * size * 0.75);
+        gameStage.setWidth(1008);
+        gameStage.setHeight(567);
 
-        gameStage.setX(configureScreenSize.getWidth() * 0.15);
-        gameStage.setY(configureScreenSize.getHeight() * 0.15);
+        gameStage.setX(250);
+        gameStage.setY(150);
 
         gameStage.setResizable(false);
 
@@ -129,11 +127,11 @@ public class UIController extends Application {
     public void MenuScene() throws FileNotFoundException {
         menuStage = new Stage();
         menuStage.setTitle("Menu Window");
-        menuStage.setWidth(configureScreenSize.getWidth() * size * 0.75);
-        menuStage.setHeight(configureScreenSize.getHeight() * size * 0.25);
+        menuStage.setWidth(1008);
+        menuStage.setHeight(189);
 
-        menuStage.setX(configureScreenSize.getWidth() * 0.15);
-        menuStage.setY(configureScreenSize.getHeight() * 0.15 + configureScreenSize.getHeight() * size * 0.75);
+        menuStage.setX(250);
+        menuStage.setY(717);
 
         menuStage.initOwner(gameStage);
         menuStage.setResizable(false);
@@ -177,7 +175,7 @@ public class UIController extends Application {
         buttons.setHgrow(vts, Priority.ALWAYS);
         buttons.setVgap(5);
         buttons.setHgap(5);
-        buttons.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
+        buttons.setPrefSize(336, 151);
 
         team1.setVgrow(team1L, Priority.NEVER);
         team1.setVgrow(team1S, Priority.ALWAYS);
@@ -224,8 +222,8 @@ public class UIController extends Application {
         team3.setMaxHeight(Double.MAX_VALUE);
         team4.setMaxHeight(Double.MAX_VALUE);
         teams.getChildren().addAll(team1, separatorV1, team2);
-        teams.getChildren().addAll(separatorV2,team3); //Adds team 3
-        teams.getChildren().addAll(separatorV3,team4); //Adds team 4
+        teams.getChildren().addAll(separatorV2, team3); //Adds team 3
+        teams.getChildren().addAll(separatorV3, team4); //Adds team 4
 
         score.setVgrow(teams, Priority.ALWAYS);
         score.setVgrow(points, Priority.NEVER);
@@ -233,15 +231,15 @@ public class UIController extends Application {
         points.setMaxWidth(Double.MAX_VALUE);
         points.setAlignment(Pos.TOP_CENTER);
         score.getChildren().addAll(points, separatorH, teams);
-        score.setPrefSize(configureScreenSize.getWidth() * size * 0.25, configureScreenSize.getHeight() * size * 0.2);
+        score.setPrefSize(336, 151);
 
         StackPane con = new StackPane();
         //con.setPrefSize(configureScreenSize.getWidth()*size*0.25,configureScreenSize.getHeight()*size*0.2);
-        con.setMinWidth(configureScreenSize.getWidth() * size * 0.25);
-        con.setMinHeight(configureScreenSize.getHeight() * size * 0.2);
+        con.setMinWidth(366);
+        con.setMinHeight(151);
         con.setAlignment(Pos.CENTER);
-        controls.setFitWidth(configureScreenSize.getWidth() * size * 0.25);
-        controls.setFitHeight(configureScreenSize.getHeight() * size * 0.2);
+        controls.setFitWidth(336);
+        controls.setFitHeight(151);
         //Image minesweeperI = new Image(new FileInputStream("src/TapasGames/Ressources/MineSweeperControls.png"));
         minesweeperI = new Image("TapasGames/Ressources/MineSweeperControls.png");
         curvefeverI = new Image("TapasGames/Ressources/CurveFeverControls.png");
@@ -282,7 +280,7 @@ public class UIController extends Application {
 
         HBox combi = new HBox();
         combi.getChildren().addAll(buttons, con, separatorV, score);
-        Scene menuScene = new Scene(combi, configureScreenSize.getWidth() * size * 0.75, configureScreenSize.getHeight() * size * 0.25);
+        Scene menuScene = new Scene(combi, 1008, 189);
 
         menuStage.setScene(menuScene);
         menuStage.show();
@@ -292,11 +290,11 @@ public class UIController extends Application {
         chatStage = new Stage();
         chatStage.setTitle("Chat Window");
 
-        chatStage.setWidth(configureScreenSize.getWidth() * 0.7 * 0.25);
-        chatStage.setHeight(configureScreenSize.getHeight() * 0.70);
+        chatStage.setWidth(336);
+        chatStage.setHeight(756);
 
-        chatStage.setX(configureScreenSize.getWidth() * 0.15 + configureScreenSize.getWidth() * 0.7 * 0.75);
-        chatStage.setY(configureScreenSize.getHeight() * 0.15);
+        chatStage.setX(1258);
+        chatStage.setY(150);
 
         chatStage.setResizable(false);
         chatStage.setOnCloseRequest(evt -> {
@@ -344,13 +342,13 @@ public class UIController extends Application {
         chatBoxT1.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT1.setVvalue((Double)newValue );
+                chatPaneT1.setVvalue((Double) newValue);
             }
         });
         chatBoxT2.heightProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
-                chatPaneT2.setVvalue((Double)newValue );
+                chatPaneT2.setVvalue((Double) newValue);
             }
         });
         chatBoxG.heightProperty().addListener(new ChangeListener() {
@@ -383,7 +381,7 @@ public class UIController extends Application {
                 System.out.println("message: " + message);
                 try {
                     //String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
-                    _clientSpace.put("UIToClient","chat", "Global," + message); //TODO replace id with current tap
+                    _clientSpace.put("UIToClient", "chat", "Global," + message); //TODO replace id with current tap
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -436,17 +434,17 @@ public class UIController extends Application {
         System.out.println("Updating ui!");
         switch (id) {
             case "Team 1" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxT1.getChildren().add(new Label(name + " : " + message));
                 });
             }
             case "Team 2" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxT2.getChildren().add(new Label(name + " : " + message));
                 });
             }
             case "Global" -> {
-                Platform.runLater( () -> {
+                Platform.runLater(() -> {
                     chatBoxG.getChildren().add(new Label(name + " : " + message));
                 });
             }
@@ -458,24 +456,24 @@ public class UIController extends Application {
         }
     }
 
-    public void voteBox(String name) {
-        _playerName = name;
+    public void voteBox(String newScoreBoard) {
+        //TODO change scoreboard to the given
         votingWindow = new VotingUI();
-            Platform.runLater( () -> {
-                try {
-                    gameStage.setScene(votingWindow.start());
-                    setUpVoting();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+        Platform.runLater(() -> {
+            try {
+                gameStage.setScene(votingWindow.start());
+                setUpVoting();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void setUpVoting() {
         votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                RadioButton selected =(RadioButton) votingWindow.tgGames.getSelectedToggle();
+                RadioButton selected = (RadioButton) votingWindow.tgGames.getSelectedToggle();
                 System.out.println("Client chose: " + selected.getText());
                 try {
 
@@ -531,7 +529,7 @@ public class UIController extends Application {
             }
         }
         _gameScene = gameScene;
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             try {
                 switch (_gameScene.toLowerCase()) {
                     case "lobby" -> {
@@ -546,15 +544,15 @@ public class UIController extends Application {
                         controls.setImage(curvefeverI);
                     }
                     case "minesweeper" -> {
-                        Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"),new ActualField("sendBoard"),new FormalField(Board.class))[2];
-                        minesweeperGame = new MineSweeper(Integer.parseInt(playerAmount));
+                        Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
+                        minesweeperGame = new MovementTest.MineSweeper(Integer.parseInt(playerAmount));
                         minesweeperScene = minesweeperGame.start(board);
                         gameStage.setScene(minesweeperScene);
                         controls.setImage(minesweeperI);
                         sendMinesweeperData();
                     }
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -562,10 +560,14 @@ public class UIController extends Application {
 
 
     public void updateGame(String data) {
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             switch (_gameScene.toLowerCase()) {
-                case "curvefever" -> {updateCurvefever(data);}
-                case "minesweeper" -> {updateMinesweeper(data);}
+                case "curvefever" -> {
+                    updateCurvefever(data);
+                }
+                case "minesweeper" -> {
+                    updateMinesweeper(data);
+                }
             }
         });
         //System.out.println("UiController updatingGame!");
@@ -575,7 +577,7 @@ public class UIController extends Application {
 
         boolean success = false;
 
-        for (var entry: data.split(":")) {
+        for (var entry : data.split(":")) {
             //playerNumber;m1;x;y
             String[] inputs = entry.split(";");
             //System.out.println("Player: " + inputs[0]);
@@ -589,11 +591,15 @@ public class UIController extends Application {
             }
         }
 
-        //check if game is over
-
-        //if not
-        sendMinesweeperData();
-
+        if (minesweeperGame.GameOver) {
+            try {
+                _clientSpace.put("UIToClient", "gameOver", minesweeperGame.playersWon);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            sendMinesweeperData();
+        }
     }
 
     public void sendMinesweeperData() {
@@ -616,22 +622,30 @@ public class UIController extends Application {
     public void updateLobby(String name, String number, String readyStatus) {
 
         switch (number) {
-            case "1" -> {Platform.runLater( () -> {
-                lobbyGame.p1Name.setText("Player1: " + name);
-                lobbyGame.display1Status.setText("Status: " + readyStatus);
-            });}
-            case "2" -> {Platform.runLater( () -> {
-                lobbyGame.p2Name.setText("Player2: " + name);
-                lobbyGame.display2Status.setText("Status: " + readyStatus);
-            });}
-            case "3" -> {Platform.runLater( () -> {
-                lobbyGame.p3Name.setText("Player3: " + name);
-                lobbyGame.display3Status.setText("Status: " + readyStatus);
-            });}
-            case "4" -> {Platform.runLater( () -> {
-                lobbyGame.p4Name.setText("Player4: " + name);
-                lobbyGame.display4Status.setText("Status: " + readyStatus);
-            });}
+            case "1" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p1Name.setText("Player1: " + name);
+                    lobbyGame.display1Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "2" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p2Name.setText("Player2: " + name);
+                    lobbyGame.display2Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "3" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p3Name.setText("Player3: " + name);
+                    lobbyGame.display3Status.setText("Status: " + readyStatus);
+                });
+            }
+            case "4" -> {
+                Platform.runLater(() -> {
+                    lobbyGame.p4Name.setText("Player4: " + name);
+                    lobbyGame.display4Status.setText("Status: " + readyStatus);
+                });
+            }
         }
 
     }
