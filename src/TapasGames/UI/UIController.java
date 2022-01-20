@@ -44,6 +44,9 @@ public class UIController extends Application {
     public String _playerName;
     public String _playerNumber = "0";
 
+    int score1 = 0;
+    int score2 = 0;
+
     TabPane chatTabs;
     ScrollPane chatPaneG;
     ScrollPane chatPaneT1;
@@ -517,33 +520,19 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
-        Font bold = Font.font("Regular", FontWeight.BOLD,12);
-        Font font = Font.font("Regular", FontWeight.NORMAL,12);
         System.out.println("UpdatingGame with playerNumber: " + playerNumber);
         switch(_playerNumber){
             case "1" -> {
-                team1L.setFont(bold);
-                team2L.setFont(font);
-                team3L.setFont(font);
-                team4L.setFont(font);
+                team1L.setStyle("-fx-text-fill: red");
             }
             case "2" -> {
-                team1L.setFont(font);
-                team2L.setFont(bold);
-                team3L.setFont(font);
-                team4L.setFont(font);
+                team2L.setStyle("-fx-text-fill: blue");
             }
             case "3" -> {
-                team1L.setFont(font);
-                team2L.setFont(font);
-                team3L.setFont(bold);
-                team4L.setFont(font);
+                team3L.setStyle("-fx-text-fill: green");
             }
             case "4" -> {
-                team1L.setFont(font);
-                team2L.setFont(font);
-                team3L.setFont(font);
-                team4L.setFont(bold);
+                team4L.setStyle("-fx-text-fill: yellow");
             }
         }
         _gameScene = gameScene;
