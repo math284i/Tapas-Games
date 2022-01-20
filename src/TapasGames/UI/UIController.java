@@ -98,7 +98,6 @@ public class UIController extends Application {
         MenuScene();
         ChatScene();
         GameScene();
-        gameStage.toFront();
     }
 
     public void start(Stage stage, SequentialSpace clientSpace) throws Exception {
@@ -108,7 +107,6 @@ public class UIController extends Application {
         MenuScene();
         ChatScene();
         GameScene();
-        gameStage.toFront();
     }
 
     public void GameScene() throws Exception {
@@ -126,6 +124,10 @@ public class UIController extends Application {
         updateGameScene(_gameScene, "0", "0");
 
         gameStage.show();
+
+        menuStage.initOwner(gameStage);
+        chatStage.initOwner(gameStage);
+
     }
 
     //TODO: Create an update function for the GameScene.
@@ -139,7 +141,6 @@ public class UIController extends Application {
         menuStage.setX(250);
         menuStage.setY(717);
 
-        menuStage.initOwner(gameStage);
         menuStage.setResizable(false);
         menuStage.setOnCloseRequest(evt -> {
             // prevent window from closing
@@ -306,7 +307,6 @@ public class UIController extends Application {
             // prevent window from closing
             evt.consume();
         });
-        chatStage.initOwner(gameStage);
 
         //Pane used for the layout
         BorderPane layout = new BorderPane();

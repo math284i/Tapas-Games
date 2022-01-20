@@ -52,7 +52,8 @@ public class ServerUI extends Application {
         Label online = new Label("Server online");
         online.setFont(new Font(18));
         statusP.getChildren().add(online);
-        online.setAlignment(Pos.CENTER);
+        online.layoutXProperty().bind(statusP.widthProperty().subtract(statusP.widthProperty()).divide(2));
+        online.layoutYProperty().bind(statusP.heightProperty().subtract(statusP.heightProperty()).divide(2));
         VBox status = new VBox(statusL,sep1h,statusP);
         statusL.setAlignment(Pos.CENTER);
 
