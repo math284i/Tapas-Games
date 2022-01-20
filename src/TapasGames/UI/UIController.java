@@ -139,8 +139,7 @@ public class UIController extends Application {
 
         GridPane buttons = new GridPane();
         Button exit = new Button("Exit");
-        Button settings = new Button("Settings");
-        Button vts = new Button("Vote to skip");
+        Button vts = new Button("Vote to Skip");
         Separator separatorH = new Separator(Orientation.HORIZONTAL);
         Separator separatorV = new Separator(Orientation.VERTICAL);
         Separator separatorV1 = new Separator(Orientation.VERTICAL);
@@ -163,17 +162,13 @@ public class UIController extends Application {
         VBox score = new VBox();
 
         exit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        settings.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         vts.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         buttons.setPrefSize(Double.MAX_VALUE, Double.MAX_VALUE);
         buttons.add(exit, 0, 0, 1, 2);
-        buttons.add(settings, 1, 0, 1, 1);
-        buttons.add(vts, 1, 1, 1, 1);
+        buttons.add(vts, 1, 0, 1, 1);
         buttons.setVgrow(exit, Priority.ALWAYS);
-        buttons.setVgrow(settings, Priority.ALWAYS);
         buttons.setVgrow(vts, Priority.ALWAYS);
         buttons.setHgrow(exit, Priority.ALWAYS);
-        buttons.setHgrow(settings, Priority.ALWAYS);
         buttons.setHgrow(vts, Priority.ALWAYS);
         buttons.setVgap(5);
         buttons.setHgap(5);
@@ -252,25 +247,6 @@ public class UIController extends Application {
         controls.setCache(true);
         con.getChildren().add(controls);
 
-
-        settings.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                final Stage settingsDialog = new Stage();
-                settingsDialog.initModality(Modality.APPLICATION_MODAL);
-                settingsDialog.initOwner(menuStage);
-                VBox content = new VBox();
-                content.getChildren().add(new Label("Here, settings will be added along side more complex games, which have setting that could warrant a change. An example could be changing between using mouse-buttons and wasd-controls for movement or to control sound."));
-                Scene settingsScene = new Scene(content, configureScreenSize.getWidth() / 4, configureScreenSize.getHeight() / 3);
-                settingsDialog.setScene(settingsScene);
-                settingsDialog.setResizable(false);
-                settingsDialog.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue)
-                        settingsDialog.setMaximized(false);
-                });
-                settingsDialog.show();
-            }
-        });
         exit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
