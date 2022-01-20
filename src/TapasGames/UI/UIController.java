@@ -54,8 +54,8 @@ public class UIController extends Application {
     VBox chatBoxG;
     VBox chatBoxT1;
     VBox chatBoxT2;
-    Tab teamChat1 = new Tab("Team 1");
-    Tab teamChat2 = new Tab("Team 2");
+    Tab teamChat1 = new Tab("Team1");
+    Tab teamChat2 = new Tab("Team2");
     Tab globalChat = new Tab("Global");
     Label team1L;
     Label team2L;
@@ -385,12 +385,11 @@ public class UIController extends Application {
         sendButtons.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                //TODO output message from Space
                 String message = messageBox.getText();
                 System.out.println("message: " + message);
                 try {
-                    //String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
-                    _clientSpace.put("UIToClient", "chat", "Global," + message); //TODO replace id with current tap
+                    String selectedTab = chatTabs.getSelectionModel().getSelectedItem().getText();
+                    _clientSpace.put("UIToClient", "chat", selectedTab + "," + message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -411,9 +410,9 @@ public class UIController extends Application {
     public void AddChat(String id) throws InterruptedException {
         System.out.println("UiController adding chat to ui: " + id);
         Platform.runLater(() -> {
-            if (id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)) {
+            if (id.equals("Team1") && !chatTabs.getTabs().contains(teamChat1)) {
                 chatTabs.getTabs().add(teamChat1);
-            } else if (id.equals("Team 2") && !chatTabs.getTabs().contains(teamChat2)) {
+            } else if (id.equals("Team2") && !chatTabs.getTabs().contains(teamChat2)) {
                 chatTabs.getTabs().add(teamChat2);
             } else if (id.equals("Global") && !chatTabs.getTabs().contains(globalChat)) {
                 chatTabs.getTabs().add(globalChat);
@@ -427,9 +426,9 @@ public class UIController extends Application {
     public void RemoveChat(String id) throws InterruptedException {
         System.out.println("UiController removing chat from ui: " + id);
         Platform.runLater(() -> {
-            if (id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)) {
+            if (id.equals("Team1") && chatTabs.getTabs().contains(teamChat1)) {
                 chatTabs.getTabs().remove(teamChat1);
-            } else if (id.equals("Team 2") && chatTabs.getTabs().contains(teamChat2)) {
+            } else if (id.equals("Team2") && chatTabs.getTabs().contains(teamChat2)) {
                 chatTabs.getTabs().remove(teamChat2);
             } else if (id.equals("Global") && chatTabs.getTabs().contains(globalChat)) {
                 chatTabs.getTabs().remove(globalChat);
@@ -443,12 +442,12 @@ public class UIController extends Application {
     public void UpdateChat(String name, String id, String message) {
         System.out.println("Updating ui!");
         switch (id) {
-            case "Team 1" -> {
+            case "Team1" -> {
                 Platform.runLater(() -> {
                     chatBoxT1.getChildren().add(new Label(name + " : " + message));
                 });
             }
-            case "Team 2" -> {
+            case "Team2" -> {
                 Platform.runLater(() -> {
                     chatBoxT2.getChildren().add(new Label(name + " : " + message));
                 });
@@ -458,11 +457,6 @@ public class UIController extends Application {
                     chatBoxG.getChildren().add(new Label(name + " : " + message));
                 });
             }
-        }
-        try {
-            _clientSpace.put("temp");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

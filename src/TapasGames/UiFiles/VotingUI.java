@@ -26,7 +26,7 @@ public class VotingUI {
         title.setFont(new Font(19));
 
         tgGames = new ToggleGroup();
-        RadioButton stop = new RadioButton("Stop");
+        RadioButton stop = new RadioButton("Lobby");
         RadioButton ms = new RadioButton("Minesweeper");
         RadioButton cv = new RadioButton("Curvefever");
         stop.setToggleGroup(tgGames);

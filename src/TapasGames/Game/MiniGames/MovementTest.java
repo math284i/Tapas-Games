@@ -187,6 +187,7 @@ public class MovementTest extends Application {
             if (currentPlayer != _teamDic.get(playerNumber)) return false;
 
             if (clicked) checkMines(x, y,true);
+            else return false;
 
             if(foundP1 == mines/2+1){
                 GameOver = true;

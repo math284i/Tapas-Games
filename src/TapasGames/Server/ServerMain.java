@@ -142,6 +142,7 @@ public class ServerMain {
         if (_readyClients.size() == _clients.size()) {
             System.out.println("All players are ready to RUUUUUMBLE!");
             _gameSpace.put("ServerToGame", "gameOver", "");
+            _readyClients.clear();
         }
     }
 
@@ -152,6 +153,15 @@ public class ServerMain {
     public void updateChat(String id, String name, String message) {
         System.out.println("Server udating its own chat!");
         _ui.UpdateChat(id, name, message);
+    }
+
+    public void gameChangedToLobby() throws InterruptedException {
+        for (String name : _clients) {
+            for (String client : _clients) {
+                String number = _clientsAndNumbers.get(client);
+                _clientSpace.put("ServerToClient", name, "updateLobby", "" + client + "," + number + "," + "Not ready");
+            }
+        }
     }
 }
 
@@ -262,12 +272,13 @@ class GameReceiver implements Runnable {
                 switch (tuple[1].toString()) {
                     case "createTeamChat" -> {
                         _server.createChatRoom(data[0]);
-                        _fromGameSpace.put("ServerBackToGame","TeamChat" + data[0] + "Created");
+                        _fromGameSpace.put("ServerBackToGame",data[0] + "Created");
                     }
                     case "addPlayerToTeamChat" -> {
                         _server.addClientToChatRoom(data[0], data[1]);
-                        _fromGameSpace.put("ServerBackToGame","Player" + data[0] + "AddedToTeamChat" + data[1]);
+                        _fromGameSpace.put("ServerBackToGame","Player" + data[0] + "AddedTo" + data[1]);
                     }
+                    case "gameChangedToLobby" ->_server.gameChangedToLobby();
 
                 }
             } catch (InterruptedException e) {

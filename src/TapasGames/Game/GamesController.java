@@ -85,7 +85,7 @@ public class GamesController {
     }
 
     public void votingTime() throws InterruptedException {
-        System.out.println("GameRoom telling everyone its votingtime!");
+        System.out.println("GameRoom telling everyone its votingtime!: dicSize: " + _playerDic.size());
         _currentlyPlaying = "voting";
         for (var entry : _playerDic.entrySet()) {
             System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
@@ -116,46 +116,72 @@ public class GamesController {
 
     private void initializeGame(String game) throws InterruptedException {
         _currentlyPlaying = game;
+        String name1 = "";
+        String name2 = "";
+        String name3 = "";
+        String name4 = "";
 
-
+        for (var entry : _playerDic.entrySet()) {
+            switch (entry.getValue()) {
+                case "1" -> name1 = entry.getKey();
+                case "2" -> name2 = entry.getKey();
+                case "3" -> name3 = entry.getKey();
+                case "4" -> name4 = entry.getKey();
+            }
+        }
         switch (game) {
             case "Minesweeper" -> {
                 if (_playerDic.size() == 3) {
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team1");
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Team1Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name1 + "AddedToTeam1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name3 + "AddedToTeam1"));
                 } else if (_playerDic.size() == 4) {
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
-                    _serverSpace.put("GameToServer", "createTeamChat", "Team 2");
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat2Created"));
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "2,Team 2");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
-                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "4,Team 2");
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player2AddedToTeamChat2"));
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
-                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player4AddedToTeamChat2"));
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team1");
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team2");
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Team1Created"));
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Team2Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name1 + ",Team1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name2 + ",Team2");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name3 + ",Team1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", name4 + ",Team2");
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name1 + "AddedToTeam1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name2 + "AddedToTeam2"));
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name3 + "AddedToTeam1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame")
+                            , new ActualField("Player" + name4 + "AddedToTeam2"));
                 }
 
                 Board board = new Board(16, 16, 51);
                 for (var entry : _playerDic.entrySet()) {
-                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame"
+                            , game + "," + _playerDic.size());
                     _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "sendBoard", board);
                 }
             }
-            case "CurveFever" -> {
+            case "Curvefever" -> {
                 for (var entry : _playerDic.entrySet()) {
-                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame"
+                            , game + "," + _playerDic.size());
                 }
             }
 
             case "Lobby" -> {
-
+                for (var entry : _playerDic.entrySet()) {
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame"
+                            , game + "," + _playerDic.size());
+                }
+                _serverSpace.put("GameToServer", "gameChangedToLobby", "");
             }
         }
     }

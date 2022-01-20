@@ -56,14 +56,14 @@ public class ClientMain {
     public void addChatRoom(String id) throws InterruptedException, IOException {
         _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
         _uiSpace.put("ClientToUI", "AddChat", "" + id);
-        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
+        _uiSpace.get(new ActualField("UIBackToClient"),new ActualField("ChatRoomAdded" + id));
         _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
     }
 
     public void removeChatRoom(String id) throws InterruptedException, IOException {
         _chatSpaces.remove(id);
         _uiSpace.put("ClientToUI", "RemoveChat", "" + id);
-        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
+        _uiSpace.get(new ActualField("UIBackToClient"),new ActualField("ChatRoomAdded" + id));
         _serverSpace.put("ClientBackToServer", _name, "ChatRoomRemoved");
     }
 
