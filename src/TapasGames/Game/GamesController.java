@@ -22,6 +22,7 @@ public class GamesController {
     private ArrayList<String> _peopleThatWantToSkipGame;
     private ArrayList<String> _haveVoted;
     private Thread _gameRoomThread;
+    private boolean teamChatAdded; //Temporary
 
     public GamesController(SpaceRepository repository, SequentialSpace serverSpace) {
         _repository = repository;
@@ -119,9 +120,12 @@ public class GamesController {
 
     private void initializeGame(String game) throws InterruptedException {
         if(_teamGames.contains(game)){
-            addTeamChat();
+            if (!_teamGames.contains(_currentlyPlaying) && !teamChatAdded) {
+                addTeamChat();
+                teamChatAdded = true;
+            }
         } else if(_teamGames.contains(_currentlyPlaying)){
-            removeTeamChat();
+            //removeTeamChat();
         }
         _currentlyPlaying = game;
 
