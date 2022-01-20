@@ -54,28 +54,30 @@ public class ClientMain {
     }
 
     public void addChatRoom(String id) throws InterruptedException, IOException {
-            _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
-            _uiSpace.put("ClientToUI", "AddChat", "" + id);
-            _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
+        _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
+        _uiSpace.put("ClientToUI", "AddChat", "" + id);
+        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
+        _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
     }
 
     public void removeChatRoom(String id) throws InterruptedException, IOException {
         _chatSpaces.remove(id);
         _uiSpace.put("ClientToUI", "RemoveChat", "" + id);
+        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
         _serverSpace.put("ClientBackToServer", _name, "ChatRoomRemoved");
     }
 
     public void sendDataToChatRoom(String id, String data) throws InterruptedException {
-            System.out.println("Client received: " + id + " : " + data);
-            _chatSpaces.get(id).put("sendMessage", _name + "," + data);
+        System.out.println("Client received: " + id + " : " + data);
+        _chatSpaces.get(id).put("sendMessage", _name + "," + data);
     }
 
     public void sendDataToGameRoom(String data) throws InterruptedException {
-            _gameSpace.put("ClientToGameRoom", _name, data);
+        _gameSpace.put("ClientToGameRoom", _name, data);
     }
 
     public void sendVote(String name, String message) throws InterruptedException {
-            _voteSpace.put("votingResult", name + "," + message);
+        _voteSpace.put("votingResult", name + "," + message);
     }
 
     public void updateChatUI(String name, String id, String message) throws InterruptedException {
@@ -90,30 +92,30 @@ public class ClientMain {
 
     public void updateLobby(String name, String number, String readyStatus) throws InterruptedException {
         if (_name.equals(name)) _playerNumber = number;
-            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
+        _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
     }
 
     public void updatePlayers(String name, String number) throws InterruptedException {
         System.out.println("Client udating: " + name + " he/she is: " + number);
-            _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number);
+        _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number);
     }
 
     public void sendImReady() throws InterruptedException {
         System.out.println(_name + " telling server im ready!");
-            _serverSpace.put("ClientToServer", "clientIsReady", _name);
+        _serverSpace.put("ClientToServer", "clientIsReady", _name);
     }
 
     public void votingTime(String score) throws InterruptedException {
         System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
-            _uiSpace.put("ClientToUI", "votingTime", score);
+        _uiSpace.put("ClientToUI", "votingTime", score);
     }
 
     public void newGame(String newGame, String playerAmount) throws InterruptedException {
-            if (newGame.equals("Minesweeper")) {
-                Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"), new ActualField(_name), new ActualField("sendBoard"), new FormalField(Board.class))[3];
-                _uiSpace.put("ClientToUI", "sendBoard", board);
-            }
-            _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
+        if (newGame.equals("Minesweeper")) {
+            Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"), new ActualField(_name), new ActualField("sendBoard"), new FormalField(Board.class))[3];
+            _uiSpace.put("ClientToUI", "sendBoard", board);
+        }
+        _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
     }
 
     public void rockTheVote() throws InterruptedException {

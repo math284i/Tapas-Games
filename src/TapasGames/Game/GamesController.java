@@ -69,7 +69,7 @@ public class GamesController {
 
     public void sendUpdateToAll(String data) throws InterruptedException {
         for (var entry : _playerDic.entrySet()) {
-                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
+            _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
         }
     }
 
@@ -87,12 +87,12 @@ public class GamesController {
         System.out.println("GameRoom telling everyone its votingtime!");
         _currentlyPlaying = "voting";
         for (var entry : _playerDic.entrySet()) {
-                System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
-                StringBuilder scores = new StringBuilder();
-                for (int x : scoreBoard){
-                    scores.append(x).append(":");
-                }
-                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
+            System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
+            StringBuilder scores = new StringBuilder();
+            for (int x : scoreBoard) {
+                scores.append(x).append(":");
+            }
+            _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
         }
     }
 
@@ -106,22 +106,56 @@ public class GamesController {
         if (_votingList.size() == _playerDic.size()) {
             System.out.println("Game got all the votes needed!");
             String newGame = mostCommon(_votingList);
-            _currentlyPlaying = newGame;
             System.out.println("Most voted game was: " + newGame);
             _votingList.clear();
             _haveVoted.clear();
-            Board board = null;
-            if(newGame.equals("Minesweeper")) {
-                board = new Board(16,16,51);
+            initializeGame(newGame);
+        }
+    }
+
+    private void initializeGame(String game) throws InterruptedException {
+        _currentlyPlaying = game;
+
+
+        switch (game) {
+            case "Minesweeper" -> {
+                if (_playerDic.size() == 3) {
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
+                } else if (_playerDic.size() == 4) {
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 2");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat2Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "2,Team 2");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "4,Team 2");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player2AddedToTeamChat2"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player4AddedToTeamChat2"));
+                }
+
+                Board board = new Board(16, 16, 51);
+                for (var entry : _playerDic.entrySet()) {
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "sendBoard", board);
+                }
             }
-            _toGameRoomSpace.getAll();
-            for (var entry : _playerDic.entrySet()) {
-                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
-                    if(newGame.equals("Minesweeper")) {
-                        _toGameRoomSpace.put("GameRoomToClient",entry.getKey(),"sendBoard",board);
-                    }
+            case "CurveFever" -> {
+                for (var entry : _playerDic.entrySet()) {
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                }
             }
 
+            case "Lobby" -> {
+
+            }
         }
     }
 

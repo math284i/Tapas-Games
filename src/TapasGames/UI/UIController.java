@@ -408,7 +408,7 @@ public class UIController extends Application {
         chatStage.setScene(chatScene);
     }
 
-    public void AddChat(String id) {
+    public void AddChat(String id) throws InterruptedException {
         System.out.println("UiController adding chat to ui: " + id);
         Platform.runLater(() -> {
             if (id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)) {
@@ -421,9 +421,10 @@ public class UIController extends Application {
                 System.out.println("No tab found with id: " + id);
             }
         });
+        _clientSpace.put("UIBackToClient", "ChatRoomAdded" + id);
     }
 
-    public void RemoveChat(String id) {
+    public void RemoveChat(String id) throws InterruptedException {
         System.out.println("UiController removing chat from ui: " + id);
         Platform.runLater(() -> {
             if (id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)) {
@@ -436,6 +437,7 @@ public class UIController extends Application {
                 System.out.println("No tab found with id: " + id);
             }
         });
+        _clientSpace.put("UIBackToClient", "ChatRoomRemoved" + id);
     }
 
     public void UpdateChat(String name, String id, String message) {
@@ -470,10 +472,18 @@ public class UIController extends Application {
         Platform.runLater(() -> {
             for (int i = 0; i < scores.length; i++) {
                 switch ("" + (i)) {
-                    case "0" -> {team1S.setText(scores[i]);}
-                    case "1" -> {team2S.setText(scores[i]);}
-                    case "2" -> { team3S.setText(scores[i]);}
-                    case "3" -> { team4S.setText(scores[i]);}
+                    case "0" -> {
+                        team1S.setText(scores[i]);
+                    }
+                    case "1" -> {
+                        team2S.setText(scores[i]);
+                    }
+                    case "2" -> {
+                        team3S.setText(scores[i]);
+                    }
+                    case "3" -> {
+                        team4S.setText(scores[i]);
+                    }
                 }
             }
         });
@@ -527,7 +537,7 @@ public class UIController extends Application {
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
         System.out.println("UpdatingGame with playerNumber: " + playerNumber);
-        switch(_playerNumber){
+        switch (_playerNumber) {
             case "1" -> {
                 team1L.setStyle("-fx-text-fill: red");
             }

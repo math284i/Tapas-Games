@@ -52,124 +52,96 @@ public class ServerMain {
         new Thread(new ClientReceiver(this, _clientSpace)).start();
         new Thread(new StartUpReceiver(this, _startUpSpace)).start();
         new Thread(new ChatReceiver(this, _chatSpace)).start();
+        new Thread(new GameReceiver(this, _gameSpace)).start();
     }
 
-    public void addClient(String name) {
-        try {
-            if (_clients.contains(name)) {
-                System.out.println("Server not adding: " + name);
-                _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "false");
-            } else {
-                System.out.println("Server adding: " + name);
-                _clients.add(name);
-                SequentialSpace space = new SequentialSpace();
-                _repository.add("ChatToClient:" + name, space);
-                _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "true");
-                _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name), new ActualField("ClientCreated"));
-                System.out.println("ServerMain received clientCreated!");
-                addClientToChatRoom(name, "Global");
-                addClientToGame(name);
-                _ui.AddClient(name);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void addClient(String name) throws InterruptedException {
+        if (_clients.contains(name)) {
+            System.out.println("Server not adding: " + name);
+            _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "false");
+        } else {
+            System.out.println("Server adding: " + name);
+            _clients.add(name);
+            SequentialSpace space = new SequentialSpace();
+            _repository.add("ChatToClient:" + name, space);
+            _startUpSpace.put("ServerBackToStartUp", _ipWithPort, "true");
+            _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name), new ActualField("ClientCreated"));
+            System.out.println("ServerMain received clientCreated!");
+            addClientToChatRoom(name, "Global");
+            addClientToGame(name);
+            _ui.AddClient(name);
         }
     }
 
-    public void removeClient(String name) {
+    public void removeClient(String name) throws InterruptedException {
         removeClientFromChatRoom(name, "Global");
 
         _clients.remove(name);
         _ui.RemoveClient(name);
     }
 
-    public void addClientToGame(String name) {
-        try {
-            _gameSpace.put("ServerToGame", "addNewPlayer", name);
-            Object[] tuple = _gameSpace.get(new ActualField("GameBackToServer")
-                    , new ActualField(name + " has been added"), new FormalField(String.class));
-            System.out.println(name + " has been added to game as number: " + tuple[2].toString());
+    public void addClientToGame(String name) throws InterruptedException {
+        _gameSpace.put("ServerToGame", "addNewPlayer", name);
+        Object[] tuple = _gameSpace.get(new ActualField("GameBackToServer")
+                , new ActualField(name + " has been added"), new FormalField(String.class));
+        System.out.println(name + " has been added to game as number: " + tuple[2].toString());
 
-            for (String client : _clients) {
-                _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString() + "," + "Not ready");
-            }
-
-            for (var entry : _clientsAndNumbers.entrySet()) {
-                _clientSpace.put("ServerToClient", name, "updateLobby"
-                        , "" + entry.getKey() + "," + entry.getValue() + "," + "Not ready");
-            }
-            _clientsAndNumbers.put(name, tuple[2].toString());
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (String client : _clients) {
+            _clientSpace.put("ServerToClient", client, "updateLobby", "" + name + "," + tuple[2].toString() + "," + "Not ready");
         }
+
+        for (var entry : _clientsAndNumbers.entrySet()) {
+            _clientSpace.put("ServerToClient", name, "updateLobby"
+                    , "" + entry.getKey() + "," + entry.getValue() + "," + "Not ready");
+        }
+        _clientsAndNumbers.put(name, tuple[2].toString());
     }
 
-    private void createChatRoom(String id) {
-        try {
-            _chatSpace.put("ServerToChat", "addChatRoom", id);
-            System.out.println("ServerMain asked chat controller to create chat room: " + id);
-            _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomAdded"));
-            System.out.println("Server received chatRoomAdded!");
-            _ui.AddChat(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void createChatRoom(String id) throws InterruptedException {
+        _chatSpace.put("ServerToChat", "addChatRoom", id);
+        System.out.println("ServerMain asked chat controller to create chat room: " + id);
+        _chatSpace.get(new ActualField("ChatBackToServer"), new ActualField("ChatRoomAdded"));
+        System.out.println("Server received chatRoomAdded!");
+        _ui.AddChat(id);
     }
 
-    public void addClientToChatRoom(String name, String id) {
-        try {
-            System.out.println("Server Adding: " + name + " to: " + id);
-            _chatSpace.put("ServerToChat", "addClient", name + "," + id);
-            _clientSpace.put("ServerToClient", name, "addChatRoom", id);
-            _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
-                    new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
-            System.out.println("Client is added from serverMain");
-            _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
-                    new ActualField("ChatRoomAdded"));
-            System.out.println("Everything is done in Server AddClientToChatRoom");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void addClientToChatRoom(String name, String id) throws InterruptedException {
+        System.out.println("Server Adding: " + name + " to: " + id);
+        _chatSpace.put("ServerToChat", "addClient", name + "," + id);
+        _clientSpace.put("ServerToClient", name, "addChatRoom", id);
+        _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
+                new ActualField("ClientAdded")); //Used to have small c, Used to have an extra field for a string.
+        System.out.println("Client is added from serverMain");
+        _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
+                new ActualField("ChatRoomAdded"));
+        System.out.println("Everything is done in Server AddClientToChatRoom");
     }
 
-    public void removeClientFromChatRoom(String name, String id) {
-        try {
-            System.out.println("Server Removing: " + name + " from: " + id);
-            _chatSpace.put("ServerToChat", "removeClient", name + "," + id);
-            _clientSpace.put("ServerToClient", name, "removeChatRoom", id);
-            _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
-                    new ActualField("ClientRemoved")); //Used to have small c, Used to have an extra field for a string.
-            System.out.println("Client is removed from serverMain");
-            _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
-                    new ActualField("ChatRoomRemoved"));
-            System.out.println("Everything is done in Server RemoveClientToChatRoom");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void removeClientFromChatRoom(String name, String id) throws InterruptedException {
+        System.out.println("Server Removing: " + name + " from: " + id);
+        _chatSpace.put("ServerToChat", "removeClient", name + "," + id);
+        _clientSpace.put("ServerToClient", name, "removeChatRoom", id);
+        _chatSpace.get(new ActualField("ChatBackToServer"), //was fromChatRoom
+                new ActualField("ClientRemoved")); //Used to have small c, Used to have an extra field for a string.
+        System.out.println("Client is removed from serverMain");
+        _clientSpace.get(new ActualField("ClientBackToServer"), new ActualField(name),
+                new ActualField("ChatRoomRemoved"));
+        System.out.println("Everything is done in Server RemoveClientToChatRoom");
     }
 
-    public void clientIsReady(String name) {
+    public void clientIsReady(String name) throws InterruptedException {
         _readyClients.add(name);
 
         String playerNumber = _clientsAndNumbers.get(name);
 
         for (var entry : _clientsAndNumbers.entrySet()) {
-            try {
-                _clientSpace.put("ServerToClient", entry.getKey(), "updateLobby"
-                        , "" + name + "," + playerNumber + "," + "Ready");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            _clientSpace.put("ServerToClient", entry.getKey(), "updateLobby"
+                    , "" + name + "," + playerNumber + "," + "Ready");
         }
 
         if (_readyClients.size() == _clients.size()) {
             System.out.println("All players are ready to RUUUUUMBLE!");
-            try {
-                _gameSpace.put("ServerToGame", "gameOver", "");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            _gameSpace.put("ServerToGame", "gameOver", "");
         }
     }
 
@@ -255,12 +227,48 @@ class ChatReceiver implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object[] tuple = _fromChatSpace.get(new ActualField("ChatToServer1")
+                Object[] tuple = _fromChatSpace.get(new ActualField("ChatToServer")
                         , new FormalField(String.class), new FormalField(String.class));
                 String[] data = tuple[2].toString().split(",");
-                System.out.println("Server recieved something form chat");
+                System.out.println("Server received something form chat");
                 switch (tuple[1].toString()) {
                     case "sendMessage" -> _server.updateChat(data[0], data[1], data[2]);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
+
+class GameReceiver implements Runnable {
+    ServerMain _server;
+    SequentialSpace _fromGameSpace;
+
+    public GameReceiver(ServerMain server, SequentialSpace fromGameSpace) {
+        _server = server;
+        _fromGameSpace = fromGameSpace;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Object[] tuple = _fromGameSpace.get(new ActualField("GameToServer")
+                        , new FormalField(String.class), new FormalField(String.class));
+                String[] data = tuple[2].toString().split(",");
+                System.out.println("Server received something form game");
+                switch (tuple[1].toString()) {
+                    case "createTeamChat" -> {
+                        _server.createChatRoom(data[0]);
+                        _fromGameSpace.put("ServerBackToGame","TeamChat" + data[0] + "Created");
+                    }
+                    case "addPlayerToTeamChat" -> {
+                        _server.addClientToChatRoom(data[0], data[1]);
+                        _fromGameSpace.put("ServerBackToGame","Player" + data[0] + "AddedToTeamChat" + data[1]);
+                    }
+
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

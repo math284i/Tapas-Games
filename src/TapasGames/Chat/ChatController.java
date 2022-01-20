@@ -115,7 +115,7 @@ class ChatRoom implements Runnable {
                 toClientSpace.put(name + "," + _id + "," + message);
         }
             System.out.println("ChatRoom sending to server!");
-            _serverSpace.put("ChatToServer1", "sendMessage", _id + "," + name + "," + message);
+            _serverSpace.put("ChatToServer", "sendMessage", _id + "," + name + "," + message);
     }
 
     @Override
