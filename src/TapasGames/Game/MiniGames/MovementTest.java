@@ -222,11 +222,11 @@ public class MovementTest extends Application {
                     minesLeft.setText("Mines left: " + minesCurrent);
                     if(currentPlayer == 1){
                         foundP1 ++;
-                        team1.setText("-> Player 1: " + foundP1);
+                        team1.setText("-> Team 1: " + foundP1);
                         buttons.get(x).get(y).setStyle("-fx-background-color: red");
                     }else{
                         foundP2++;
-                        team2.setText("-> Player 2: " + foundP2);
+                        team2.setText("-> Team 2: " + foundP2);
                         buttons.get(x).get(y).setStyle("-fx-background-color: blue");
                     }
                 }
@@ -239,12 +239,12 @@ public class MovementTest extends Application {
                     buttons.get(x).get(y).setText(new StringBuilder().append(board.neighbors(x, y)).toString());
                     if(currentPlayer == 1 && firstClick){
                         currentPlayer = 2;
-                        team2.setText("-> Player 2: " + foundP2);
-                        team1.setText("Player 1: " + foundP1);
+                        team2.setText("-> Team 2: " + foundP2);
+                        team1.setText("Team 1: " + foundP1);
                     }else if(firstClick){
                         currentPlayer = 1;
-                        team1.setText("-> Player 1: " + foundP1);
-                        team2.setText("Player 2: " + foundP2);
+                        team1.setText("-> Team 1: " + foundP1);
+                        team2.setText("Team 2: " + foundP2);
                     }
                 }
                 else {
@@ -258,12 +258,12 @@ public class MovementTest extends Application {
                     }
                     if(currentPlayer == 1 && firstClick){
                         currentPlayer = 2;
-                        team2.setText("-> Player 2: " + foundP2);
-                        team1.setText("Player 1: " + foundP1);
+                        team2.setText("-> Team 2: " + foundP2);
+                        team1.setText("Team 1: " + foundP1);
                     }else if(firstClick){
                         currentPlayer = 1;
-                        team1.setText("-> Player 1: " + foundP1);
-                        team2.setText("Player 2: " + foundP2);
+                        team1.setText("-> Team 1: " + foundP1);
+                        team2.setText("Team 2: " + foundP2);
                     }
                 }
             }
