@@ -519,6 +519,7 @@ public class UIController extends Application {
         _playerNumber = playerNumber;
         Font bold = Font.font("Regular", FontWeight.BOLD,12);
         Font font = Font.font("Regular", FontWeight.NORMAL,12);
+        System.out.println("UpdatingGame with playerNumber: " + playerNumber);
         switch(_playerNumber){
             case "1" -> {
                 team1L.setFont(bold);
