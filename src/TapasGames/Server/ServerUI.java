@@ -113,7 +113,7 @@ public class ServerUI extends Application {
         outerH.setHgrow(clients,Priority.ALWAYS);
         outerH.setHgrow(_chatTabs,Priority.ALWAYS);
 
-        Scene output = new Scene(outerH, 480, 640);
+        Scene output = new Scene(outerH,640,480);
         _stage = new Stage();
         stage.setScene(output);
         stage.show();
