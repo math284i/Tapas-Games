@@ -62,6 +62,11 @@ public class UIController extends Application {
     Label team3L;
     Label team4L;
 
+    Label team1S;
+    Label team2S;
+    Label team3S;
+    Label team4S;
+
     ImageView controls = new ImageView();
     Image minesweeperI;
     Image curvefeverI;
@@ -116,12 +121,14 @@ public class UIController extends Application {
 
         gameStage.setResizable(false);
 
-        updateGameScene(_gameScene, "0", "1");
-
-        gameStage.show();
+        updateGameScene(_gameScene, "0", "0");
 
         menuStage.initOwner(gameStage);
         chatStage.initOwner(gameStage);
+
+        chatStage.show();
+        menuStage.show();
+        gameStage.show();
 
     }
 
@@ -152,16 +159,16 @@ public class UIController extends Application {
         Separator separatorV3 = new Separator(Orientation.VERTICAL);
         VBox team1 = new VBox();
         team1L = new Label("Player 1");
-        Label team1S = new Label("" + score1);
+        team1S = new Label("0");
         VBox team2 = new VBox();
         team2L = new Label("Player 2");
-        Label team2S = new Label("" + score2);
+        team2S = new Label("0");
         VBox team3 = new VBox();
         team3L = new Label("Player 3");
-        Label team3S = new Label("0");
+        team3S = new Label("0");
         VBox team4 = new VBox();
         team4L = new Label("Player 4");
-        Label team4S = new Label("0");
+        team4S = new Label("0");
         HBox teams = new HBox();
         Label points = new Label("Points");
         VBox score = new VBox();
@@ -254,10 +261,12 @@ public class UIController extends Application {
         exit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                curvefeverGame.stop();
                 gameStage.close();
+                menuStage.close();
+                chatStage.close();
                 Stage stage = new Stage();
                 try {
+                    _clientSpace.put("UIToClient", "leaving", "");
                     Parent root = FXMLLoader.load(getClass().getResource("../UiFiles/frontpage.fxml"));
 
                     Scene scene = new Scene(root);
@@ -285,7 +294,6 @@ public class UIController extends Application {
         Scene menuScene = new Scene(combi, 1008, 189);
 
         menuStage.setScene(menuScene);
-        menuStage.show();
     }
 
     public void ChatScene() {
@@ -398,10 +406,9 @@ public class UIController extends Application {
 
         Scene chatScene = new Scene(layout);
         chatStage.setScene(chatScene);
-        chatStage.show();
     }
 
-    public void AddChat(String id) {
+    public void AddChat(String id) throws InterruptedException {
         System.out.println("UiController adding chat to ui: " + id);
         Platform.runLater(() -> {
             if (id.equals("Team 1") && !chatTabs.getTabs().contains(teamChat1)) {
@@ -414,9 +421,10 @@ public class UIController extends Application {
                 System.out.println("No tab found with id: " + id);
             }
         });
+        _clientSpace.put("UIBackToClient", "ChatRoomAdded" + id);
     }
 
-    public void RemoveChat(String id) {
+    public void RemoveChat(String id) throws InterruptedException {
         System.out.println("UiController removing chat from ui: " + id);
         Platform.runLater(() -> {
             if (id.equals("Team 1") && chatTabs.getTabs().contains(teamChat1)) {
@@ -429,6 +437,7 @@ public class UIController extends Application {
                 System.out.println("No tab found with id: " + id);
             }
         });
+        _clientSpace.put("UIBackToClient", "ChatRoomRemoved" + id);
     }
 
     public void UpdateChat(String name, String id, String message) {
@@ -458,7 +467,27 @@ public class UIController extends Application {
     }
 
     public void voteBox(String newScoreBoard) {
-        //TODO change scoreboard to the given
+        String[] scores = newScoreBoard.split(":");
+        //0:0:0:0
+        Platform.runLater(() -> {
+            for (int i = 0; i < scores.length; i++) {
+                switch ("" + (i)) {
+                    case "0" -> {
+                        team1S.setText(scores[i]);
+                    }
+                    case "1" -> {
+                        team2S.setText(scores[i]);
+                    }
+                    case "2" -> {
+                        team3S.setText(scores[i]);
+                    }
+                    case "3" -> {
+                        team4S.setText(scores[i]);
+                    }
+                }
+            }
+        });
+
         votingWindow = new VotingUI();
         Platform.runLater(() -> {
             try {
@@ -471,6 +500,8 @@ public class UIController extends Application {
     }
 
     private void setUpVoting() {
+        votingWindow.btnOk.setDisable(false);
+        votingWindow.btnOk.setVisible(true);
         votingWindow.btnOk.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -479,6 +510,8 @@ public class UIController extends Application {
                 try {
 
                     _clientSpace.put("UIToClient", "tellGameMyVote", _playerName + "," + selected.getText());
+                    votingWindow.btnOk.setDisable(true);
+                    votingWindow.btnOk.setVisible(false);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -503,7 +536,8 @@ public class UIController extends Application {
 
     public void updateGameScene(String gameScene, String playerAmount, String playerNumber) {
         _playerNumber = playerNumber;
-        switch(_playerNumber){
+        System.out.println("UpdatingGame with playerNumber: " + playerNumber);
+        switch (_playerNumber) {
             case "1" -> {
                 team1L.setStyle("-fx-text-fill: red");
             }
@@ -528,9 +562,10 @@ public class UIController extends Application {
                         setUpReadyButton();
                     }
                     case "curvefever" -> {
-                        curvefeverGame = new CurveFewer();
+                        curvefeverGame = new CurveFewer(Integer.parseInt(playerAmount));
                         gameStage.setScene(curvefeverGame.start());
                         controls.setImage(curvefeverI);
+                        sendCurveFeverData();
                     }
                     case "minesweeper" -> {
                         Board board = (Board) _clientSpace.get(new ActualField("ClientToUI"), new ActualField("sendBoard"), new FormalField(Board.class))[2];
@@ -605,7 +640,34 @@ public class UIController extends Application {
     }
 
     public void updateCurvefever(String data) {
+        for (var entry : data.split(":")) {
+            //playerNumber;goLeft,goRight
+            String[] inputs = entry.split(";");
+            boolean goLeft = Boolean.parseBoolean(inputs[1]);
+            boolean goRight = Boolean.parseBoolean(inputs[2]);
+            //System.out.println("Player: " + inputs[0]);
+            curvefeverGame.UpdatePlayer(inputs[0], goLeft, goRight);
+        }
 
+        if (curvefeverGame.GameOver) {
+            try {
+                _clientSpace.put("UIToClient", "gameOver", curvefeverGame.playerWon);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            sendCurveFeverData();
+        }
+
+    }
+
+    public void sendCurveFeverData() {
+        String dataOut = _playerNumber + ";" + curvefeverGame.goLeft + ";" + curvefeverGame.goRight;
+        try {
+            _clientSpace.put("UIToClient", "gameInput", dataOut);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateLobby(String name, String number, String readyStatus) {

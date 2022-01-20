@@ -98,13 +98,13 @@ class ChatRoom implements Runnable {
     public void addClient(String client) throws InterruptedException {
         System.out.println("ChatRoom adding client: " + client + " : " + _id);
         _clients.add(client);
-            _controllerSpace.put("ChatRoomBackToController", _id + client + "Added");
+        _controllerSpace.put("ChatRoomBackToController", _id + client + "Added");
     }
 
     public void removeClient(String client) throws InterruptedException {
-        _repository.remove("ChatToClient:" + client);
+        System.out.println("Chatroom removing client! " + client);
         _clients.remove(client);
-            _controllerSpace.put("ChatRoomBackToController", _id + "Removed");
+        _controllerSpace.put("ChatRoomBackToController", _id + client + "Removed");
     }
 
     private void sendMessageToAll(String name, String message) throws InterruptedException {
@@ -115,7 +115,7 @@ class ChatRoom implements Runnable {
                 toClientSpace.put(name + "," + _id + "," + message);
         }
             System.out.println("ChatRoom sending to server!");
-            _serverSpace.put("ChatToServer1", "sendMessage", _id + "," + name + "," + message);
+            _serverSpace.put("ChatToServer", "sendMessage", _id + "," + name + "," + message);
     }
 
     @Override

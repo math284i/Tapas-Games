@@ -130,8 +130,12 @@ public class ServerUI extends Application {
     }
 
     public void RemoveClient(String clientName) {
-        _clientList.remove(clientName);
-        //_clientConnected.getChildren().remove();
+        Platform.runLater(() -> {
+            Label name = _clientList.get(clientName);
+            _clientList.remove(clientName);
+            _clientConnected.getChildren().remove(name);
+        });
+
 
     }
 

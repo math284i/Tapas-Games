@@ -19,6 +19,7 @@ public class GamesController {
     private String _currentlyPlaying;
     private ArrayList<String> _votingList;
     private ArrayList<String> _peopleThatWantToSkipGame;
+    private ArrayList<String> _haveVoted;
     private Thread _gameRoomThread;
 
     public GamesController(SpaceRepository repository, SequentialSpace serverSpace) {
@@ -27,6 +28,7 @@ public class GamesController {
         _playerDic = new HashMap<>();
         _currentlyPlaying = "lobby";
         _votingList = new ArrayList<>();
+        _haveVoted = new ArrayList<>();
         _peopleThatWantToSkipGame = new ArrayList<>();
         _toGameRoomSpace = new SequentialSpace();
         _toVotingSpace = new SequentialSpace();
@@ -67,52 +69,94 @@ public class GamesController {
 
     public void sendUpdateToAll(String data) throws InterruptedException {
         for (var entry : _playerDic.entrySet()) {
-                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
+            _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "updateGame", data);
         }
     }
 
     public void gameOver(String playersWon) throws InterruptedException {
-        for (var player : playersWon.split(":")){
-            if (player.equals("")) break;
-            scoreBoard[Integer.parseInt(player)] += 1;
+        if (!_currentlyPlaying.equals("voting")) {
+            for (var player : playersWon.split(":")) {
+                if (player.equals("")) break;
+                if (player.equals("Invalid")) break;
+                scoreBoard[Integer.parseInt(player) - 1] += 1;
+            }
+            votingTime();
         }
-        votingTime();
     }
 
     public void votingTime() throws InterruptedException {
         System.out.println("GameRoom telling everyone its votingtime!");
+        _currentlyPlaying = "voting";
         for (var entry : _playerDic.entrySet()) {
-                System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
-                StringBuilder scores = new StringBuilder();
-                for (int x : scoreBoard){
-                    scores.append(x).append(":");
-                }
-                _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
+            System.out.println("GameRoom telling: " + entry.getKey() + " to vote for trump!");
+            StringBuilder scores = new StringBuilder();
+            for (int x : scoreBoard) {
+                scores.append(x).append(":");
+            }
+            _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "votingTime", scores.toString());
         }
     }
 
     public void addVotingResult(String name, String result) throws InterruptedException {
-        _votingList.add(result);
+        if (!_haveVoted.contains(name)) {
+            _haveVoted.add(name);
+            _votingList.add(result);
+        }
         System.out.println("Game received: " + name + " chose: " + result);
 
         if (_votingList.size() == _playerDic.size()) {
             System.out.println("Game got all the votes needed!");
             String newGame = mostCommon(_votingList);
-            _currentlyPlaying = newGame;
             System.out.println("Most voted game was: " + newGame);
             _votingList.clear();
-            Board board = null;
-            if(newGame.equals("Minesweeper")) {
-                board = new Board(16,16,51);
+            _haveVoted.clear();
+            initializeGame(newGame);
+        }
+    }
+
+    private void initializeGame(String game) throws InterruptedException {
+        _currentlyPlaying = game;
+
+
+        switch (game) {
+            case "Minesweeper" -> {
+                if (_playerDic.size() == 3) {
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
+                } else if (_playerDic.size() == 4) {
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 1");
+                    _serverSpace.put("GameToServer", "createTeamChat", "Team 2");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat1Created"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("TeamChat2Created"));
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "1,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "2,Team 2");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "3,Team 1");
+                    _serverSpace.put("GameToServer", "addPlayerToTeamChat", "4,Team 2");
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player1AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player2AddedToTeamChat2"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player3AddedToTeamChat1"));
+                    _serverSpace.get(new ActualField("ServerBackToGame"), new ActualField("Player4AddedToTeamChat2"));
+                }
+
+                Board board = new Board(16, 16, 51);
+                for (var entry : _playerDic.entrySet()) {
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "sendBoard", board);
+                }
             }
-            _toGameRoomSpace.getAll();
-            for (var entry : _playerDic.entrySet()) {
-                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", newGame + "," + _playerDic.size());
-                    if(newGame.equals("Minesweeper")) {
-                        _toGameRoomSpace.put("GameRoomToClient",entry.getKey(),"sendBoard",board);
-                    }
+            case "CurveFever" -> {
+                for (var entry : _playerDic.entrySet()) {
+                    _toGameRoomSpace.put("GameRoomToClient", entry.getKey(), "newGame", game + "," + _playerDic.size());
+                }
             }
 
+            case "Lobby" -> {
+
+            }
         }
     }
 
@@ -182,7 +226,7 @@ class GameRoom implements Runnable {
                 }
                 try {
                     _gamescontroller.sendUpdateToAll(data.toString());
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

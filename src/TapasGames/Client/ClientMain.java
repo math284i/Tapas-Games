@@ -54,61 +54,68 @@ public class ClientMain {
     }
 
     public void addChatRoom(String id) throws InterruptedException, IOException {
-            _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
-            _uiSpace.put("ClientToUI", "AddChat", "" + id);
-            _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
+        _chatSpaces.put(id, new RemoteSpace(_serverIpWithPort + "toChatRoom:" + id + "?keep"));
+        _uiSpace.put("ClientToUI", "AddChat", "" + id);
+        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
+        _serverSpace.put("ClientBackToServer", _name, "ChatRoomAdded");
+    }
+
+    public void removeChatRoom(String id) throws InterruptedException, IOException {
+        _chatSpaces.remove(id);
+        _uiSpace.put("ClientToUI", "RemoveChat", "" + id);
+        _uiSpace.get(new ActualField("UIBackTOClient"),new ActualField("ChatRoomAdded" + id));
+        _serverSpace.put("ClientBackToServer", _name, "ChatRoomRemoved");
     }
 
     public void sendDataToChatRoom(String id, String data) throws InterruptedException {
-            System.out.println("Client received: " + id + " : " + data);
-            _chatSpaces.get(id).put("sendMessage", _name + "," + data);
+        System.out.println("Client received: " + id + " : " + data);
+        _chatSpaces.get(id).put("sendMessage", _name + "," + data);
     }
 
     public void sendDataToGameRoom(String data) throws InterruptedException {
-            _gameSpace.put("ClientToGameRoom", _name, data);
+        _gameSpace.put("ClientToGameRoom", _name, data);
     }
 
     public void sendVote(String name, String message) throws InterruptedException {
-            _voteSpace.put("votingResult", name + "," + message);
+        _voteSpace.put("votingResult", name + "," + message);
     }
 
     public void updateChatUI(String name, String id, String message) throws InterruptedException {
         System.out.println("in " + id + ": " + name + " Says: " + message);
-            _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
+        _uiSpace.put("ClientToUI", "UpdateChat", name + "," + id + "," + message);
     }
 
     public void updateGame(String data) throws InterruptedException { // data:    playerNumber;left;right;up;down;m1;x;y : playerNumber;left;right;up;down;m1;x;y
         //System.out.println(_name + "has gotten the game data and is sending it to UI: " + data);
-        //TODO send data to UI/Client side game
-            _uiSpace.put("ClientToUI", "UpdateGame", data);
+        _uiSpace.put("ClientToUI", "UpdateGame", data);
     }
 
     public void updateLobby(String name, String number, String readyStatus) throws InterruptedException {
         if (_name.equals(name)) _playerNumber = number;
-            _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
+        _uiSpace.put("ClientToUI", "UpdateLobby", name + "," + number + "," + "messagePlaceholder" + "," + readyStatus);
     }
 
     public void updatePlayers(String name, String number) throws InterruptedException {
         System.out.println("Client udating: " + name + " he/she is: " + number);
-            _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number); //TODO PROTOCOL
+        _uiSpace.put("ClientToUI", "UpdatePlayers", name + "," + number);
     }
 
     public void sendImReady() throws InterruptedException {
         System.out.println(_name + " telling server im ready!");
-            _serverSpace.put("ClientToServer", "clientIsReady", _name); //TODO PROTOCOL
+        _serverSpace.put("ClientToServer", "clientIsReady", _name);
     }
 
     public void votingTime(String score) throws InterruptedException {
         System.out.println("Im about to make my vote! #trumpsupporter");//hmmm
-            _uiSpace.put("ClientToUI", "votingTime", "");
+        _uiSpace.put("ClientToUI", "votingTime", score);
     }
 
     public void newGame(String newGame, String playerAmount) throws InterruptedException {
-            if (newGame.equals("Minesweeper")) {
-                Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"), new ActualField(_name), new ActualField("sendBoard"), new FormalField(Board.class))[3];
-                _uiSpace.put("ClientToUI", "sendBoard", board);
-            }
-            _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
+        if (newGame.equals("Minesweeper")) {
+            Board board = (Board) _gameSpace.get(new ActualField("GameRoomToClient"), new ActualField(_name), new ActualField("sendBoard"), new FormalField(Board.class))[3];
+            _uiSpace.put("ClientToUI", "sendBoard", board);
+        }
+        _uiSpace.put("ClientToUI", "newGame", newGame + "," + playerAmount + "," + _playerNumber);
     }
 
     public void rockTheVote() throws InterruptedException {
@@ -117,6 +124,10 @@ public class ClientMain {
 
     public void tellServerGameOver(String playersWon) throws InterruptedException {
         _serverSpace.put("ClientToServer", "gameOver", playersWon);
+    }
+
+    public void tellServerImLeaving() throws InterruptedException {
+        _serverSpace.put("ClientToServer", "clientLeaving", _name);
     }
 }
 
@@ -141,6 +152,7 @@ class ServerReceiver implements Runnable {
                     case "addChatRoom" -> _client.addChatRoom(data[0]);
                     case "updateLobby" -> _client.updateLobby(data[0], data[1], data[2]);
                     case "updatePlayers" -> _client.updatePlayers(data[0], data[1]);
+                    case "removeChatRoom" -> _client.removeChatRoom(data[0]);
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -172,6 +184,7 @@ class UIReceiver implements Runnable {
                     case "rockTheVote" -> _client.rockTheVote();
                     case "gameInput" -> _client.sendDataToGameRoom(data[0]);
                     case "gameOver" -> _client.tellServerGameOver(data[0]);
+                    case "leaving" -> _client.tellServerImLeaving();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
